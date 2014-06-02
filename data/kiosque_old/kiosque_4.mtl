@@ -1,0 +1,13 @@
+# Blender MTL File: 'kiosque_musique.blend'
+# Material Count: 1
+
+newmtl 0.002
+Ns 7.843137
+Ka 0.000000 0.000000 0.000000
+Kd 0.470400 0.470400 0.470400
+Ks 0.504000 0.504000 0.504000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd C:\Users\flo\Desktop\Java3D\Objet_blender\Piano\piano_grand_d.dds
+map_Ka C:\\Users\\flo\\Desktop\\Java3D\\Objet_blender\\Piano\\piano_grand_d.dds

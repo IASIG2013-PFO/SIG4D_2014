@@ -1,0 +1,11 @@
+# Blender MTL File: 'kiosque_musique.blend'
+# Material Count: 1
+
+newmtl Material.188
+Ns 0.000000
+Ka 0.000000 0.000000 0.000000
+Kd 0.015638 0.053460 0.007362
+Ks 0.100000 0.100000 0.100000
+Ni 1.000000
+d 1.000000
+illum 2

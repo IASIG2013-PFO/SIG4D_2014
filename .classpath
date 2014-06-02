@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="jar/gluegen-rt-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="jar/gluegen-rt.jar"/>
+	<classpathentry kind="lib" path="jar/gluegen.jar"/>
+	<classpathentry kind="lib" path="jar/j3dcore.jar"/>
+	<classpathentry kind="lib" path="jar/j3dutils.jar"/>
+	<classpathentry kind="lib" path="jar/joal-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="jar/joal.jar"/>
+	<classpathentry kind="lib" path="jar/jocl-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="jar/jocl.jar"/>
+	<classpathentry kind="lib" path="jar/jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry kind="lib" path="jar/jogl-all.jar"/>
+	<classpathentry kind="lib" path="jar/vecmath.jar"/>
+	<classpathentry kind="lib" path="jar/postgis.jar"/>
+	<classpathentry kind="lib" path="jar/postgresql-9.3-1101.jdbc41.jar"/>
+	<classpathentry kind="lib" path="jar/gdal.jar"/>
+	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/gluegen-rt-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/joal-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/jocl-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/jogl-all-natives-linux-amd64.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
