@@ -151,9 +151,9 @@ public class World extends JFrame {
 		// listeAffichage =
 		// Tuile.getAllIndicesBetween(0,0,Tuile.PX-1,Tuile.PY-1,Tuile.R200);//Toutes
 		// la Haute-Savoie
-//		listeAffichage = Tuile.getAllIndicesBetween(22, 9, 42, 29, Tuile.R200);// Lac
+		listeAffichage = Tuile.getAllIndicesBetween(22, 9, 42, 29, Tuile.R5);// Lac
 																				// d'Annecy
-		listeAffichage = Tuile.getAllIndicesBetween(30, 17, 34, 21, Tuile.R5);// Lac
+		//listeAffichage = Tuile.getAllIndicesBetween(30, 17, 34, 21, Tuile.R5);// Lac
 			// listeAffichage =
 		// Tuile.getAllIndicesBetween(83,27,83,27,Tuile.R5);//Tunnel du
 		// Mont-Blanc
@@ -210,118 +210,7 @@ public class World extends JFrame {
 		return tuileCourante;
 	}
 
-//	/**
-//	 * 
-//	 * @return G�n�re le BRanchgroup du MNT � plugger sur l'arborescence de la
-//	 *         sc�ne
-//	 */
-//	private Node[] DisplayMNT() {
-//
-//		BranchGroup racine2 = new BranchGroup();
-//		TransformGroup tg = new TransformGroup();
-//		TransformGroup tlast = new TransformGroup();
-//		TransformGroup tt = new TransformGroup();
-//		tg.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-//		tg.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-//		tt.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-//		tt.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-//		tlast.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
-//		tlast.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-//
-//		racine2.addChild(tg);
-//		Vector<Point3f> vecpoints = new Vector<Point3f>();
-//
-//		int compteur = 0;
-//		int compteurpoints = 0;
-//		int limitel = this.nligne - 2;
-//		int limitec = this.ncolonne - 2;
-//
-//		while (compteur < limitel) {
-//
-//			for (int i = 0; i < limitec; i++) {
-//				vecpoints.addElement(new Point3f(
-//						(float) ((float) (i * this.DX)),
-//						(float) ((compteur + 1) * this.DY),
-//						this.MNT[compteur + 1][i]));
-//				vecpoints.addElement(new Point3f(
-//						(float) ((float) ((i + 1) * this.DX)),
-//						(float) ((compteur + 1) * this.DY),
-//						this.MNT[compteur + 1][i + 1]));
-//				vecpoints.addElement(new Point3f(
-//						(float) ((float) (i * this.DX)),
-//						(float) (compteur * this.DY), this.MNT[compteur][i]));
-//				vecpoints
-//						.addElement(new Point3f(
-//								(float) ((float) ((i + 1) * this.DX)),
-//								(float) (compteur * this.DY),
-//								this.MNT[compteur][i + 1]));
-//
-//				compteurpoints = compteurpoints + 4;
-//			}
-//			compteur++;
-//
-//		}
-//
-//		// COPIE DANS UN TABLEAU
-//		Point3f[] tabpoints = new Point3f[vecpoints.size()];
-//		vecpoints.toArray(tabpoints);
-//		// ----------------------
-//
-//		int tab[] = new int[this.nligne - 1]; // Nbre de strips = (nbre de ligne
-//												// MNT - 1 )
-//
-//		for (int i = 0; i < nligne - 1; i++) {
-//			tab[i] = 2 * this.ncolonne;
-//		}
-//
-//		Appearance app = new Appearance();
-//		TriangleStripArray pla = new TriangleStripArray(compteurpoints,
-//				TriangleStripArray.COORDINATES | GeometryArray.NORMALS, tab);
-//		pla.setCoordinates(0, tabpoints);
-//		// --------------------------
-//		int face;
-//		Vector3f normal = new Vector3f();
-//		Vector3f v1 = new Vector3f();
-//		Vector3f v2 = new Vector3f();
-//		Point3f[] pts = new Point3f[3];
-//		for (int i = 0; i < 3; i++) {
-//			pts[i] = new Point3f();
-//		}
-//
-//		for (face = 0; face < compteurpoints / 2; face++) {
-//			pla.getCoordinates(face, pts);
-//			v1.sub(pts[1], pts[0]);
-//			v2.sub(pts[2], pts[0]);
-//			normal.cross(v1, v2);
-//			normal.normalize();
-//
-//			for (int i = 0; i < 3; i++) {
-//				pla.setNormal((face + i), normal);
-//			}
-//		}
-//		// ----------------------------
-//
-//		DirectionalLight light = new DirectionalLight(new Color3f(1, 1, 1),
-//				new Vector3f(0, 0, -1));
-//		light.setInfluencingBounds(new BoundingSphere(new Point3d(), 100000));
-//		Material mat = new Material();
-//		mat.setLightingEnable(true);
-//		app.setMaterial(mat);
-//
-//		app.setColoringAttributes(new ColoringAttributes(
-//				new Color3f(0f, 1f, 0f), ColoringAttributes.SHADE_GOURAUD));
-//		Shape3D plShape = new Shape3D(pla, app);
-//		plShape.setCollidable(true);
-//		tt.setCollidable(false);
-//		tt.addChild(light);
-//		tt.addChild(plShape);
-//		tg.addChild(tt);
-//		plShape.setUserData("mnt");
-//
-//		tt.addChild(tlast);
-//		Node[] tab2 = { racine2, tlast };
-//		return tab2;
-//	}
+
 
 	/**
 	 * Calcul de distance
@@ -523,30 +412,37 @@ public class World extends JFrame {
 		int i = (int) ((x - Tuile.Xmin) / Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin) / Tuile.DY);
 		System.out.println(i+" "+j);
-
+		
 		if(liste_tuiles!=null){
+			//System.out.println("liste de tuiles: "+liste_tuiles.length);
 		for (Tuile t : liste_tuiles) {
-			if (t.i_maille != i)
+			if (t.i_maille != i){
 				continue;
-			if (t.j_maille != j)
+			}
+			if (t.j_maille != j){
 				continue;
-			// on a la bonne tuile
-//			if(tuileCourante==t){
-//				System.out.println("je suis la meme");
-//				return;
-//			}
-			System.out.println("je change !");
+			}
+		///	 on a la bonne tuile
+			if(tuileCourante == t){
+				//System.out.println("je suis la meme");
+				return;
+			}
+			
 			tuileCourante = t;
-			if(Math.abs(i-buffer_objets.mailleobservateur_i)>10||Math.abs(j-buffer_objets.mailleobservateur_j)>10){
+		}
+
+		//System.out.println("limite rechargement: "+buffer_objets.getLimiteRechargement());
+			if(Math.abs(i-buffer_objets.mailleobservateur_i) >= buffer_objets.getLimiteRechargement() ||Math.abs(j-buffer_objets.mailleobservateur_j) >= buffer_objets.getLimiteRechargement()){
+				System.out.println(" chargement! ");
 				GenericDAO.selection_geographique(buffer_objets, (float) ltn.getView().getEye().x, (float)ltn.getView().getEye().y, 1000);
 				
 			}
+			System.out.println("Mise en memoire du visible");
+			buffer_visible =  buffer_objets.getObjet_Visible(i, j);
 			
-			buffer_objets.getObjet_Visible(i, j);
 			dessin();
 			
 			return;
-		}
 		}
 	}
 
@@ -594,6 +490,7 @@ public class World extends JFrame {
 	private Vector<int[]> listeAffichage;
 	public Tunnel tunnel;
 	public Buffer buffer_objets;
+	public Vector<Vector<Object>> buffer_visible ;
 	Shape3D[] pieces;
 	Objet3d[] tabobj;
 
@@ -654,30 +551,16 @@ public class World extends JFrame {
 		// chargement de tous les types .obj --> methode sans BDD
 		tabobj = new Objet3d[listeobj.length];
 		for (int i = 0; i < listeobj.length; i++) {
-			// System.out.println(listeobj[i][0]+"/"+listeobj[i][1]);
 			int nbobj = Integer.parseInt(listeobj[i][1]);
 			tabobj[i] = new Objet3d(nbobj, listeobj[i][0]);
 		}// endfor(i)
 
 		// chargement du buffer d'objets
 		System.out.println("initialisation du buffer");
-		buffer_objets = new Buffer(21, Centre.x, Centre.y, 1000, 3);// 943000.f, 6538000.f, 1000, 9);
+		buffer_objets = new Buffer(5, Centre.x, Centre.y, 1000, 3);// 943000.f, 6538000.f, 1000, 9);
 		this.setTuileCourante(ltn.getView().getEye().x, ltn.getView().getEye().y);
 
-		int cpt = 0;
-		for (int i = 0; i < buffer_objets.getVectObj().size(); i++) {// pour
-																		// chaque
-																		// tuile
-			for (int k = 0; k < buffer_objets.getVectObj().elementAt(i).size(); k++) {// pour
-																						// chaque
-																						// objet
-																						// de
-																						// la
-																						// tuile
-				cpt++;
-			}
-		}
-		System.out.println("nb obj dans le buffer complet : " + cpt);
+		
 
 		// Cr�ation des branches graphiques correspondant � chaque tuile. Elles
 		// s'attachent au TransformGroup principal.
@@ -686,9 +569,12 @@ public class World extends JFrame {
 		}
 
 		// Cr�ation de la branche graphique correspondant aux objets de l'espace visible. 
+		System.out.println("taille embryon" +buffer_objets.embryon_buffer_visible.size());
 		for (int i = 0; i < buffer_objets.embryon_buffer_visible.size(); i++) {
 
+			//transformObjet.addChild(define_tile_buffer_bg(0));
 			transformObjet.addChild(define_tile_buffer_bg(i));
+
 	
 		}
 
@@ -814,7 +700,7 @@ public class World extends JFrame {
 		private BranchGroup define_tile_buffer_bg(int i)
 				throws IOException {
 			/**
-			 * FONCTION : Construire le BranchGroup graphique d'une tuile donn�e.
+			 * FONCTION : Construire le BranchGroup graphique d'une tuile donnee.
 			 * 
 			 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe Tuile] : tuile
 			 * source.
@@ -828,32 +714,15 @@ public class World extends JFrame {
 			bg.setCapability(BranchGroup.ALLOW_DETACH);
 
 	
-	//		// objets � desssiner dans la tuile
-	//		System.out.println("nbobj_tuile=  "
-	//				+ buffer_objets.getVectObj().elementAt(buffer_objets.getNumMaille(t.get_i_maille(),t.get_j_maille())).size());
-	//		Objet3d.dessin_obj_vecteur(
-	//				bg,
-	//				tabobj[2].pieces,
-	//				buffer_objets.getVectObj().elementAt(
-	//						buffer_objets.getNumMaille(t.get_i_maille(),
-	//								t.get_j_maille())));
-	
-			// objets � desssiner dans la tuile
-	//		System.out.println("nbobj_tuile=  "
-	//				+ buffer_objets.getVectObj().elementAt(t));
-	//		Objet3d.dessin_obj_vecteur(
-	//				bg,
-	//				tabobj[2].pieces,
-	//				buffer_objets.getVectObj().elementAt(t));
-	
-//			System.out.println("nbobj_tuile=  "
-//					+ buffer_objets.getObjet_Visible(buffer_objets.mailleobservateur_i, buffer_objets.mailleobservateur_j));
-			System.out.println(tuileCourante.i_maille + "    "+tuileCourante.j_maille);
+
+			//System.out.println("PLOUP: Dessin des elements du vecteur objet visible");
 			Objet3d.dessin_obj_vecteur(
 					bg,
 					tabobj[2].pieces,
-//					buffer_objets.getObjet_Visible(buffer_objets.mailleobservateur_i, buffer_objets.mailleobservateur_j).elementAt(i));
-			buffer_objets.getObjet_Visible(tuileCourante.i_maille, tuileCourante.j_maille).elementAt(i));
+//					buffer_objets.getObjet_Visible(buffer_objets.mailleobservateur_i, buffer_objets.mailleobservateur_j).elementAt(i));					
+//					buffer_objets.getObjet_Visible(tuileCourante.i_maille, tuileCourante.j_maille).elementAt(i));
+					buffer_visible.elementAt(i)
+					);
 	
 			return bg;
 		}

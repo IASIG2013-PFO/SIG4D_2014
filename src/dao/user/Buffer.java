@@ -8,7 +8,7 @@ import java.util.Vector;
 public class Buffer {
 
 	/**
-	 * le vecteur de vecteur, portant les objets maisons regroupes par appartenance de maille
+	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
 	 */
 	private Vector<Vector<Object>> objets_instanciated = new Vector<Vector<Object>>();
 	/**
@@ -23,7 +23,10 @@ public class Buffer {
 	//La matrice indexant le vecteur de de vecteur d'objet relativement à la taille choisie du buffer memoire
 	private int[][] matrice_indexation;
 	private int demi_largeur_maillage_memoire;
+	//Critere de rechargement du buffer
+	int limite_rechargement; 
 
+	
 	//L'objet Buffer porte en attribut les indices de la maille observateur au moment du chargement des objets à
 	//partir de la lecture de la BDD
 	public int mailleobservateur_i;
@@ -42,7 +45,7 @@ public class Buffer {
 	 * Constructeur 1 - Vide
 	 */
 	public Buffer() {
-		// TODO Auto-generated constructor stub
+		// RIEN
 	}
 	
 	/**
@@ -69,6 +72,7 @@ public class Buffer {
 		this.centre_relatif = (int)(parametre_de_generation/2);
 		this.demi_largeur_maillage_memoire = (int)(parametre_de_generation/2);
 		this.interval_de_maille = interval_de_maille;
+		this.limite_rechargement =  demi_espace_memoire_maille() - (int) ( dimension_espace_visible/2 ) ;
 		//creation de la matrice 2D; Representant le maillage relatif au point d'entree fixe dans la maille centrale.
 		this.matrice_indexation = new int[parametre_de_generation][parametre_de_generation];
 		//creation indexation du vecteur de vecteur d'objet
@@ -94,10 +98,9 @@ public class Buffer {
 				int[] maill = { m,l};
 							l = l + 1;
 				this.embryon_buffer_visible.add(maill);
-				System.out.println(maill[0]+" "+maill[1]);
 			}
 		}
-		
+		System.out.println("Selection Geographique Init");
 		GenericDAO.selection_geographique_init(this, Xinit, Yinit, interval_de_maille);
 	}
 	
@@ -205,7 +208,7 @@ public class Buffer {
 	}
 
 	/**
-	 * Calcul du num�ro d'une maille dans le buffer d'eqfses coordonnees geographiques
+	 * Calcul du numero d'une maille dans le buffer d'eqfses coordonnees geographiques
 	 *  
 	 * @param i coordonnees geographique de la maille
 	 * @param j coordonnees geographique de la maille
@@ -251,10 +254,10 @@ System.out.println("nummaille="+nummaille);
 	}
 	
 	/**
-	 * Permet de conversion coordonn�es monde vers coordonn�es mailee
-	 * @param Xobs	coordonn�es monde
-	 * @param Yobs	coordonn�es monde
-	 * @return nummaille les coordonn�es maile
+	 * Permet de conversion coordonnees monde vers coordonnees mailee
+	 * @param Xobs	coordonnees monde
+	 * @param Yobs	coordonnees monde
+	 * @return nummaille les coordonnees maile
 	 */
 	public int[] Conversion_Terrain_Maillage(float Xobs, float Yobs){
 		int[] tmp = new int[2];
@@ -267,10 +270,10 @@ System.out.println("nummaille="+nummaille);
 
 	
 	/**
-	 * Permet de conversion coordonn�es maille vers coordonn�es relatives buffer
-	 * @param Xobs	coordonn�es maille
-	 * @param Yobs	coordonn�es maille
-	 * @return nummaille les coordonn�es relative
+	 * Permet de conversion coordonnees maille vers coordonnees relatives buffer
+	 * @param Xobs	coordonnees maille
+	 * @param Yobs	coordonnees maille
+	 * @return nummaille les coordonnees relative
 	 */
 	public int[] Conversion_Maille_Buffer(int i , int j){
 		int[] tmp = new int[2];
@@ -296,10 +299,8 @@ System.out.println("nummaille="+nummaille);
 		
 		for (int k = 0; k < this.embryon_buffer_visible.size(); k++){
 			int[] tmp4 = {this.embryon_buffer_visible.elementAt(k)[0] + tmp2[0], this.embryon_buffer_visible.elementAt(k)[1] + tmp2[1] };
-		
+			//System.out.println("tmp4 : "+tmp4[0]+" / "+tmp4[1]);
 			int tmp5 = matrice_indexation[tmp4[0]][tmp4[1]];
-			System.out.println("cc   " + matrice_indexation[tmp4[0]][tmp4[1]]);
-		
 			tmp.add(this.objets_instanciated.elementAt(tmp5));
 			
 		}
@@ -309,23 +310,24 @@ System.out.println("nummaille="+nummaille);
 	
 	
 	/**
-	 * Permet de vider le buffer d'objet 
+	 * Permet de vider le buffer d'objet en conservant la taille (nbre d'element) du conteneur
 	 */
 	public void vide_Objet_en_memoire(){
 		
 		for (int i =0; i < this.objets_instanciated.size(); i++)
 				this.objets_instanciated.elementAt(i).clear();
-		
-			this.mailleobservateur_i = 0;
-			this.mailleobservateur_j = 0;
+	
 			this.nombre_objets = 0;
 		}
 			
 
 
 	/**
-	 * Retourne le nombre d'objets stockes
+	 * Retourne la distance limite, en maille, au delà de laquelle on doit recharger le buffer
 	 */
-	//	public   int NbreObjets();
-	
+	public int getLimiteRechargement() {
+		return limite_rechargement;
+		
+	}
+
 }
