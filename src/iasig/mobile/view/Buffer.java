@@ -49,40 +49,11 @@ public class Buffer {
 		this.taille_buffer_memoire=taille_buffer_memoire;
 		this.taille_buffer_visible=taille_buffer_visible;
 		
-		//Référence sur le TransformGroup de "World"
+		//Référence sur le TransformGroup parent
 		this.tg = tg;
 		
-		//Initialisation des Buffers (matrices) à vide
-		Vector<SuperBG> NULL_memoire = new Vector<SuperBG>();
+		//Initialisation des Buffers (matrices) à vide		
 		buffer_memoire = new Vector<Vector<SuperBG>>();
-	
-		Vector<SuperBG> NULL_visible = new Vector<SuperBG>();
-		buffer_visible = new Vector<Vector<SuperBG>>();
-		
-		Vector<Vector<Object>> VIDE_objet = new Vector<Vector<Object>>();
-		buffer_objet = new Vector<Vector<Vector<Object>>>();
-		
-		Vector<Tuile> NULL_tuile = new Vector<Tuile>();
-		buffer_tuile = new Vector<Vector<Tuile>>(); 
-		
-		/*for (int i = 0; i < taille_buffer_memoire; i++){
-			NULL_memoire.add(null);
-			NULL_tuile.add(null);
-			VIDE_objet.add(new Vector<Object>());
-		}
-		for (int i = 0; i < taille_buffer_visible; i++){
-			NULL_visible.add(null);
-		}
-		
-		for (int i = 0; i < taille_buffer_memoire; i++){
-			buffer_memoire.add(NULL_memoire);
-			buffer_tuile.add(NULL_tuile);
-			buffer_objet.add(VIDE_objet);
-		}
-		for (int i = 0; i < taille_buffer_visible; i++){
-			buffer_visible.add(NULL_visible);
-		}*/
-		
 		for (int i = 0; i < taille_buffer_memoire; i++) {
 			buffer_memoire.addElement(new Vector<SuperBG>());
 			
@@ -90,7 +61,8 @@ public class Buffer {
 				buffer_memoire.lastElement().addElement(null);
 			}
 		}
-		
+
+		buffer_tuile = new Vector<Vector<Tuile>>();
 		for (int i = 0; i < taille_buffer_memoire; i++) {
 			buffer_tuile.addElement(new Vector<Tuile>());
 			
@@ -99,6 +71,7 @@ public class Buffer {
 			}
 		}
 		
+		buffer_objet = new Vector<Vector<Vector<Object>>>();
 		for (int i = 0; i < taille_buffer_memoire; i++) {
 			buffer_objet.addElement(new Vector<Vector<Object>>());
 			
@@ -107,6 +80,7 @@ public class Buffer {
 			}
 		}
 		
+		buffer_visible = new Vector<Vector<SuperBG>>();
 		for (int i = 0; i < taille_buffer_visible; i++) {
 			buffer_visible.addElement(new Vector<SuperBG>());
 			
@@ -114,8 +88,6 @@ public class Buffer {
 				buffer_visible.lastElement().addElement(null);
 			}
 		}
-		
-		
 		//Fin initialisation
 		
 		//Ajout des Objets
@@ -190,7 +162,7 @@ public class Buffer {
 					int j_terrain = this.centre_buffer_memoire_j +  deltaj;
 					
 					//buffer_tuile[i][j] =  new Tuile(i_terrain, j_terrain, Tuile.R200, Tuile.DB)
-					buffer_tuile.elementAt(i).setElementAt(new Tuile(i_terrain, j_terrain, Tuile.R200, Tuile.DB), j);	
+					buffer_tuile.elementAt(i).setElementAt(new Tuile(i_terrain, j_terrain, Tuile.R5, Tuile.DB), j);	
 				}
 		}
 			
@@ -210,8 +182,8 @@ public class Buffer {
 						buffer_objet.elementAt(i).elementAt(j)), j);
 							
 				//Liberation mémoire
-				//buffer_tuile.elementAt(i).setElementAt(null, j);
-				//buffer_objet.elementAt(i).setElementAt(new Vector<>(), j);
+				buffer_tuile.elementAt(i).setElementAt(null, j);
+				buffer_objet.elementAt(i).setElementAt(new Vector<>(), j);
 				
 			}
 		}
@@ -235,7 +207,7 @@ public class Buffer {
 				//buffer_visible[i][j] = new SuperBG(buffer_memoire[i_memoire][j_memoire]);
 				//En copie constructeur
 				//buffer_visible.elementAt(i).setElementAt(new SuperBG( buffer_memoire.elementAt(i_memoire).elementAt(j_memoire) ), j);
-				buffer_visible.elementAt(i).setElementAt( buffer_memoire.elementAt(i_memoire).elementAt(j_memoire) , j);
+				buffer_visible.elementAt(i).setElementAt( new SuperBG( buffer_memoire.elementAt(i_memoire).elementAt(j_memoire) ), j);
 				
 				tg.addChild(buffer_visible.elementAt(i).elementAt(j).sbg);
 			}

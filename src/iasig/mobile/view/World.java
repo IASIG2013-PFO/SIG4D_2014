@@ -88,7 +88,9 @@ public class World extends JFrame {
 	 *            : longueur fenetre
 	 */
 	public World(int i, int L) {
+		
 		this.setSize(i, L);
+		
 	}
 
 	/**
@@ -98,7 +100,7 @@ public class World extends JFrame {
 	 * @throws IOException
 	 */
 	public void DisplayWorld() throws SQLException, IOException {
-
+		double t = System.currentTimeMillis();
 		Container conteneur = this.getContentPane();
 		conteneur.setLayout(new BorderLayout());
 		GraphicsConfiguration config = SimpleUniverse
@@ -173,6 +175,7 @@ public class World extends JFrame {
 		univers.addBranchGraph(racine); // Ajout de l'univers � la racine
 										// graphique
 		setVisible(true);
+		System.out.println("Temps de création de la fenêtre : "+(System.currentTimeMillis()-t));
 	}
 
 	/**

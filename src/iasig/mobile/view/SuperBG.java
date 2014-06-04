@@ -35,7 +35,7 @@ public class SuperBG {
 		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
 		
 		this.sbg.addChild(mnt_plaque);
-		//this.sbg.addChild(objets);
+		this.sbg.addChild(objets);
 		
 		this.i=tuile.i_maille;
 		this.j=tuile.j_maille;
