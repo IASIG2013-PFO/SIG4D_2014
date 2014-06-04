@@ -3,49 +3,20 @@
  */
 package dao;
 
-import dao.DAO;
 import dao.user.Buffer;
 import dao.user.Graphe;
 import dao.user.Lampadaire;
-import dao.user.Maison;
-import dao.user.Objet_Maison;
 import dao.user.Objet_Postgre;
 import dao.user.Polyligne_graphe;
 
-import java.awt.FlowLayout;
-import java.awt.Image;
-import java.awt.color.ColorSpace;
-import java.awt.image.BandedSampleModel;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.sql.PreparedStatement;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
+
 
 import org.postgis.PGgeometry;
 
-import iasig.mobile.view.MNT;
 
 /**
  * @author Francois
@@ -58,7 +29,7 @@ public class Polyligne_grapheDAO extends ObjectDao<Polyligne_graphe> {
 		
 		try {
 			
-			//vidage préalable du vecteur
+			//vidage prï¿½alable du vecteur
 			obj.VideObjets();
 	
 	        ResultSet result = this .connect

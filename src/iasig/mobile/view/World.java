@@ -47,7 +47,7 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 
 import dao.GenericDAO;
-import dao.user.Buffer;
+//import dao.user.Buffer;
 
 public class World extends JFrame {
 	public float[][] MNT = null;
@@ -60,6 +60,25 @@ public class World extends JFrame {
 	private Listeners ltn;
 	private TransformGroup transformObjet;
 	private TransformGroup transformMNT;
+	private TransformGroup tg2;
+	
+	
+	
+	Buffer buffer;
+	
+	
+	
+	
+
+	
+	/**********************COULEURS*********************/
+	static final Color3f Blue = new Color3f(0.f,0.f,1.f);
+	static final Color3f Red = new Color3f(1.f,0.f,0.f);
+	static final Color3f Green = new Color3f(0.f,1.f,0.f);
+	static final Color3f Yellow = new Color3f(1.f,1.f,0.f);
+	static final Color3f Magenta = new Color3f(1.f,0.f,1.f);
+	static final Color3f Cyan = new Color3f(0.f,1.f,1.f);
+	
 	
 	/**
 	 * 
@@ -85,6 +104,7 @@ public class World extends JFrame {
 		GraphicsConfiguration config = SimpleUniverse
 				.getPreferredConfiguration();
 		Canvas3D c = new Canvas3D(config);
+		System.out.println(c.getDoubleBufferEnable());
 		conteneur.add("Center", c);
 
 		univers = new SimpleUniverse(c);
@@ -98,7 +118,7 @@ public class World extends JFrame {
 		
 		racine = new BranchGroup();
 		BranchGroup bg = new BranchGroup();
-		TransformGroup tg2 = new TransformGroup();
+		tg2 = new TransformGroup();
 		TransformGroup tg3 = new TransformGroup();
 		TransformGroup tg4 = new TransformGroup();
 		tg2.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -135,31 +155,7 @@ public class World extends JFrame {
 		view2.setBackClipDistance(1000000d);
 		//this.GestionCamera(0);
 		//this.GestionVoiture(0);
-
-		/**
-		 * FONCTION : Cr�er l'application graphique.
-		 * 
-		 * PARAMETRES EN ENTREE : - l [Scalaire, entier] : hauteur initiale de
-		 * la fen�tre de l'application. - l [Scalaire, entier] : largeur
-		 * initiale de la fen�tre de l'application.
-		 * 
-		 * CONSTRUIT : - [Scalaire, objet de la classe Fenetre3D] : une nouvelle
-		 * fen�tre graphique, regroupant l'ensemble des objets de l'univers
-		 * visibles depuis la position initiale.
-		 * */
-
-		// listeAffichage =
-		// Tuile.getAllIndicesBetween(0,0,Tuile.PX-1,Tuile.PY-1,Tuile.R200);//Toutes
-		// la Haute-Savoie
-		listeAffichage = Tuile.getAllIndicesBetween(22, 9, 42, 29, Tuile.R5);// Lac
-																				// d'Annecy
-		//listeAffichage = Tuile.getAllIndicesBetween(30, 17, 34, 21, Tuile.R5);// Lac
-			// listeAffichage =
-		// Tuile.getAllIndicesBetween(83,27,83,27,Tuile.R5);//Tunnel du
-		// Mont-Blanc
-//		tunnel = new Tunnel(999225, 6540850, 1270, 5); // Chargement du tunnel
-//														// depuis la BDD
-
+		
 		// Creation d'une lumiere ambiante de couleur blanche
 		BoundingSphere bounds = new BoundingSphere(new Point3d(), 1000);
 		Light ambientLight = new AmbientLight(new Color3f(Color.white));
@@ -406,7 +402,7 @@ public class World extends JFrame {
 
 	}
 
-	public void setTuileCourante(double x, double y) throws IOException {
+	/*public void setTuileCourante(double x, double y) throws IOException {
 		System.out.println("setT");
 		System.out.println(x+" "+y);
 		int i = (int) ((x - Tuile.Xmin) / Tuile.DX);
@@ -444,7 +440,7 @@ public class World extends JFrame {
 			
 			return;
 		}
-	}
+	}*/
 
 	// /////////////////DEBUT EMILIE JEAN FLO ......
 	// //////////////////////////////
@@ -463,14 +459,7 @@ public class World extends JFrame {
 														// l'orthophoto
 	/****************************************************/
 
-	/********************** COULEURS *********************/
-	Color3f Blue = new Color3f(0.f, 0.f, 1.f);
-	Color3f Red = new Color3f(1.f, 0.f, 0.f);
-	Color3f Green = new Color3f(0.f, 1.f, 0.f);
-	Color3f Yellow = new Color3f(1.f, 1.f, 0.f);
-	Color3f Magenta = new Color3f(1.f, 0.f, 1.f);
-	Color3f Cyan = new Color3f(0.f, 1.f, 1.f);
-	/****************************************************/
+
 
 	/* ////////////////////////////////////////////////// */
 
@@ -490,9 +479,10 @@ public class World extends JFrame {
 	private Vector<int[]> listeAffichage;
 	public Tunnel tunnel;
 	public Buffer buffer_objets;
+	public Buffer buffer_BG;
 	public Vector<Vector<Object>> buffer_visible ;
 	Shape3D[] pieces;
-	Objet3d[] tabobj;
+	public static Objet3d[] tabobj;
 
 	/****************************************************/
 
@@ -523,6 +513,34 @@ public class World extends JFrame {
 		transform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		transform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		
+		transform.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
+		transform.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
+		transform.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
+		
+		// CHARGEMENT .OBJ
+		URLobj urlobj = new URLobj();
+		String[][] listeobj = urlobj.getTabobj();
+		// chargement de tous les types .obj --> methode sans BDD
+		tabobj = new Objet3d[listeobj.length];
+		for (int i = 0; i < listeobj.length; i++) {
+			int nbobj = Integer.parseInt(listeobj[i][1]);
+			tabobj[i] = new Objet3d(nbobj, listeobj[i][0]);
+		}// endfor(i)
+		
+		//Initialisation du buffer
+		buffer = new Buffer(11, 1, 32, 19, transform);
+		
+	/*System.out.println(transform.numChildren());
+	
+	SuperBG sbg = (SuperBG)transform.getChild(39);
+	TriangleArray mnt_graphique = (TriangleArray)sbg.mnt_plaque.getGeometry();
+	int n = mnt_graphique.getVertexCount();
+	//int n = mnt_graphique.getVertexCount();
+	System.out.println("nb points MNT :"+n);
+	System.out.println(sbg.objets.numChildren()		);*/
+		System.out.println("Initialisation buffer terminée !!!");
+		
+		/*
 		transformObjet = new TransformGroup();
 		
 		transformObjet.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
@@ -545,21 +563,14 @@ public class World extends JFrame {
 		// R�cup�ration des tuiles de la liste d'affichage depuis la BDD
 		liste_tuiles = Tuile.load(listeAffichage, source);
 
-		// CHARGEMENT .OBJ
-		URLobj urlobj = new URLobj();
-		String[][] listeobj = urlobj.getTabobj();
-		// chargement de tous les types .obj --> methode sans BDD
-		tabobj = new Objet3d[listeobj.length];
-		for (int i = 0; i < listeobj.length; i++) {
-			int nbobj = Integer.parseInt(listeobj[i][1]);
-			tabobj[i] = new Objet3d(nbobj, listeobj[i][0]);
-		}// endfor(i)
-
+		
+		
 		// chargement du buffer d'objets
 		System.out.println("initialisation du buffer");
-		buffer_objets = new Buffer(5, Centre.x, Centre.y, 1000, 3);// 943000.f, 6538000.f, 1000, 9);
+		buffer_objets = new Buffer(9, Centre.x, Centre.y, 1000,3);// 943000.f, 6538000.f, 1000, 9);
 		this.setTuileCourante(ltn.getView().getEye().x, ltn.getView().getEye().y);
-
+		
+		
 		
 
 		// Cr�ation des branches graphiques correspondant � chaque tuile. Elles
@@ -576,7 +587,7 @@ public class World extends JFrame {
 			transformObjet.addChild(define_tile_buffer_bg(i));
 
 	
-		}
+		}*/
 
 
 		bg.addChild(transform); // Attachement du TransformGroup � son
@@ -588,7 +599,7 @@ public class World extends JFrame {
 		return bg;
 	}
 	
-	public void dessin() throws IOException{
+	/*public void dessin() throws IOException{
 		System.out.println("je dessineeeee");
 		transformObjet.removeAllChildren();
 	for (int i = 0; i < buffer_objets.embryon_buffer_visible.size(); i++) {
@@ -603,7 +614,7 @@ public class World extends JFrame {
 	}
 	
 	
-	}
+	}*/
 
 	// ---------------------------------------------------
 
@@ -1162,6 +1173,13 @@ public class World extends JFrame {
 	/****************************************************/
 
 	/* ////////////////////////////////////////////////// */
+	public TransformGroup getTg2(){
+		return tg2;
+	}
+	
+	
+	
+	
 }
 /* CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC */
 

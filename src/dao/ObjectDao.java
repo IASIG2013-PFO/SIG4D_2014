@@ -5,8 +5,6 @@ import dao.user.Objet_Postgre;
 import dao.user.Buffer;
 import dao.user.Raster_img_mnt;
 
-import java.awt.image.BufferedImage;
-
 import org.postgis.PGgeometry;
 
 public abstract class ObjectDao<T> extends DAO {

@@ -13,7 +13,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
-import java.io.IOException;
 import java.util.Vector;
 
 import javax.media.j3d.Transform3D;
@@ -26,7 +25,7 @@ import com.sun.j3d.utils.universe.SimpleUniverse;
 
 /**
  * <b><u>Class Listeners</u> :Permet l'interaction entre l'utilisateur et le
- * programme. Cette classe contient tous les listeners associés à la caméra.</b>
+ * programme. Cette classe contient tous les listeners associï¿½s ï¿½ la camï¿½ra.</b>
  * 
  * @see MouseListener
  * @see MouseWheelListener
@@ -44,21 +43,21 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Camera associée au dessin.
+	 * Camera associï¿½e au dessin.
 	 * 
 	 * @see Camera
 	 */
 	private Camera view;
 
 	/**
-	 * Point enregistré au moment d'un "released" de la souris. En pixel.
+	 * Point enregistrï¿½ au moment d'un "released" de la souris. En pixel.
 	 * 
 	 * @see Point
 	 */
 	private Point LastPosition;
 
 	/**
-	 * Point enregistré au moment d'un "pressed" de la souris. En pixel.
+	 * Point enregistrï¿½ au moment d'un "pressed" de la souris. En pixel.
 	 * 
 	 * @see Point
 	 */
@@ -72,7 +71,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	Point pt = new Point();
 
 	/**
-	 * Booleen permettant de définir s'il s'agit oui ou non d'un nouveau clic.
+	 * Booleen permettant de dï¿½finir s'il s'agit oui ou non d'un nouveau clic.
 	 * 
 	 */
 	private boolean nouvclick;
@@ -93,7 +92,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	private boolean InOutCar = false;
 
 	/**
-	 * Différence en pixel (en x et y) entre le point courant et le dernier
+	 * Diffï¿½rence en pixel (en x et y) entre le point courant et le dernier
 	 * point connu.
 	 * 
 	 * @see pt
@@ -109,21 +108,21 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	private SimpleUniverse simpleU;
 	private World world;
 	/**
-	 * Latitude et longitude de la Camera par rapport au point visé.
+	 * Latitude et longitude de la Camera par rapport au point visï¿½.
 	 * 
 	 */
 	private double theta = 0;
-	private double phi = 0;
+	private double phi = -89;
 
 	/**
-	 * TransformGroup auquel est rattachée la caméra.
+	 * TransformGroup auquel est rattachï¿½e la camï¿½ra.
 	 * 
 	 * @see TransformGroup
 	 */
 	private TransformGroup mnt;
 
 	/**
-	 * Vecteur contenant la liste de tous les vehicule présent dans l'univers.
+	 * Vecteur contenant la liste de tous les vehicule prï¿½sent dans l'univers.
 	 * 
 	 */
 	private Vector<VehiculeLibre> listevehicule;
@@ -140,24 +139,26 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	/**
 	 * Constructeur Listeners
 	 * <p>
-	 * A la construction d'un objet Listeners, on recupère l'univers courant
-	 * aisni que le MNT, ce qui permet d'y associer les différents mouvements de
-	 * la souris. On ajoute une vue par défaut.
+	 * A la construction d'un objet Listeners, on recupï¿½re l'univers courant
+	 * aisni que le MNT, ce qui permet d'y associer les diffï¿½rents mouvements de
+	 * la souris. On ajoute une vue par dï¿½faut.
 	 * </p>
 	 * 
 	 * @param simpleU
 	 *            SimpleUniverse courant.
-	 * @throws IOException 
 	 * @see Listeners#simpleU
 	 * @see Listeners#mnt
 	 */
 	public Listeners(SimpleUniverse simpleU, World world,
-			Vector<VehiculeLibre> listevehicule) throws IOException {
+			Vector<VehiculeLibre> listevehicule) {
 		this.listevehicule = listevehicule;
 		this.simpleU = simpleU;
 		this.world = world;
+		this.mnt = world.getTg2();
 		System.out.println("ltn construit "+world.getHeight());
 		view = new Camera(this);
+		view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)), Math
+				.sin(Math.toRadians(theta)), 0));
 
 	}
 
@@ -170,7 +171,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Booleen permettant de passer de caméra exterieure en FreeCam et
+	 * Booleen permettant de passer de camï¿½ra exterieure en FreeCam et
 	 * inversement
 	 * 
 	 * @return the freeCar
@@ -181,7 +182,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Booleen permettant de passer de caméra exterieure en caméra intérieure
+	 * Booleen permettant de passer de camï¿½ra exterieure en camï¿½ra intï¿½rieure
 	 * 
 	 * @return the InOutCar
 	 * 
@@ -191,7 +192,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Getteur permettant de récupérer le lookAt gerant la caméra
+	 * Getteur permettant de rï¿½cupï¿½rer le lookAt gerant la camï¿½ra
 	 * 
 	 * @return the view
 	 */
@@ -204,13 +205,13 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Listener permettant de gèrer le zoom de la Camera.
+	 * Listener permettant de gï¿½rer le zoom de la Camera.
 	 * <p>
-	 * Listener activé à l'activation de la molette de la souris.
+	 * Listener activï¿½ ï¿½ l'activation de la molette de la souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseWheelListener
 	 * 
@@ -223,45 +224,41 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			System.out.println("Zoom+");
 //			if (FreeCar) { // cam mnt
 				//double z = world.GetZMNTPlan(view.getEye().x, view.getEye().y);
-				double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
+				//double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
 //				System.out.println(z+" z");
-//				if (view.mntAlt(view.getEye().z, z) || !zm) {
-//					zp = true;
-					// Point visé au moment de l'action zoom
-//					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
+				//if (view.mntAlt(view.getEye().z, z) || !zm) {
+					zp = true;
+					// Point visï¿½ au moment de l'action zoom
+					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
 //					System.out.println(pt);
 //					// angle d'horizon
-//					int horizon = -68;
-//					if (phi < horizon) {
+					int horizon = -68;
+					if (phi < horizon) {
 						dx = (double) (view.getAt().x - view.getEye().x)/15;
 						dy = (double) (view.getAt().y - view.getEye().y)/15;
 						dz = (double) (view.getAt().z - view.getEye().z)/15;
 						System.out.println(dx + " "+dy+" "+dz);
-//					} else {
-//						dx = (double) ((pt.x - view.getEye().x) / 15);
-//						dy = (double) ((pt.y - view.getEye().y) / 15);
-//						dz = (double) ((pt.z - view.getEye().z) / 15);
-//					}
-					// Actualisation de la position de la caméra
+					} else {
+						dx = (double) ((pt.x - view.getEye().x) / 15);
+						dy = (double) ((pt.y - view.getEye().y) / 15);
+						dz = (double) ((pt.z - view.getEye().z) / 15);
+					}
+					// Actualisation de la position de la camï¿½ra
 					view.setEye(new Point3d(view.getEye().x + dx,
 							view.getEye().y + dy, view.getEye().z + dz));
 
-					// Actualisation du point visé lors du ZOOM
-//					view.setAt(new Point3d(view.getAt().x + dx, view.getAt().y
-//							+ dy, view.getAt().z + dz));
+					// Actualisation du point visï¿½ lors du ZOOM
+					view.setAt(new Point3d(view.getAt().x + dx, view.getAt().y
+							+ dy, view.getAt().z + dz));
 
 					// MAJ de la view
-					try {
-						view.moveView(simpleU, view.getEye(), view.getAt(),
-								view.getUp());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					view.moveView(simpleU, view.getEye(), view.getAt(),
+							view.getUp());
+				
 //				} else {
 //					zp = false;
 //				}
-//			} else if (!InOutCar) {// derrière voiture
+//			} else if (!InOutCar) {// derriï¿½re voiture
 ////				view.setEye(new Point3d(view.getEye().getX()
 ////						- (view.getEye().getX() - view.getAt().getX()) / 15,
 ////						view.getEye().getY()
@@ -282,43 +279,38 @@ public class Listeners implements MouseListener, MouseWheelListener,
 //			if (FreeCar) { // cam mnt
 				// Calcul de l'alti
 				//double z = world.GetZMNTPlan(view.getEye().x, view.getEye().y);
-				double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
-//				if (view.mntAlt(view.getEye().z, z) || !zp) {
-//					zm = true;
-//					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
+				//double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
+				//if (view.mntAlt(view.getEye().z, z) || !zp) {
+					zm = true;
+					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
 //					System.out.println(pt);
 //					// angle d'horizon
-//					int horizon = -68;
-//					if (phi < horizon) {
+					int horizon = -68;
+					if (phi < horizon) {
 						dx = (double) (view.getAt().x - view.getEye().x)/15;
 						dy = (double) (view.getAt().y - view.getEye().y)/15;
 						dz = (double) (view.getAt().z - view.getEye().z)/15;
 						System.out.println(dx + " "+dy+" "+dz);
-//					} else {
-//						dx = (double) ((pt.x - view.getEye().x) / 15);
-//						dy = (double) ((pt.y - view.getEye().y) / 15);
-//						dz = (double) ((pt.z - view.getEye().z) / 15);
-//					}
-					// Actualisation de la position de la caméra
+					} else {
+						dx = (double) ((pt.x - view.getEye().x) / 15);
+						dy = (double) ((pt.y - view.getEye().y) / 15);
+						dz = (double) ((pt.z - view.getEye().z) / 15);
+					}
+					// Actualisation de la position de la camï¿½ra
 					view.setEye(new Point3d(view.getEye().x - dx,
 							view.getEye().y - dy, view.getEye().z - dz));
 
-					// Actualisation du point visé lors du ZOOM
-//					view.setAt(new Point3d(view.getAt().x - dx, view.getAt().y
-//							- dy, view.getAt().z - dz));
+					// Actualisation du point visï¿½ lors du ZOOM
+					view.setAt(new Point3d(view.getAt().x - dx, view.getAt().y
+							- dy, view.getAt().z - dz));
 
 					// MAJ de la view
-					try {
-						view.moveView(simpleU, view.getEye(), view.getAt(),
-								view.getUp());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-//				} else {
-//					zm = false;
-//				}
-//			}else if (!InOutCar) {// derrière voiture
+					view.moveView(simpleU, view.getEye(), view.getAt(),
+							view.getUp());
+				} else {
+					zm = false;
+				}
+//			}else if (!InOutCar) {// derriï¿½re voiture
 //				view.setEye(new Point3d(view.getEye().getX()
 //						+ (view.getEye().getX() - view.getAt().getX()) / 15,
 //						view.getEye().getY()
@@ -333,7 +325,8 @@ public class Listeners implements MouseListener, MouseWheelListener,
 //
 //			}
 			
-		}
+//		}
+		
 	}
 
 	/**
@@ -344,14 +337,14 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Listener permettant de gèrer le déplacement de la Camera ainsi que sa
+	 * Listener permettant de gï¿½rer le dï¿½placement de la Camera ainsi que sa
 	 * rotation sur l'axe phi et theta.
 	 * <p>
-	 * Listener activé au déplacement de la souris ainsi qu'un clic.
+	 * Listener activï¿½ au dï¿½placement de la souris ainsi qu'un clic.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
@@ -359,20 +352,20 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	@Override
 	public void mouseDragged(java.awt.event.MouseEvent arg0) {
 
-		// aucun déplacement n'a encore été fait ou il s'agit d'un nouveau
+		// aucun dï¿½placement n'a encore ï¿½tï¿½ fait ou il s'agit d'un nouveau
 		// click
 		if (LastPosition == null | nouvclick == true) {
 			LastPosition = FirstPosition;
 		}
 
-		// récupération du Point courant
+		// rï¿½cupï¿½ration du Point courant
 		pt = arg0.getPoint();
 
 		if (SwingUtilities.isLeftMouseButton(arg0)) {
 			// click gauche
 			System.out.println("click gauche");
 
-			// la souris se trouve dans l'écran
+			// la souris se trouve dans l'ï¿½cran
 			if (pt.getX() == 0
 					| pt.getY() == 0
 					| pt.getX() == KeyboardFocusManager
@@ -381,9 +374,9 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					| pt.getY() == KeyboardFocusManager
 							.getCurrentKeyboardFocusManager().getActiveWindow()
 							.getSize().height) {
-				System.out.println("souris en dehors de l'écran");
+				System.out.println("souris en dehors de l'ï¿½cran");
 			} else {
-				// calcul du déplacement global
+				// calcul du dï¿½placement global
 				dx = (pt.getX() - LastPosition.getX());
 				dy = (pt.getY() - LastPosition.getY());
 
@@ -407,7 +400,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					dx *= .15 * scale;
 					dy *= .15 * scale;
 
-					// Calcul des nouvelles coordonnées de la caméra
+					// Calcul des nouvelles coordonnï¿½es de la camï¿½ra
 					Point3d eye = new Point3d(view.getEye().x + dy
 							* Math.cos(Math.toRadians(theta)) - dx
 							* Math.sin(Math.toRadians(theta)), view.getEye().y
@@ -424,13 +417,10 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					// MAJ CAM
 					view.setEye(eye);
 					view.setAt(at);
-					try {
-						view.moveView(simpleU, view.getEye(), view.getAt(),
-								view.getUp());
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					view.moveView(simpleU, view.getEye(), view.getAt(),
+							view.getUp());
+					
+					System.out.println(view.getAt());
 
 					System.out.println(pt.getX() + " " + pt.getY() + " ");
 				}
@@ -445,18 +435,22 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		else if (SwingUtilities.isMiddleMouseButton(arg0)) {
 			// click molette
 			System.out.println("click roulette");
-
+			
+			Point pt_vis = arg0.getPoint();
+			
 			// on gere la rotation autour du point clique
-			double diffx = pt.getX() - LastPosition.getX();
-			double diffy = pt.getY() - LastPosition.getY();
+			double diffx = pt_vis.getX() - LastPosition.getX();
+			double diffy = pt_vis.getY() - LastPosition.getY();
 
-			// Calcul des nouvelles coordonnées de la caméra
+			
+			// Calcul des nouvelles coordonnï¿½es de la camï¿½ra
 
 			if (!InOutCar && FreeCar) { // camera free (mnt)
 
 				updateAngles(Math.abs(diffx), Math.abs(diffy));
 				System.out.println("molette freeeeee");
-
+				System.out.println(view.getAt()+" V");
+				System.out.println(view.getEye()+" E");
 				double dist = Geometrie.distance(view.getAt(), view.getEye());
 				view.setEye(new Point3d(view.getAt().x + dist
 						* Math.cos(Math.toRadians(theta))
@@ -468,13 +462,8 @@ public class Listeners implements MouseListener, MouseWheelListener,
 				view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)), Math
 						.sin(Math.toRadians(theta)), 0));
 
-				try {
-					view.moveView(simpleU, view.getEye(), view.getAt(),
-							view.getUp());
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				view.moveView(simpleU, view.getEye(), view.getAt(),
+						view.getUp());
 
 			} else if (!InOutCar && !FreeCar) { // camera ext suivant la voiture
 				System.out.println("molette derriere");
@@ -500,13 +489,13 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Listener permettant de gèrer le déplacement de la Camera.
+	 * Listener permettant de gï¿½rer le dï¿½placement de la Camera.
 	 * <p>
-	 * Listener activé au déplacement de la souris.
+	 * Listener activï¿½ au dï¿½placement de la souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
@@ -519,48 +508,71 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * Listener permettant de d'enregistrer les positions courantes et de
 	 * zoomer.
 	 * <p>
-	 * Listener activé au déplacement au clic de la souris.
+	 * Listener activï¿½ au dï¿½placement au clic de la souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
 	 */
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent arg0) {
-		// Cette méthode est appelée quand l'utilisateur a cliqué (appuyé puis
-		// relâché) sur le composant écouté
+		// Cette mï¿½thode est appelï¿½e quand l'utilisateur a cliquï¿½ (appuyï¿½ puis
+		// relï¿½chï¿½) sur le composant ï¿½coutï¿½
 		if (arg0.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(arg0)) {
 			System.out.println("Il y a eu un double clic");
 
 			Point3d aa = new Point3d();
 
 			aa = getPosition(arg0, simpleU, mnt);
+			
+			double pasEyex = (view.getEye().getX() - aa.getX()) / 100;
+			double pasEyey = (view.getEye().getY() - aa.getY()) / 100;
+			double pasEyez = ((view.getEye().getZ() - view.getAt().getZ())/2) / 100;
+			
+			double pasAtx = (view.getAt().getX() - aa.getX()) / 100;
+			double pasAty = (view.getAt().getY() - aa.getY()) / 100;
+			
+			double pasphi = (phi/100);
+			
+			for (int i = 0; i < 100; i++) {
+				
+				view.setEye(new Point3d(view.getEye().getX()-pasEyex, view.getEye().getY()-pasEyey, view.getEye().getZ()-pasEyez));
+				view.setAt(new Point3d(view.getAt().getX()-pasAtx, view.getAt().getY()-pasAty, .0));
+				phi -= pasphi;
+				
 
-			view.setEye(new Point3d(aa.getX(), aa.getY(), view.getEye().z / 5));
-			view.setAt(new Point3d(aa.getX(), aa.getY(), .0));
-			phi = 0;
-
-			// MAJ CAM
-			try {
+				// MAJ CAM
 				view.moveView(simpleU, view.getEye(), view.getAt(), view.getUp());
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				
+				try {
+					Thread.sleep(15);
+				} catch (InterruptedException e) {
+					System.out
+							.println("Problï¿½me sur la MAZ de la cam @see mazAngles");
+					e.printStackTrace();
+				}
 			}
+
+//			view.setEye(new Point3d(aa.getX(), aa.getY(), view.getEye().z / 5));
+//			view.setAt(new Point3d(aa.getX(), aa.getY(), .0));
+//			phi = 0;
+//
+//			// MAJ CAM
+//			view.moveView(simpleU, view.getEye(), view.getAt(), view.getUp());
 		}
 	}
 
 	/**
-	 * Listener par défaut.
+	 * Listener par dï¿½faut.
 	 * <p>
-	 * Listener activé lorsque que la souris rentre dans la fenêtre courante.
+	 * Listener activï¿½ lorsque que la souris rentre dans la fenï¿½tre courante.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
@@ -571,13 +583,13 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Listener par défaut.
+	 * Listener par dï¿½faut.
 	 * <p>
-	 * Listener activé lorsque que la souris sort dans la fenêtre courante.
+	 * Listener activï¿½ lorsque que la souris sort dans la fenï¿½tre courante.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
@@ -588,33 +600,34 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Listener permettant de récuperer la première position et le double clic
+	 * Listener permettant de rï¿½cuperer la premiï¿½re position et le double clic
 	 * zoom.
 	 * <p>
-	 * Listener activé à l'enfoncement du bouton souris.
+	 * Listener activï¿½ ï¿½ l'enfoncement du bouton souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
 	 */
 	@Override
 	public void mousePressed(java.awt.event.MouseEvent arg0) {
+		System.out.println("Initialisation pt visï¿½ !");
 		FirstPosition = arg0.getPoint();
 		nouvclick = true;
 
 	}
 
 	/**
-	 * Listener permettant de récuperer la dernière position.
+	 * Listener permettant de rï¿½cuperer la derniï¿½re position.
 	 * <p>
-	 * Listener activé au relachement du bouton souris.
+	 * Listener activï¿½ au relachement du bouton souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associé au listener.
+	 *            Evenement souris associï¿½ au listener.
 	 * 
 	 * @see MouseEvent
 	 * 
@@ -635,11 +648,11 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	/**
 	 * Listeners KeyPressed.
 	 * <p>
-	 * Listener activé quand une touche est pressée.
+	 * Listener activï¿½ quand une touche est pressï¿½e.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement clavier associé au listener.
+	 *            Evenement clavier associï¿½ au listener.
 	 * 
 	 * @see KeyEvent
 	 * 
@@ -648,7 +661,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	public void keyPressed(KeyEvent arg0) {
 		switch (arg0.getKeyChar()) {
 
-		// Gestion du la vue en freeCam ou extérieure
+		// Gestion du la vue en freeCam ou extï¿½rieure
 		// MAJ d'un Booleen
 		case ('a'): {
 
@@ -659,25 +672,15 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			if (FreeCar) {
 				phi = -89;
 				theta = 45;
-				try {
-					view.GestionCamFree(listevehicule.firstElement(), simpleU);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				view.GestionCamFree(listevehicule.firstElement(), simpleU);
 			} else {
-				try {
-					view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
 			}
 			// Have a Break...
 			break;
 		}
 
-		// Gestion du la vue en interieure ou extérieure de la caméra
+		// Gestion du la vue en interieure ou extï¿½rieure de la camï¿½ra
 		// (MAJ d'un Booleen)
 		case ('z'): {
 			
@@ -685,19 +688,9 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			view.setZoom(0.);
 			view.mazAngles();
 			if (InOutCar) {
-				try {
-					view.GestionCamInterieure(listevehicule.firstElement(), simpleU);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				view.GestionCamInterieure(listevehicule.firstElement(), simpleU);
 			} else {
-				try {
-					view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
 			}
 
 			// Have a Break...
@@ -708,13 +701,13 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Listener par défaut.
+	 * Listener par dï¿½faut.
 	 * <p>
-	 * Listener activé lorsque qu'un touche clavier est relachée.
+	 * Listener activï¿½ lorsque qu'un touche clavier est relachï¿½e.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement clavier associé au listener.
+	 *            Evenement clavier associï¿½ au listener.
 	 * 
 	 * @see KeyEvent
 	 * 
@@ -725,14 +718,14 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Listener par défaut.
+	 * Listener par dï¿½faut.
 	 * <p>
-	 * Listener activé lorsque qu'un touche clavier est tapée
+	 * Listener activï¿½ lorsque qu'un touche clavier est tapï¿½e
 	 * (Pressed+Released).
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement clavier associé au listener.
+	 *            Evenement clavier associï¿½ au listener.
 	 * 
 	 * @see KeyEvent
 	 * 
@@ -747,17 +740,17 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Méthode de passage des coordonnées pixels au coordonnées 3D dans la
+	 * Mï¿½thode de passage des coordonnï¿½es pixels au coordonnï¿½es 3D dans la
 	 * scene.
 	 * 
 	 * 
 	 * @param simpleU
 	 *            SimpleUniverse courant.
 	 * @param MouseEvent
-	 *            Evenements souris pour récuperer les pixels x et y.
+	 *            Evenements souris pour rï¿½cuperer les pixels x et y.
 	 * @param mnt
 	 *            TransformGroup ayant subi les transformations 3D faite
-	 *            précédemment.
+	 *            prï¿½cï¿½demment.
 	 */
 	public Point3d getPosition(MouseEvent event, SimpleUniverse simpleU,
 			TransformGroup mnt) {
@@ -772,15 +765,25 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		transform.transform(mousePos);
 		Vector3d direction = new Vector3d(eyePos);
 		direction.sub(mousePos);
+		//-- TEST
+		//double Xmax = world.getTuileCourante().Xmax;
+		//double Xmin = world.getTuileCourante().Xmin;
+		//double Ymax = world.getTuileCourante().Ymax;
+		//double Ymin = world.getTuileCourante().Ymin;
+		
+		double Xmean = this.getWorld().getTuileCourante().getMNT().getXmean();
+		double Ymean = this.getWorld().getTuileCourante().getMNT().getYmean();
+		//-- TEST
+		System.out.println(Xmean+" "+Ymean);
 		// three points on the plane
-		Point3d p1 = new Point3d(.5, -.5 * Math.cos(Math.toRadians(phi)),
+		Point3d p1 = new Point3d(Xmean,Ymean - .5*Math.cos(Math.toRadians(phi)),
 				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p2 = new Point3d(.5, .5 * Math.cos(Math.toRadians(phi)),
+		Point3d p2 = new Point3d(-Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
 				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p3 = new Point3d(-.5, .5 * Math.cos(Math.toRadians(phi)),
+		Point3d p3 = new Point3d(Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
 				.5 * Math.sin(Math.toRadians(phi)));
 		Transform3D currentTransform = new Transform3D();
-		mnt.getLocalToVworld(currentTransform);
+		//mnt.getLocalToVworld(currentTransform);
 		currentTransform.transform(p1);
 		currentTransform.transform(p2);
 		currentTransform.transform(p3);
@@ -791,7 +794,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Méthode de passage des coordonnées pixels au coordonnées 3D dans la
+	 * Mï¿½thode de passage des coordonnï¿½es pixels au coordonnï¿½es 3D dans la
 	 * scene.
 	 * 
 	 * 
@@ -805,7 +808,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * 
 	 * @param mnt
 	 *            TransformGroup ayant subi les transformations 3D faite
-	 *            précédemment.
+	 *            prï¿½cï¿½demment.
 	 */
 	public Point3d getPosition(int x, int y, SimpleUniverse simpleU,
 			TransformGroup mnt) {
@@ -819,15 +822,20 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		transform.transform(mousePos);
 		Vector3d direction = new Vector3d(eyePos);
 		direction.sub(mousePos);
+		// three points on the plane		
+		double Xmean = this.getWorld().getTuileCourante().getMNT().getXmean();
+		double Ymean = this.getWorld().getTuileCourante().getMNT().getYmean();
+		//-- TEST
+		System.out.println(Xmean+" "+Ymean);
 		// three points on the plane
-		Point3d p1 = new Point3d(.5, -.5 * Math.cos(Math.toRadians(phi)),
+		Point3d p1 = new Point3d(Xmean,Ymean - .5*Math.cos(Math.toRadians(phi)),
 				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p2 = new Point3d(.5, .5 * Math.cos(Math.toRadians(phi)),
+		Point3d p2 = new Point3d(-Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
 				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p3 = new Point3d(-.5, .5 * Math.cos(Math.toRadians(phi)),
+		Point3d p3 = new Point3d(Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
 				.5 * Math.sin(Math.toRadians(phi)));
 		Transform3D currentTransform = new Transform3D();
-		mnt.getLocalToVworld(currentTransform);
+		//mnt.getLocalToVworld(currentTransform);
 		currentTransform.transform(p1);
 		currentTransform.transform(p2);
 		currentTransform.transform(p3);
@@ -869,13 +877,13 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Méthode permettant de mettre à jour qLon2 et qLat2.
+	 * Mï¿½thode permettant de mettre ï¿½ jour qLon2 et qLat2.
 	 * 
 	 * 
 	 * @param diffx
-	 *            différence de pixels en x.
+	 *            diffï¿½rence de pixels en x.
 	 * @param diffy
-	 *            différence de pixels en y.
+	 *            diffï¿½rence de pixels en y.
 	 * 
 	 */
 	private void updateAngles(double diffx, double diffy) {
@@ -910,39 +918,39 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 //	/**
-//	 * Méthode permettant de récupérer les coordonnées des limites de la
-//	 * fenetre. Cette méthode utilise le centre de la fenetre et les coordonnées
-//	 * pixels de la souris pour en calculer les coordonnées limite de la fenetre
-//	 * passant par la droite construite par les deux points précédents
+//	 * Mï¿½thode permettant de rï¿½cupï¿½rer les coordonnï¿½es des limites de la
+//	 * fenetre. Cette mï¿½thode utilise le centre de la fenetre et les coordonnï¿½es
+//	 * pixels de la souris pour en calculer les coordonnï¿½es limite de la fenetre
+//	 * passant par la droite construite par les deux points prï¿½cï¿½dents
 //	 * 
 //	 * 
 //	 * @param diffx
-//	 *            différence de pixels en x.
+//	 *            diffï¿½rence de pixels en x.
 //	 * @param diffy
-//	 *            différence de pixels en y.
+//	 *            diffï¿½rence de pixels en y.
 //	 * 
 //	 */
 //	private void recupExt(Point2d Ext, MouseEvent arg0, int height, int width) {
-//		// calcul des droite des diagonales de l'écran en pixels.
-//		// point en bas à gauche au point en haut à droite
+//		// calcul des droite des diagonales de l'ï¿½cran en pixels.
+//		// point en bas ï¿½ gauche au point en haut ï¿½ droite
 //		// demi diagonale
 //		double Ademi = (double) -height / width;
 //		double Bdemi = height;
 //
-//		// point en haut à gauche au point en bas à droite
+//		// point en haut ï¿½ gauche au point en bas ï¿½ droite
 //		// min-max diagonale
 //		double Amm = (double) height / width;
 //		double Bmm = 0;
 //
-//		// initialisation l'équation de droite et du point extreme
+//		// initialisation l'ï¿½quation de droite et du point extreme
 //		Droite d = new Droite();
 //
-//		// Définition du triangle dans lequel le click souris se trouve
+//		// Dï¿½finition du triangle dans lequel le click souris se trouve
 //		// HAUT
 //		if (arg0.getY() < Ademi * arg0.getX() + Bdemi) {
 //			if (arg0.getY() < Amm * arg0.getX() + Bmm) {
 //				System.out.println("haut");
-//				// calcul de la droite point cliqué/centre
+//				// calcul de la droite point cliquï¿½/centre
 //
 //				d = Droite.EquationDroite(new Point(width / 2, height / 2),
 //						arg0.getPoint());
@@ -953,7 +961,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 //				// GAUCHE
 //			} else {
 //				System.out.println("gauche");
-//				// calcul de la droite point cliqué/centre
+//				// calcul de la droite point cliquï¿½/centre
 //				d = Droite.EquationDroite(new Point(width / 2, height / 2),
 //						arg0.getPoint());
 //
@@ -965,16 +973,16 @@ public class Listeners implements MouseListener, MouseWheelListener,
 //			// BAS
 //			if (arg0.getY() > Amm * arg0.getX() + Bmm) {
 //				System.out.println("bas");
-//				// calcul de la droite point cliqué/centre
+//				// calcul de la droite point cliquï¿½/centre
 //				d = Droite.EquationDroite(new Point(width / 2, height / 2),
 //						arg0.getPoint());
-//				// penser à mettre AB en droite
+//				// penser ï¿½ mettre AB en droite
 //				Ext.x = (height - d.getB()) / d.getA();
 //				Ext.y = height;
 //				// DROITE
 //			} else {
 //				System.out.println("droite");
-//				// calcul de la droite point cliqué/centre
+//				// calcul de la droite point cliquï¿½/centre
 //				d = Droite.EquationDroite(new Point(width / 2, height / 2),
 //						arg0.getPoint());
 //

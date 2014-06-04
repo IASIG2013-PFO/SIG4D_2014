@@ -3,49 +3,22 @@
  */
 package dao;
 
-import dao.*;
+
 import dao.user.Buffer;
 import dao.user.Lampadaire;
 import dao.user.Objet_Postgre;
 import dao.user.Raster_img_mnt;
 
-import java.awt.FlowLayout;
-import java.awt.Image;
-import java.awt.color.ColorSpace;
-import java.awt.image.BandedSampleModel;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-import java.awt.image.DataBufferShort;
-import java.awt.image.Raster;
-import java.awt.image.SampleModel;
-import java.awt.image.WritableRaster;
+
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.sql.PreparedStatement;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
-import org.gdal.gdal.Band;
-import org.gdal.gdal.Dataset;
-import org.gdal.gdal.GCP;
-import org.gdal.gdal.gdal;
-import org.gdal.gdalconst.gdalconstConstants;
-import org.postgis.MultiLineString;
 import org.postgis.PGgeometry;
 
 /**
@@ -84,9 +57,9 @@ public class Raster_img_mntDAO extends ObjectDao<Raster_img_mnt> {
 		
 	    byte[] content = null;
 //	    Dataset dattaset = null;
-	    //type de raster enregistré (img ou raster)
+	    //type de raster enregistrï¿½ (img ou raster)
 	    String type_raster="img";
-	    //conversion des valeurs de i et j vers l'équivalent en indice
+	    //conversion des valeurs de i et j vers l'ï¿½quivalent en indice
 	    int id=(85-i)*99+j;
 	    try {
 			

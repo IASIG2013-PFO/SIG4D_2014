@@ -12,6 +12,8 @@ import global.Generation;
 
 import org.postgis.PGgeometry;
 
+import iasig.mobile.view.Tuile;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -381,6 +383,131 @@ public class GenericDAO extends DAO {
 		
 	}
 
+	
+public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
+		
+		//recuperation de la maille observateur
+	
+		int maille_observateur_i = obj.centre_buffer_memoire_i;
+		int maille_observateur_j = obj.centre_buffer_memoire_j;
+		
+		System.out.println(maille_observateur_i+" "+maille_observateur_j);
+
+		int demi_taille_buffer= obj.taille_buffer_memoire/2;
+		//ecriture du Polygone de requête selon paramètre de generation
+		//1-recuperation des mailles extremes de l'espace à mettre en memoire
+		int mailleMax_i = maille_observateur_i +  demi_taille_buffer ;
+		int mailleMin_i = maille_observateur_i -  demi_taille_buffer;
+		int mailleMax_j = maille_observateur_j +  demi_taille_buffer ;
+		int mailleMin_j = maille_observateur_j -  demi_taille_buffer;
+		
+		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
+		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
+		int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
+		int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
+		
+		
+		
+		
+		String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
+		PGgeometry polygone;
+		try {
+			polygone = new PGgeometry(Polygone);			
+	        ResultSet result = connection_statique
+	                                .createStatement(
+	                                        	ResultSet.TYPE_SCROLL_INSENSITIVE, 
+	                                            ResultSet.TYPE_SCROLL_INSENSITIVE
+	                                         ).executeQuery(
+	                                        		
+	     //" SELECT * FROM maison2 WHERE ST_WITHIN(centroid, ST_GeomFromText('POLYGON((2000 2000,8000 2000, 8000 8000, 2000 8000, 2000 2000))', 4326) )  ;" 
+	     // " SELECT *, ST_CENTROID(geom) FROM maison2 WHERE ST_WITHIN(centroid, ST_GeomFromText('"+polygone.getValue()+"', 4326) ) ;"
+	      //Multifoncteur - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
+	      " SELECT *, ST_CENTROID(geom) FROM generic_object1 WHERE ST_WITHIN(ST_CENTROID(geom), ST_GeomFromText('"+polygone.getValue()+"', 2154) ) ;"
+
+	                               );System.out.println(polygone.getValue());
+	        
+	        //Mise a disposition des conteneurs
+        	Maison home1 = new Maison();
+        	Lampadaire lamp = new Lampadaire();
+        	Arbre arbre = new Arbre();
+        	ObjetPonctuel objet_ponctuel = new ObjetPonctuel();
+       	 System.out.println("parcours du resultSet");
+
+     while(result.next()){
+ 		if(result.absolute(result.getRow()))
+
+ 			switch (result.getString("type")) {
+ 				case "maison":
+ 					//Instanciation d'une maison					
+ 					home1 = new Maison(
+ 							result.getInt("gid"),
+ 							result.getString("nom"),
+ 							result.getFloat("rotz"),
+ 							result.getFloat("f"),
+
+ 							(PGgeometry)result.getObject("geom"),
+ 							(PGgeometry)result.getObject("st_centroid")
+ 						 	);
+ 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					obj.AjoutObjet(home1);
+ 					break;
+ 				case "lampadaire":
+ 					//Instanciation d'un lampadaire				
+ 					lamp = new Lampadaire(
+ 							result.getInt("gid"),
+ 							//result.getString("nom"),
+ 							result.getFloat("rotz"),
+ 							result.getFloat("f"),
+ 							result.getString("type"),
+
+ 							(PGgeometry)result.getObject("geom"),
+ 							(PGgeometry)result.getObject("st_centroid")
+ 						 	);
+ 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					obj.AjoutObjet(lamp);
+ 					
+ 				case "arbre":
+ 					//Instanciation d'un qrbre				
+ 					arbre = new Arbre(
+ 							result.getInt("gid"),
+ 							result.getFloat("rotz"),
+ 							result.getFloat("f"),
+ 							result.getString("type"),
+ 							(PGgeometry)result.getObject("geom"),
+ 							(PGgeometry)result.getObject("st_centroid")
+ 						 	);
+ 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					obj.AjoutObjet(arbre);
+ 					
+ 					break;
+ 				default:
+ 					//throw new IllegalArgumentException("Invalid type: " + result.getString("type"));
+ 					//instanciation d'un nouvel objet ponctuel
+ 					objet_ponctuel = new ObjetPonctuel(
+ 							result.getInt("gid"),
+ 							result.getString("type"),
+ 							result.getString("nom"),
+ 							result.getFloat("rotz"),
+ 							result.getFloat("f"),
+ 							(PGgeometry)result.getObject("geom"),
+ 							(PGgeometry)result.getObject("st_centroid")
+ 							);
+ 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					obj.AjoutObjet(objet_ponctuel);
+ 			}
+     }
+        	
+		    } catch (SQLException e) {
+		            e.printStackTrace();
+		    }
+
+		
+	}
+	
+
+	
+	
+	
 }
 
 

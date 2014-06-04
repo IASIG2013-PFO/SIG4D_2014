@@ -244,7 +244,7 @@ public class Objet3d {
 		  * */
 		 public static  void dessin_obj_vecteur(BranchGroup bg, Shape3D[] pieces, Vector<Object> vect) {
 			 
- System.out.println(vect.size());
+ //System.out.println(vect.size());
 			 if (vect.size()==0) {
 				return;
 			 }
@@ -278,6 +278,7 @@ public class Objet3d {
 			   	Transform3D transObj=new Transform3D();
 			    transObj.setScale(objpt.getf());
 			    transObj.setTranslation(new Vector3d( objpt.getX(),  objpt.getY(), objpt.getZ()));
+			    //System.out.println( objpt.getX()+"/"+objpt.getY()+"/"+objpt.getZ());
  //System.out.println( objpt.getX()+"  "+  objpt.getY()+"   "+ objpt.getZ());
  
 			    transObj.setRotation(new AxisAngle4d( 1,  0, objpt.getRotZ(), Math.PI/2));

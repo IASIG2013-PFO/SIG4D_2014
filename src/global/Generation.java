@@ -6,8 +6,8 @@ public class Generation {
 	private static int taille_buffer_objet = 10 ;
 	private static double Xmin = 0 ;
 	private static double Ymin = 0 ;
-	public static double x0=916000;
-	public static double y0=6513000;
+	public static double x0 = 916000;
+	public static double y0 = 6513000;
 	
 	//getter static
 	public static int get_taille_de_maille(){

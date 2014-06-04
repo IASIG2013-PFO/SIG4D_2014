@@ -2,7 +2,9 @@ package dao.user;
 
 import dao.GenericDAO;
 import global.Generation;
+import iasig.mobile.view.SuperBG;
 
+import java.io.IOException;
 import java.util.Vector;
 
 public class Buffer {
@@ -270,6 +272,22 @@ System.out.println("nummaille="+nummaille);
 
 	
 	/**
+	 * Permet de conversion indice d'indexation vers coordonnees maille monde
+	 * @param indice l'indice
+	 * @return tmp maille les coordonnees maille
+	 */
+	public int[] Conversion_Indice_Monde(int indice){
+		
+		int[] tmp = new int[2];
+		
+		tmp[1] = indice/interval_de_maille;
+		tmp[0] = indice%interval_de_maille;
+		
+		return tmp;
+		
+	}
+	
+	/**
 	 * Permet de conversion coordonnees maille vers coordonnees relatives buffer
 	 * @param Xobs	coordonnees maille
 	 * @param Yobs	coordonnees maille
@@ -330,4 +348,22 @@ System.out.println("nummaille="+nummaille);
 		
 	}
 
+	/**
+	 * Objet to SuperBG
+	 * @throws IOException 
+	 */
+	public void TransformToSuperBG() throws IOException{
+	
+		for (int i = 0; i < this.objets_instanciated.size(); i++ ){
+			int[] indicemaille = Conversion_Indice_Monde(i);
+			
+			
+			SuperBG tmp_SBG = new SuperBG(indicemaille[0], indicemaille[1],5, this.objets_instanciated.elementAt(i));
+			
+			
+			
+		}
+	}
+	
+	
 }
