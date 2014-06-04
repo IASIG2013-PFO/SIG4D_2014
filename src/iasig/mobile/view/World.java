@@ -528,7 +528,7 @@ public class World extends JFrame {
 		}// endfor(i)
 		
 		//Initialisation du buffer
-		buffer = new Buffer(11, 1, 32, 19, transform);
+		buffer = new Buffer(11, 11, 32, 19, transform);
 		
 	/*System.out.println(transform.numChildren());
 	

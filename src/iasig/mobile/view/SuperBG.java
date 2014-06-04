@@ -7,11 +7,13 @@ import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.TransformGroup;
 
-public class SuperBG extends BranchGroup {
+public class SuperBG {
 	
+	public BranchGroup sbg;
 	public Shape3D mnt_plaque;
 	public BranchGroup objets;
-	
+	int i;
+	int j;
 	
 	/**
 	 * Super Branchgroupe
@@ -20,27 +22,33 @@ public class SuperBG extends BranchGroup {
 	 * @throws IOException 
 	 */
 	public SuperBG(Tuile tuile, Vector<Object> vecteur_objet) throws IOException {
-		super();
 		this.mnt_plaque=tuile.draw(World.WITHORTHO);
 		
 		this.objets = new BranchGroup();
 		
 		Objet3d.dessin_obj_vecteur(this.objets, World.tabobj[2].pieces, vecteur_objet);
 		
-		this.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
-		this.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-		this.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+		sbg = new BranchGroup();
 		
-		this.addChild(mnt_plaque);
-		this.addChild(objets);
+		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+		
+		this.sbg.addChild(mnt_plaque);
+		//this.sbg.addChild(objets);
+		
+		this.i=tuile.i_maille;
+		this.j=tuile.j_maille;
 	}
 	
 	//Constructeur par copie
-	public SuperBG(SuperBG sbg){
+	public SuperBG(SuperBG s){
 		
-			this.mnt_plaque = sbg.mnt_plaque;
-			this.objets = sbg.objets;
-		
+			this.mnt_plaque = s.mnt_plaque;
+			this.objets = s.objets;
+			this.sbg = s.sbg;
+			this.i = s.i;
+			this.j = s.j;
 	}
 
 }
