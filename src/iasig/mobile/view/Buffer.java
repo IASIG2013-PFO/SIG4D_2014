@@ -21,14 +21,16 @@ public class Buffer {
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
 	 */
-	public  Vector<Vector<SuperBG>> buffer_memoire;
+	//public  Vector<Vector<SuperBG>> buffer_memoire;
+	public SuperBG[][] buffer_memoire;
 	public int taille_buffer_memoire;
 	public int centre_buffer_memoire_i;
 	public int centre_buffer_memoire_j;
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
 	 */
-	public  Vector<Vector<SuperBG>> buffer_visible;
+	//public  Vector<Vector<SuperBG>> buffer_visible;
+	public SuperBG[][] buffer_visible;
 	public int taille_buffer_visible;
 	public int centre_buffer_visible_i;
 	public int centre_buffer_visible_j;
@@ -53,14 +55,15 @@ public class Buffer {
 		this.tg = tg;
 		
 		//Initialisation des Buffers (matrices) à vide		
-		buffer_memoire = new Vector<Vector<SuperBG>>();
-		for (int i = 0; i < taille_buffer_memoire; i++) {
-			buffer_memoire.addElement(new Vector<SuperBG>());
-			
-			for (int j = 0; j < taille_buffer_memoire; j++) {
-				buffer_memoire.lastElement().addElement(null);
-			}
-		}
+		buffer_memoire = new SuperBG[taille_buffer_memoire][taille_buffer_memoire];
+//		buffer_memoire = new Vector<Vector<SuperBG>>();
+//		for (int i = 0; i < taille_buffer_memoire; i++) {
+//			buffer_memoire.addElement(new Vector<SuperBG>());
+//			
+//			for (int j = 0; j < taille_buffer_memoire; j++) {
+//				buffer_memoire.lastElement().addElement(null);
+//			}
+//		}
 
 		buffer_tuile = new Vector<Vector<Tuile>>();
 		for (int i = 0; i < taille_buffer_memoire; i++) {
@@ -80,14 +83,15 @@ public class Buffer {
 			}
 		}
 		
-		buffer_visible = new Vector<Vector<SuperBG>>();
-		for (int i = 0; i < taille_buffer_visible; i++) {
-			buffer_visible.addElement(new Vector<SuperBG>());
-			
-			for (int j = 0; j < taille_buffer_visible; j++) {
-				buffer_visible.lastElement().addElement(null);
-			}
-		}
+		buffer_visible = new SuperBG[taille_buffer_visible][taille_buffer_visible];
+//		buffer_visible = new Vector<Vector<SuperBG>>();
+//		for (int i = 0; i < taille_buffer_visible; i++) {
+//			buffer_visible.addElement(new Vector<SuperBG>());
+//			
+//			for (int j = 0; j < taille_buffer_visible; j++) {
+//				buffer_visible.lastElement().addElement(null);
+//			}
+//		}
 		//Fin initialisation
 		
 		//Ajout des Objets
@@ -178,8 +182,10 @@ public class Buffer {
 			for(int j = 0; j< taille_buffer_memoire; j++){
 		
 				//buffer_memoire[i][j] = new SuperBG(buffer_tuile[i][j], buffer_objet[i][j] ) 
-				buffer_memoire.elementAt(i).setElementAt(new SuperBG(buffer_tuile.elementAt(i).elementAt(j), 
-						buffer_objet.elementAt(i).elementAt(j)), j);
+				buffer_memoire[i][j] = new SuperBG(new SuperBG(buffer_tuile.elementAt(i).elementAt(j), 
+						buffer_objet.elementAt(i).elementAt(j))) ;
+//				buffer_memoire.elementAt(i).setElementAt(new SuperBG(buffer_tuile.elementAt(i).elementAt(j), 
+//						buffer_objet.elementAt(i).elementAt(j)), j);
 							
 				//Liberation mémoire
 				buffer_tuile.elementAt(i).setElementAt(null, j);
@@ -207,9 +213,11 @@ public class Buffer {
 				//buffer_visible[i][j] = new SuperBG(buffer_memoire[i_memoire][j_memoire]);
 				//En copie constructeur
 				//buffer_visible.elementAt(i).setElementAt(new SuperBG( buffer_memoire.elementAt(i_memoire).elementAt(j_memoire) ), j);
-				buffer_visible.elementAt(i).setElementAt( new SuperBG( buffer_memoire.elementAt(i_memoire).elementAt(j_memoire) ), j);
+				buffer_visible[i][j] = new SuperBG(buffer_memoire[i_memoire][j_memoire]);
+				//buffer_visible.elementAt(i).setElementAt( new SuperBG( buffer_memoire.elementAt(i_memoire).elementAt(j_memoire) ), j);
 				
-				tg.addChild(buffer_visible.elementAt(i).elementAt(j).sbg);
+				tg.addChild(buffer_visible[i][j].sbg);
+				//tg.addChild(buffer_visible.elementAt(i).elementAt(j).sbg);
 			}
 		}
 		
