@@ -97,12 +97,15 @@ public class Camera {
 	 * </p>
 	 */
 	Camera(Listeners ltn) {
-		this.eye = new Point3d(948000.0d,6532000.0d,40000);//948000.0d, 6532000.0d, 5000.0d);
+		this.eye = new Point3d(948000.0d,6532000.0d,20000);//948000.0d, 6532000.0d, 5000.0d);
 		this.at = new Point3d(948000.0d,6532000.0d,0);//948000.0d, 6532000.0d, 500.0d);
 		this.up = new Vector3d(1.0d, 0.0d, 0.0d);
 		this.ltn = ltn;
 		
-
+		ltn.setPhi(-.89);
+		ltn.setTheta(0);
+		ltn.setFreeCar(true);
+		ltn.setInOutCar(false);
 
 		// On initialise les deux quaternions avec leurs valeurs par d�faut
 		qRightLeft = new Quaternion();
@@ -215,14 +218,13 @@ public class Camera {
 		lookAt.lookAt(p1, p2, v);
 		lookAt.invert();
 		
-
 		try {
 			ltn.getWorld().CameraMovedTo(at.x, at.y);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		
 		simpleU.getViewingPlatform().getViewPlatformTransform()
 				.setTransform(lookAt);
 	}
@@ -468,7 +470,7 @@ public class Camera {
 	 * @return Boolean
 	 */
 	public boolean mntAlt(double z, double zmnt) {
-		zmnt += 10;
+		zmnt += 50;
 		if (z <= zmnt) {
 			return false;
 		} else {

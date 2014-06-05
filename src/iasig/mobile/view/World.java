@@ -409,8 +409,8 @@ public class World extends JFrame {
 		
 		if(buffer==null){return;}
 		
-		System.out.println("setT");
-		System.out.println(x+" "+y);
+//		System.out.println("setT");
+//		System.out.println(x+" "+y);
 		int i = (int) ((x - Tuile.Xmin) / Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin) / Tuile.DY);
 		
@@ -426,7 +426,7 @@ public class World extends JFrame {
 //		buffer.centre_buffer_visible_i = i;
 //		buffer.centre_buffer_visible_j = j;
 		
-		System.out.println(i+" "+j);
+//		System.out.println(i+" "+j);
 		
 		buffer.rafraichissement_visible(delta_i, delta_j);
 
@@ -530,7 +530,7 @@ public class World extends JFrame {
 		}// endfor(i)
 		
 		//Initialisation du buffer
-		buffer = new Buffer(11, 5, 32, 19, transform);
+		buffer = new Buffer(11, 3, 32, 19, transform);
 		
 	/*System.out.println(transform.numChildren());
 	

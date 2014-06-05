@@ -81,7 +81,14 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * Freecam False : camera sur la voiture
 	 * 
 	 */
-	private boolean FreeCar = true;
+	private boolean FreeCar;
+
+	/**
+	 * @param freeCar the freeCar to set
+	 */
+	public void setFreeCar(boolean freeCar) {
+		FreeCar = freeCar;
+	}
 
 	/**
 	 * Booleen permettant de changer la vue interieur et exterieur pour la
@@ -89,7 +96,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * camera interieure
 	 * 
 	 */
-	private boolean InOutCar = false;
+	private boolean InOutCar;
 
 	/**
 	 * Diff�rence en pixel (en x et y) entre le point courant et le dernier
@@ -111,8 +118,22 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * Latitude et longitude de la Camera par rapport au point vis�.
 	 * 
 	 */
-	private double theta = 0;
-	private double phi = -89;
+	private double theta;
+	/**
+	 * @param theta the theta to set
+	 */
+	public void setTheta(double theta) {
+		this.theta = theta;
+	}
+
+	/**
+	 * @param phi the phi to set
+	 */
+	public void setPhi(double phi) {
+		this.phi = phi;
+	}
+
+	private double phi;
 
 	/**
 	 * TransformGroup auquel est rattach�e la cam�ra.
@@ -223,10 +244,10 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			// rotation molette UP
 			System.out.println("Zoom+");
 //			if (FreeCar) { // cam mnt
-				//double z = world.GetZMNTPlan(view.getEye().x, view.getEye().y);
+				double z = world.GetZMNTPlan(view.getEye().x, view.getEye().y);
 				//double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
 //				System.out.println(z+" z");
-				//if (view.mntAlt(view.getEye().z, z) || !zm) {
+				if (view.mntAlt(view.getEye().z, z)) {
 					zp = true;
 					// Point vis� au moment de l'action zoom
 					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
@@ -255,7 +276,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					view.moveView(simpleU, view.getEye(), view.getAt(),
 							view.getUp());
 				
-//				} else {
+				} //else {
 //					zp = false;
 //				}
 //			} else if (!InOutCar) {// derri�re voiture
@@ -363,7 +384,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 
 		if (SwingUtilities.isLeftMouseButton(arg0)) {
 			// click gauche
-			System.out.println("click gauche");
+			//System.out.println("click gauche");
 
 			// la souris se trouve dans l'�cran
 			if (pt.getX() == 0
@@ -396,7 +417,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					}
 				} else if (FreeCar) { // cam mnt
 					int scale = (int) (view.getEye().z / 200 + 1);
-					System.out.println(scale);
+					//System.out.println(scale);
 					dx *= .15 * scale;
 					dy *= .15 * scale;
 
@@ -419,10 +440,8 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					view.setAt(at);
 					view.moveView(simpleU, view.getEye(), view.getAt(),
 							view.getUp());
-					
-					System.out.println(view.getAt());
 
-					System.out.println(pt.getX() + " " + pt.getY() + " ");
+					//System.out.println(pt.getX() + " " + pt.getY() + " ");
 				}
 
 			}
