@@ -5,6 +5,7 @@ package iasig.mobile.view;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.media.j3d.BranchGroup;
@@ -242,7 +243,7 @@ public class Objet3d {
 		  * vect : ensemble des objets java � dessiner dans la sc�ne
 		  * 
 		  * */
-		 public static  void dessin_obj_vecteur(BranchGroup bg, Shape3D[] pieces, Vector<Object> vect) {
+		 public static  void dessin_obj_vecteur(BranchGroup bg, Shape3D[] pieces, ArrayList<Object> vect) {
 			 
  //System.out.println(vect.size());
 			 if (vect.size()==0) {
@@ -260,12 +261,12 @@ public class Objet3d {
 				//vecteur d'objets ponctuels
 				ObjetPonctuel objpt = new ObjetPonctuel();
 				
-				if (vect.elementAt(j) instanceof Lampadaire) {
-					Lampadaire obj = (Lampadaire)(vect.elementAt(j));
+				if (vect.get(j) instanceof Lampadaire) {
+					Lampadaire obj = (Lampadaire)(vect.get(j));
 		//			System.out.println("lamp: "+ obj.getX1()+"  "+  obj.getY1()+"   "+ obj.getZ1());
 					objpt = new ObjetPonctuel(obj.getId(), obj.getGeom(), 0, 2, obj.getType());
-				}else if (vect.elementAt(j) instanceof Arbre) {
-					Arbre obj = (Arbre)(vect.elementAt(j));
+				}else if (vect.get(j) instanceof Arbre) {
+					Arbre obj = (Arbre)(vect.get(j));
 			//		System.out.println("arbre: "+ obj.getX1()+"  "+  obj.getY1()+"   "+ obj.getZ1());
 					objpt = new ObjetPonctuel(obj.getId(), obj.getGeom(), 0, 2, obj.getType());
 				}

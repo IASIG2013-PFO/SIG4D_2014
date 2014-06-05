@@ -1,6 +1,7 @@
 package iasig.mobile.view;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.media.j3d.BranchGroup;
@@ -21,7 +22,7 @@ public class SuperBG {
 	 * @param args
 	 * @throws IOException 
 	 */
-	public SuperBG(Tuile tuile, Vector<Object> vecteur_objet) throws IOException {
+	public SuperBG(Tuile tuile, ArrayList<Object> vecteur_objet) throws IOException {
 		this.mnt_plaque=tuile.draw(World.WITHORTHO);
 		
 		this.objets = new BranchGroup();
@@ -33,6 +34,7 @@ public class SuperBG {
 		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
 		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		this.sbg.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+		this.sbg.setCapability(BranchGroup.ALLOW_DETACH);
 		
 		this.sbg.addChild(mnt_plaque);
 		this.sbg.addChild(objets);
@@ -42,13 +44,16 @@ public class SuperBG {
 	}
 	
 	//Constructeur par copie
+	/**
+	 * Constructeur par copie
+	 * @param s le SuperBG a copier
+	 */
 	public SuperBG(SuperBG s){
-		
-			this.mnt_plaque = s.mnt_plaque;
-			this.objets = s.objets;
-			this.sbg = s.sbg;
-			this.i = s.i;
-			this.j = s.j;
+		this.mnt_plaque = s.mnt_plaque;
+		this.objets = s.objets;
+		this.sbg = s.sbg;
+		this.i = s.i;
+		this.j = s.j;
 	}
 
 }

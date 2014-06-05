@@ -215,13 +215,14 @@ public class Camera {
 		lookAt.lookAt(p1, p2, v);
 		lookAt.invert();
 		
-//		try {
-//			ltn.getWorld().setTuileCourante(at.x, at.y);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-		
+
+		try {
+			ltn.getWorld().CameraMovedTo(at.x, at.y);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		simpleU.getViewingPlatform().getViewPlatformTransform()
 				.setTransform(lookAt);
 	}

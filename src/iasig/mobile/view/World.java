@@ -405,45 +405,44 @@ public class World extends JFrame {
 
 	}
 
-	/*public void setTuileCourante(double x, double y) throws IOException {
+	public void CameraMovedTo(double x, double y) throws IOException {
+		
+		if(buffer==null){return;}
+		
 		System.out.println("setT");
 		System.out.println(x+" "+y);
 		int i = (int) ((x - Tuile.Xmin) / Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin) / Tuile.DY);
-		System.out.println(i+" "+j);
 		
-		if(liste_tuiles!=null){
-			//System.out.println("liste de tuiles: "+liste_tuiles.length);
-		for (Tuile t : liste_tuiles) {
-			if (t.i_maille != i){
-				continue;
-			}
-			if (t.j_maille != j){
-				continue;
-			}
-		///	 on a la bonne tuile
-			if(tuileCourante == t){
-				//System.out.println("je suis la meme");
-				return;
-			}
-			
-			tuileCourante = t;
-		}
-
-		//System.out.println("limite rechargement: "+buffer_objets.getLimiteRechargement());
-			if(Math.abs(i-buffer_objets.mailleobservateur_i) >= buffer_objets.getLimiteRechargement() ||Math.abs(j-buffer_objets.mailleobservateur_j) >= buffer_objets.getLimiteRechargement()){
-				System.out.println(" chargement! ");
-				GenericDAO.selection_geographique(buffer_objets, (float) ltn.getView().getEye().x, (float)ltn.getView().getEye().y, 1000);
-				
-			}
-			System.out.println("Mise en memoire du visible");
-			buffer_visible =  buffer_objets.getObjet_Visible(i, j);
-			
-			dessin();
-			
+		
+		int delta_i = i-buffer.centre_buffer_visible_i ;
+		int delta_j = j-buffer.centre_buffer_visible_j ;
+		
+		if (delta_i == 0 && delta_j == 0 ){
+			//la camera n'a pas change de tuile
 			return;
 		}
-	}*/
+		
+//		buffer.centre_buffer_visible_i = i;
+//		buffer.centre_buffer_visible_j = j;
+		
+		System.out.println(i+" "+j);
+		
+		buffer.rafraichissement_visible(delta_i, delta_j);
+
+//		//System.out.println("limite rechargement: "+buffer_objets.getLimiteRechargement());
+//			if(Math.abs(i-buffer_objets.mailleobservateur_i) >= buffer_objets.getLimiteRechargement() ||Math.abs(j-buffer_objets.mailleobservateur_j) >= buffer_objets.getLimiteRechargement()){
+//				System.out.println(" chargement! ");
+//				GenericDAO.selection_geographique(buffer_objets, (float) ltn.getView().getEye().x, (float)ltn.getView().getEye().y, 1000);
+//				
+//			}
+//			System.out.println("Mise en memoire du visible");
+//			buffer_visible =  buffer_objets.getObjet_Visible(i, j);
+//			
+//			dessin();
+//			
+		
+	}
 
 	// /////////////////DEBUT EMILIE JEAN FLO ......
 	// //////////////////////////////
@@ -531,7 +530,7 @@ public class World extends JFrame {
 		}// endfor(i)
 		
 		//Initialisation du buffer
-		buffer = new Buffer(11, 11, 32, 19, transform);
+		buffer = new Buffer(11, 5, 32, 19, transform);
 		
 	/*System.out.println(transform.numChildren());
 	
@@ -710,36 +709,36 @@ public class World extends JFrame {
 	// ---------------------------------------------------
 	
 		
-		// ---------------------------------------------------
-		private BranchGroup define_tile_buffer_bg(int i)
-				throws IOException {
-			/**
-			 * FONCTION : Construire le BranchGroup graphique d'une tuile donnee.
-			 * 
-			 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe Tuile] : tuile
-			 * source.
-			 * 
-			 * RETOURNE : - [Scalaire, objet de la classe BranchGroup] : le
-			 * BranchGroup construit avec objets du buffer graphique
-			 **/
-	
-			// Cr�ation du BranchGroup de la tuile
-			BranchGroup bg = new BranchGroup();
-			bg.setCapability(BranchGroup.ALLOW_DETACH);
-
-	
-
-			//System.out.println("PLOUP: Dessin des elements du vecteur objet visible");
-			Objet3d.dessin_obj_vecteur(
-					bg,
-					tabobj[2].pieces,
-//					buffer_objets.getObjet_Visible(buffer_objets.mailleobservateur_i, buffer_objets.mailleobservateur_j).elementAt(i));					
-//					buffer_objets.getObjet_Visible(tuileCourante.i_maille, tuileCourante.j_maille).elementAt(i));
-					buffer_visible.elementAt(i)
-					);
-	
-			return bg;
-		}
+//		// ---------------------------------------------------
+//		private BranchGroup define_tile_buffer_bg(int i)
+//				throws IOException {
+//			/**
+//			 * FONCTION : Construire le BranchGroup graphique d'une tuile donnee.
+//			 * 
+//			 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe Tuile] : tuile
+//			 * source.
+//			 * 
+//			 * RETOURNE : - [Scalaire, objet de la classe BranchGroup] : le
+//			 * BranchGroup construit avec objets du buffer graphique
+//			 **/
+//	
+//			// Cr�ation du BranchGroup de la tuile
+//			BranchGroup bg = new BranchGroup();
+//			bg.setCapability(BranchGroup.ALLOW_DETACH);
+//
+//	
+//
+//			//System.out.println("PLOUP: Dessin des elements du vecteur objet visible");
+//			Objet3d.dessin_obj_vecteur(
+//					bg,
+//					tabobj[2].pieces,
+////					buffer_objets.getObjet_Visible(buffer_objets.mailleobservateur_i, buffer_objets.mailleobservateur_j).elementAt(i));					
+////					buffer_objets.getObjet_Visible(tuileCourante.i_maille, tuileCourante.j_maille).elementAt(i));
+//					buffer_visible.elementAt(i)
+//					);
+//	
+//			return bg;
+//		}
 
 	// ---------------------------------------------------
 	public TriangleArray trace_MNT(MNT mnt) {
