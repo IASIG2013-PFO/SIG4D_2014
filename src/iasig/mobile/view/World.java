@@ -11,6 +11,7 @@ import java.awt.GraphicsConfiguration;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.Vector;
 
@@ -532,7 +533,8 @@ public class World extends JFrame {
 		}// endfor(i)
 		
 		//Initialisation du buffer
-		buffer = new Buffer(21, 9, 32, 19, transform);
+		buffer = new Buffer(25, 7, 32, 19, transform);
+		
 		
 	/*System.out.println(transform.numChildren());
 	

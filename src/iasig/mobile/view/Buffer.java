@@ -31,7 +31,9 @@ public class Buffer {
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
 	 */
 	public  ArrayList<ArrayList<SuperBG>> buffer_auxiliaire;
-
+	public int centre_buffer_auxiliaire_i;
+	public int centre_buffer_auxiliaire_j;
+	
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
 	 */
@@ -48,8 +50,11 @@ public class Buffer {
 	
 	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int centre_i, int centre_j, TransformGroup tg ) throws IOException {
 		
-		this.centre_buffer_memoire_i=centre_i;
-		this.centre_buffer_memoire_j=centre_j;
+		this.centre_buffer_auxiliaire_i=centre_i;
+		this.centre_buffer_auxiliaire_j=centre_j;
+		
+//		this.centre_buffer_memoire_i=centre_i;
+//		this.centre_buffer_memoire_j=centre_j;
 		
 		this.centre_buffer_visible_i=centre_i;
 		this.centre_buffer_visible_j=centre_j;
@@ -114,8 +119,9 @@ public class Buffer {
 		System.out.println("Temps de selection des tuiles : "+(System.currentTimeMillis()-t));
 
 		//remplissage du Buffer auxiliaire
+		//initialisation de son propre buufer auxiliaire
 		t = System.currentTimeMillis();
-		remplissage_Buffer_Auxiliaire();
+		remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
 		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-t));
 
 		//transfert du contenu du buffer auxiliaire vers le buffer mémoire
@@ -124,7 +130,7 @@ public class Buffer {
 		System.out.println("Temps de swap : "+(System.currentTimeMillis()-t));
 
 		//Initialisation du Buffer Visible
-		initialisation_buffer_visible();
+		initialisation_buffer_visible(this.buffer_memoire);
 		
 		
 	}
@@ -176,14 +182,14 @@ public class Buffer {
 		for (int i = 0; i< taille_buffer_memoire; i++){
 			
 			int deltai = i - demi_taille_buffer;
-			int i_terrain = this.centre_buffer_memoire_i +  deltai;
+			int i_terrain = this.centre_buffer_auxiliaire_i +  deltai;
 			
 				for(int j = 0; j< taille_buffer_memoire; j++){
 					int deltaj = j - demi_taille_buffer;
-					int j_terrain = this.centre_buffer_memoire_j +  deltaj;
+					int j_terrain = this.centre_buffer_auxiliaire_j +  deltaj;
 					
 					if(i_terrain>=0 && i_terrain<=Tuile.PX-1 && j_terrain>=0 && j_terrain<=Tuile.PY ){
-						buffer_tuile.get(i).set(j,new Tuile(i_terrain, j_terrain, Tuile.R5, Tuile.DB) );
+						buffer_tuile.get(i).set(j,new Tuile(i_terrain, j_terrain, Tuile.R40, Tuile.DB) );
 					}
 					else{
 						buffer_tuile.get(i).set(j,null);
@@ -198,12 +204,12 @@ public class Buffer {
 	 * Permet de remplir le Buffer Memoire de Tuiles auxiliaire
 	 * @throws IOException 
 	 */
-	public void remplissage_Buffer_Auxiliaire() throws IOException{
+	public void remplissage_Buffer_Auxiliaire(ArrayList<ArrayList<SuperBG>> buffaux) throws IOException{
 		
 		for (int i = 0; i< taille_buffer_memoire; i++){
 			for(int j = 0; j< taille_buffer_memoire; j++){
 			
-				buffer_auxiliaire.get(i).set(j, new SuperBG(buffer_tuile.get(i).get(j),
+				buffaux.get(i).set(j, new SuperBG(buffer_tuile.get(i).get(j),
 			
 						buffer_objet.get(i).get(j)));
 				
@@ -217,6 +223,11 @@ public class Buffer {
 	}
 	
 	public void swap(){
+		
+		//Refenetrage du buffer_memoire autour du buffer_auxiliaire
+		this.centre_buffer_memoire_i = this.centre_buffer_auxiliaire_i;
+		this.centre_buffer_memoire_j = this.centre_buffer_auxiliaire_j;
+
 		for (int i = 0; i< taille_buffer_memoire; i++){
 			for(int j = 0; j< taille_buffer_memoire; j++){
 			
@@ -224,23 +235,26 @@ public class Buffer {
 				buffer_auxiliaire.get(i).set(j,null);
 			}
 		}
-//		buffer_memoire = buffer_auxiliaire;
-//		buffer_auxiliaire = null;
-		
+//		ArrayList<ArrayList<SuperBG>> tmp = buffer_memoire;
+//		ArrayList<ArrayList<SuperBG>> tmp2 = buffer_auxiliaire;
+//
+//		buffer_memoire = tmp2;
+//		buffer_auxiliaire = tmp;
+//		
 	}
 	
 	/**
 	 * Met à disposition le visible
 	 * @throws IOException 
 	 */
-	public void initialisation_buffer_visible() {
+	public void initialisation_buffer_visible(ArrayList<ArrayList<SuperBG>> buffmem) {
 		System.out.println("init buffer visible");
 	
 		
 		for (int i = 0; i< taille_buffer_visible; i++){
 			for(int j = 0; j< taille_buffer_visible; j++){
 				
-				buffer_visible.get(i).set(j, copieAttache_SuperBG(i, j));	
+				buffer_visible.get(i).set(j, copieAttache_SuperBG(i, j, buffmem));	
 			}
 		}
 	}
@@ -279,7 +293,7 @@ public class Buffer {
 					}
 					
 					//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
-					buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j));				
+					buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j, this.buffer_memoire));				
 				}
 				
 			}
@@ -306,7 +320,7 @@ public class Buffer {
 					}
 					
 					//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
-					buffer_visible.get(i).set(j_transfert, copieAttache_SuperBG(i, j_transfert));
+					buffer_visible.get(i).set(j_transfert, copieAttache_SuperBG(i, j_transfert,this.buffer_memoire));
 				}
 				
 			}
@@ -358,8 +372,23 @@ public class Buffer {
 			
 			int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 			
-			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)==ecart-marge || Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)==ecart-marge){
-				rechargement_buffer_memoire();
+			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)==3|| Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)==3){
+
+				Thread t = new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						try {
+							rechargement_buffer_memoire();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+					}
+				});
+				t.start();
 			}
 		}
 			
@@ -368,31 +397,39 @@ public class Buffer {
 			/**
 			 * copie_et_attache_SuperBG_depuis_buffer_memoire_vers visible
 			 */
-			public SuperBG copieAttache_SuperBG(int i, int j) {
+			public SuperBG copieAttache_SuperBG(int i, int j, ArrayList<ArrayList<SuperBG>> buffmem) {
 				
 				int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 				int i_memoire = i + ecart + centre_buffer_visible_i - centre_buffer_memoire_i;
 				int j_memoire = j + ecart + centre_buffer_visible_j - centre_buffer_memoire_j;	
 				
-				SuperBG copie_sbg = new SuperBG(buffer_memoire.get(i_memoire).get(j_memoire));
+				SuperBG copie_sbg = new SuperBG(buffmem.get(i_memoire).get(j_memoire));
 				tg.addChild(copie_sbg.sbg);
 				
 				return copie_sbg;
 			}
 			
 			public void rechargement_buffer_memoire() throws IOException{
-				//Rentrage du buffer_memoire autour du buffer_visible
-				centre_buffer_memoire_i=centre_buffer_visible_i;
-				centre_buffer_memoire_j=centre_buffer_visible_j;
+			
 
+				//Refenetrage du buffer_memoire autour du buffer_auxiliaire
+				centre_buffer_auxiliaire_i=centre_buffer_visible_i;
+				centre_buffer_auxiliaire_j=centre_buffer_visible_j;
+
+				
 				//Ajout des Objets
 				GenericDAO.selection_geographique_buffer(this);
+				System.out.println("fin rafraichissement des objets");
 				//Ajout des Tuiles
 				remplissage_Buffer_Tuile();
+				System.out.println("fin rafraichissement des tuiles");
+
 				//remplissage du Buffer auxiliaire
-				remplissage_Buffer_Auxiliaire();
+				remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
 				//transfert du contenu du buffer auxiliaire vers le buffer mémoire
 				swap();
+				System.out.println("fin swap");
+				
 			}
 			
 	
