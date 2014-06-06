@@ -4,7 +4,7 @@
 package dao;
 
 
-import dao.user.Buffer;
+import dao.user.Conteneur_objet;
 import dao.user.Lampadaire;
 import dao.user.Objet_Postgre;
 import dao.user.Raster_img_mnt;
@@ -131,7 +131,7 @@ public class Raster_img_mntDAO extends ObjectDao<Raster_img_mnt> {
 
 
 	@Override
-	public void selection_geographique(Buffer obj, Float Xobs, Float Yobs,
+	public void selection_geographique(Conteneur_objet obj, Float Xobs, Float Yobs,
 			int interval_de_maille) {
 		// TODO Auto-generated method stub
 		

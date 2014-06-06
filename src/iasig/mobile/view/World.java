@@ -52,15 +52,15 @@ import dao.GenericDAO;
 
 public class World extends JFrame {
 	public float[][] MNT = null;
-	private Tuile[] liste_tuiles;
+	//private Tuile[] liste_tuiles;
 	private Tuile tuileCourante = null;
 	double x0, y0, DX, DY;
-	private int nligne = 0, ncolonne = 0;
+	//private int nligne = 0, ncolonne = 0;
 	private Vector<VehiculeLibre> listevehicule = new Vector<VehiculeLibre>();
 	private static final long serialVersionUID = 1L;
 	private Listeners ltn;
-	private TransformGroup transformObjet;
-	private TransformGroup transformMNT;
+	//private TransformGroup transformObjet;
+	//private TransformGroup transformMNT;
 	private TransformGroup tg2;
 	
 	
@@ -95,7 +95,7 @@ public class World extends JFrame {
 	}
 
 	/**
-	 * G�n�re l'affichage de la sc�ne, du MNT et des mobiles associ�s
+	 * Genere l'affichage de la scene, du MNT et des mobiles associes
 	 * 
 	 * @throws SQLException
 	 * @throws IOException
@@ -171,9 +171,9 @@ public class World extends JFrame {
 		directionalLight.setInfluencingBounds(bounds);
 		racine.addChild(directionalLight);
 
-		racine.addChild(create_universe()); // Cr�ation de l'univers
+		racine.addChild(create_universe()); // Creation de l'univers
 
-		univers.addBranchGraph(racine); // Ajout de l'univers � la racine
+		univers.addBranchGraph(racine); // Ajout de l'univers e la racine
 										// graphique
 		setVisible(true);
 		System.out.println("Temps de création de la fenêtre : "+(System.currentTimeMillis()-t));
@@ -184,8 +184,8 @@ public class World extends JFrame {
 	/**
 	 * 
 	 * @param i
-	 *            : num�ro de la voiture
-	 * @return : l'i-�me objet voiture de la liste de voiture de l'objet World
+	 *            : numero de la voiture
+	 * @return : l'i-eme objet voiture de la liste de voiture de l'objet World
 	 */
 	public VehiculeLibre getlistevehicule(int i) {
 		return listevehicule.get(i);
@@ -228,7 +228,7 @@ public class World extends JFrame {
 	}
 
 	/**
-	 * Pour un couple (X,Y) donn�, on r�cup�re le Z associ� sur le MNT
+	 * Pour un couple (X,Y) donne, on recupere le Z associe sur le MNT
 	 * 
 	 * @param x
 	 *            : position x
@@ -237,88 +237,29 @@ public class World extends JFrame {
 	 * @return z : une altitude
 	 */
 	public double GetZMNTPlan(double x, double y) {
-		Vector3d normale = new Vector3d();
-		Point3d A = new Point3d();
-		Point3d B = new Point3d();
-		Point3d C = new Point3d();
-		Vector3d BA = new Vector3d();
-		Vector3d BC = new Vector3d();
+		
+		int i = (int) ((x - Tuile.Xmin)/ Tuile.DX);
+		int j = (int) ((y - Tuile.Ymin)/ Tuile.DY);
+		
+		int delta_i = i - buffer.centre_buffer_memoire_i;
+		int delta_j = j - buffer.centre_buffer_memoire_j;
+		
+		int i_mem = (buffer.taille_buffer_memoire/2) + delta_i;
+		int j_mem = (buffer.taille_buffer_memoire/2) + delta_j;
+		
+		SuperBG sbg = buffer.buffer_memoire.get(i_mem).get(j_mem);
+		Tuile t = (Tuile) sbg.tuile;
+		System.out.println(t);
+		return t.mnt.altitude(x, y);
 
-		double z = 0;
-		int xmin = (int) Math.floor((x - this.x0) / DX);
-		int ymin = (int) Math.floor((y - this.y0) / DY);
-		int ymax = ymin + 1;
-		int xmax = xmin + 1;
-
-		double distance1 = Distance(xmin * this.DX + this.x0, ymin * this.DY
-				+ this.y0, x, y);
-		double distance2 = Distance(xmax * this.DX + this.x0, ymax * this.DY
-				+ this.y0, x, y);
-		double distance3 = Distance(xmin * this.DX + this.x0, ymax * this.DY
-				+ this.y0, x, y);
-		double distance4 = Distance(xmax * this.DX + this.x0, ymin * this.DY
-				+ this.y0, x, y);
-		// -------------------------------------------
-		double a = Math.min(distance1, distance2);
-		double b = Math.min(distance3, distance4);
-		double c = Math.min(a, b);
-		if (c == distance1) {
-			// On ne consid�re pas le point xmin/ymin
-
-			A = new Point3d(xmin * this.DX + this.x0, ymax * this.DY + this.y0,
-					this.MNT[ymax][xmin]);
-			B = new Point3d(xmax * this.DX + this.x0, ymax * this.DY + this.y0,
-					this.MNT[ymax][xmax]);
-			C = new Point3d(xmax * this.DX + this.x0, ymin * this.DY + this.y0,
-					this.MNT[ymin][xmax]);
-		} else if (c == distance2) {
-			// On ne consid�re pas le point xmax/ymax
-
-			A = new Point3d(xmin * this.DX + this.x0, ymax * this.DY + this.y0,
-					this.MNT[ymax][xmin]);
-			B = new Point3d(xmin * this.DX + this.x0, ymin * this.DY + this.y0,
-					this.MNT[ymin][xmin]);
-			C = new Point3d(xmax * this.DX + this.x0, ymin * this.DY + this.y0,
-					this.MNT[ymin][xmax]);
-			// System.out.println("Point " + A.z + " "+ B.z + " "+ C.z);
-		} else if (c == distance3) {// On ne consid�re pas le point xmin/ymax
-
-			A = new Point3d(xmin * this.DX + this.x0, ymin * this.DY + this.y0,
-					this.MNT[ymin][xmin]);
-			B = new Point3d(xmax * this.DX + this.x0, ymax * this.DY + this.y0,
-					this.MNT[ymax][xmax]);
-			C = new Point3d(xmax * this.DX + this.x0, ymin * this.DY + this.y0,
-					this.MNT[ymin][xmax]);
-			// System.out.println("Point " +A.z + " "+ B.z + " "+ C.z);
-		} else if (c == distance4) {// On ne consid�re pas le point xmax/ymin
-
-			A = new Point3d(xmin * this.DX + this.x0, ymax * this.DY + this.y0,
-					this.MNT[ymax][xmin]);
-			B = new Point3d(xmax * this.DX + this.x0, ymax * this.DY + this.y0,
-					this.MNT[ymax][xmax]);
-			C = new Point3d(xmin * this.DX + this.x0, ymin * this.DY + this.y0,
-					this.MNT[ymin][xmin]);
-			// System.out.println("Point " +A.z + " "+ B.z + " "+ C.z);
-		}
-
-		BA = new Vector3d(A.x - B.x, A.y - B.y, A.z - B.z);
-		BC = new Vector3d(C.x - B.x, C.y - B.y, C.z - B.z);
-		normale = new Vector3d();
-		normale.cross(BA, BC);
-		normale.normalize();
-		double d1 = -B.x * normale.x - B.y * normale.y - B.z * normale.z;
-
-		z = -(d1 + normale.x * x + normale.y * y) / normale.z;
-
-		return z;
 	}
 
 	/**
-	 * M�thode permettant de mettre � jour les valeurs de pitch & roll de la
-	 * i-�me voiture de l'objet world
+	 * Methode permettant de mettre e jour les valeurs de pitch & roll de la
+	 * i-eme voiture de l'objet world
 	 * 
 	 * @param i
-	 *            : num�ro de voiture dans la liste de voiture de l'objet world
+	 *            : numero de voiture dans la liste de voiture de l'objet world
 	 * 
 	 */
 	public void GestionVoiture(int i) {
@@ -327,19 +268,19 @@ public class World extends JFrame {
 		double pitch = 0, roll = 0;
 		double[] Z = new double[4];
 		if (i > listevehicule.size()) {
-			System.out.println("Erreur num�rotation voiture");
+			System.out.println("Erreur numerotation voiture");
 		}
-		// 1) R�cup�ration position roues
+		// 1) Recuperation position roues
 		try {
 
 			tab = ((VoitureLibre) (this.listevehicule.get(i)))
 					.getVWorldPositionRoues();
-			// 2) R�cup�ration des Z respectifs
+			// 2) Recuperation des Z respectifs
 			for (int j = 0; j <= 3; j++) {
 				Z[j] = this.GetZMNTPlan(tab[j][0], tab[j][1]);
 			}
-			// 3) R�cup�ration pitch & roll
-			// Pitch : roue 3 : Arri�re Gauche / roue 0 :Avant Gauche
+			// 3) Recuperation pitch & roll
+			// Pitch : roue 3 : Arriere Gauche / roue 0 :Avant Gauche
 			pitch = (Z[3] - Z[0]) / (2 * this.listevehicule.get(i).getLength());
 			this.listevehicule.get(i).SetPitch(Math.asin(pitch));
 			// Roll : roue 0: Avant Gauche / roue 1 :Avant Droite
@@ -351,7 +292,7 @@ public class World extends JFrame {
 	}
 
 	/**
-	 * Permet d'ajouter un objet voiture � la liste de voiture de l'objet World
+	 * Permet d'ajouter un objet voiture e la liste de voiture de l'objet World
 	 * 
 	 * @param voiture
 	 */
@@ -360,11 +301,11 @@ public class World extends JFrame {
 	}
 
 	/**
-	 * M�thode mettant � jour la position de la cam�ra en vue ext�rieure de la
-	 * i-�me voiture de la liste
+	 * Methode mettant e jour la position de la camera en vue exterieure de la
+	 * i-eme voiture de la liste
 	 * 
 	 * @param i
-	 *            : num�ro de la voiture � suivre
+	 *            : numero de la voiture e suivre
 	 */
 	public void GestionCamera(int i) {
 		// VehiculeLibre car = null;
@@ -385,11 +326,11 @@ public class World extends JFrame {
 	}
 
 	/**
-	 * M�thode mettant � jour la position de la cam�ra en vue conducteur de la
-	 * i-�me voiture de la liste
+	 * Methode mettant e jour la position de la camera en vue conducteur de la
+	 * i-eme voiture de la liste
 	 * 
 	 * @param i
-	 *            : num�ro de la voiture � suivre
+	 *            : numero de la voiture e suivre
 	 */
 	public void GestionCameraConducteur(int i) {
 
@@ -426,24 +367,7 @@ public class World extends JFrame {
 			return;
 		}
 		
-//		buffer.centre_buffer_visible_i = i;
-//		buffer.centre_buffer_visible_j = j;
-		
-//		System.out.println(i+" "+j);
-		
 		buffer.rafraichissement_visible(delta_i, delta_j);
-
-//		//System.out.println("limite rechargement: "+buffer_objets.getLimiteRechargement());
-//			if(Math.abs(i-buffer_objets.mailleobservateur_i) >= buffer_objets.getLimiteRechargement() ||Math.abs(j-buffer_objets.mailleobservateur_j) >= buffer_objets.getLimiteRechargement()){
-//				System.out.println(" chargement! ");
-//				GenericDAO.selection_geographique(buffer_objets, (float) ltn.getView().getEye().x, (float)ltn.getView().getEye().y, 1000);
-//				
-//			}
-//			System.out.println("Mise en memoire du visible");
-//			buffer_visible =  buffer_objets.getObjet_Visible(i, j);
-//			
-//			dessin();
-//			
 		
 	}
 
@@ -452,7 +376,7 @@ public class World extends JFrame {
 
 	/**
 	 * Cette classe est la classe d'affichage graphique de tous les objets de
-	 * l'univers dans une fen�tre applicative. HERITE DE : -JFrame application
+	 * l'univers dans une fenetre applicative. HERITE DE : -JFrame application
 	 * graphique standard
 	 */
 
@@ -502,18 +426,18 @@ public class World extends JFrame {
 	// ---------------------------------------------------
 	private BranchGroup create_universe() throws IOException {
 		/**
-		 * FONCTION : D�finir l'ensemble du graphe de sc�ne associ� � l'univers,
-		 * avec initialisation de la cam�ra.
+		 * FONCTION : Definir l'ensemble du graphe de scene associe e l'univers,
+		 * avec initialisation de la camera.
 		 * 
 		 * RETOURNE : - [Scalaire, objet de la classe BranchGroup] : le
-		 * BranchGroup principal supportant l'ensemble du graphe de sc�ne, �
-		 * attacher � la racine.
+		 * BranchGroup principal supportant l'ensemble du graphe de scene, e
+		 * attacher e la racine.
 		 **/
 
-		// cr�ation du BranchGroup principal
+		// creation du BranchGroup principal
 		BranchGroup bg = new BranchGroup();
 
-		// Cr�ation du TransformGroup principal
+		// Creation du TransformGroup principal
 		TransformGroup transform = new TransformGroup();
 		transform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 		transform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
@@ -535,68 +459,10 @@ public class World extends JFrame {
 		//Initialisation du buffer
 		buffer = new Buffer(25, 7, 32, 19, transform);
 		
-		
-	/*System.out.println(transform.numChildren());
-	
-	SuperBG sbg = (SuperBG)transform.getChild(39);
-	TriangleArray mnt_graphique = (TriangleArray)sbg.mnt_plaque.getGeometry();
-	int n = mnt_graphique.getVertexCount();
-	//int n = mnt_graphique.getVertexCount();
-	System.out.println("nb points MNT :"+n);
-	System.out.println(sbg.objets.numChildren()		);*/
 		System.out.println("Initialisation buffer terminée !!!");
-		
-		/*
-		transformObjet = new TransformGroup();
-		
-		transformObjet.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
-		transformObjet.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
-		transformObjet.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
-		
-		transform.addChild(transformObjet);
-
-		transformMNT = new TransformGroup();
-		
-		transformMNT.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
-		transformMNT.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
-		transformMNT.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
-		
-		transform.addChild(transformMNT);
-
-		// R�cup�ration des Tuiles � partir de la BDD
-		Point2i Centre = Tuile.Center(listeAffichage);
-
-		// R�cup�ration des tuiles de la liste d'affichage depuis la BDD
-		liste_tuiles = Tuile.load(listeAffichage, source);
-
-		
-		
-		// chargement du buffer d'objets
-		System.out.println("initialisation du buffer");
-		buffer_objets = new Buffer(9, Centre.x, Centre.y, 1000,3);// 943000.f, 6538000.f, 1000, 9);
-		this.setTuileCourante(ltn.getView().getEye().x, ltn.getView().getEye().y);
-		
-		
-		
-
-		// Cr�ation des branches graphiques correspondant � chaque tuile. Elles
-		// s'attachent au TransformGroup principal.
-		for (Tuile t : liste_tuiles) {
-			transformMNT.addChild(define_tile_bg(t, orthophoto));
-		}
-
-		// Cr�ation de la branche graphique correspondant aux objets de l'espace visible. 
-		System.out.println("taille embryon" +buffer_objets.embryon_buffer_visible.size());
-		for (int i = 0; i < buffer_objets.embryon_buffer_visible.size(); i++) {
-
-			//transformObjet.addChild(define_tile_buffer_bg(0));
-			transformObjet.addChild(define_tile_buffer_bg(i));
-
-	
-		}*/
 
 
-		bg.addChild(transform); // Attachement du TransformGroup � son
+		bg.addChild(transform); // Attachement du TransformGroup e son
 								// BranchGroup
 
 		bg.compile(); // Compilation de l'ensemble du graphe => optimisation du
@@ -605,160 +471,27 @@ public class World extends JFrame {
 		return bg;
 	}
 	
-	/*public void dessin() throws IOException{
-		System.out.println("je dessineeeee");
-		transformObjet.removeAllChildren();
-	for (int i = 0; i < buffer_objets.embryon_buffer_visible.size(); i++) {
-
-		transformObjet.addChild(define_tile_buffer_bg(i));
 	
-		}
-	
-	transformMNT.removeAllChildren();	
-	for (Tuile t : liste_tuiles) {
-		transformMNT.addChild(define_tile_bg(t, orthophoto));
-	}
-	
-	
-	}*/
 
 	// ---------------------------------------------------
 
-	// ---------------------------------------------------
-	private BranchGroup define_tile_bg(Tuile t, boolean orthophoto)
-			throws IOException {
-		/**
-		 * FONCTION : Construire le BranchGroup graphique d'une tuile donn�e.
-		 * 
-		 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe Tuile] : tuile
-		 * source. - [Scalaire, bool�en] : option : orthophoto ou non.
-		 * 
-		 * RETOURNE : - [Scalaire, objet de la classe BranchGroup] : le
-		 * BranchGroup construit avec MNT graphique
-		 **/
-
-		TriangleArray MNT_graphique = trace_MNT(t.mnt); // D�finition de la
-														// g�om�trie du MNT
-														// graphique
-
-		Appearance apparence = new Appearance();
-
-		if (orthophoto) { // WITHORTHO
-			Texture textureOrtho = plaquer_ortho(MNT_graphique, t.ortho,
-					t.mnt.getXmin(), t.mnt.getYmin(), t.mnt.getXmax(),
-					t.mnt.getYmax(), t.mnt.getDX() / 5, t.mnt.getDY() / 5); // Application
-																			// de
-																			// la
-																			// texture
-																			// sur
-																			// le
-																			// MNT
-																			// graphique
-			apparence = set_apparence(textureOrtho,
-					PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE); // D�finition
-																					// de
-																					// l'apparence
-																					// du
-																					// MNT
-																					// graphique
-																					// incluant
-																					// les
-																					// param�tres
-																					// de
-																					// la
-																					// texture
-		} else { // WITHOUTORTHO
-			apparence = set_apparence(PolygonAttributes.POLYGON_LINE,
-					PolygonAttributes.CULL_NONE); // D�finition de l'apparence
-													// du MNT graphique non
-													// textur�
-		}
-
-		// Shape du MNT graphique = Geom�trie + apparence
-		Shape3D shape3d = new Shape3D(MNT_graphique, apparence);
-
-		// Cr�ation du BranchGroup de la tuile
-		BranchGroup bg = new BranchGroup();
-		bg.setCapability(BranchGroup.ALLOW_DETACH);
-
-
-		// Ajout de la forme
-		bg.addChild(shape3d);
-
-		// ////////////////////////
-		// Dessin du tunnel
-		if (t.mnt.getXmin() == 999000 && t.mnt.getYmin() == 6540000
-				&& t.mnt.getDX() == 25) {
-			GeometryInfo[] tunnel_graphique = trace_tunnel(tunnel);
-
-			apparence = set_apparence(PolygonAttributes.POLYGON_FILL,
-					PolygonAttributes.CULL_FRONT); // ///
-
-			for (int k = 1; k <= tunnel_graphique.length; k++) {
-				shape3d = new Shape3D(
-						tunnel_graphique[k - 1].getIndexedGeometryArray(),
-						apparence);
-				bg.addChild(shape3d);
-			}
-		} else {
-		}
-		// ////////////////////////
-
-		return bg;
-	}
-
-	// ---------------------------------------------------
-
-
-	// ---------------------------------------------------
-	
 		
-//		// ---------------------------------------------------
-//		private BranchGroup define_tile_buffer_bg(int i)
-//				throws IOException {
-//			/**
-//			 * FONCTION : Construire le BranchGroup graphique d'une tuile donnee.
-//			 * 
-//			 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe Tuile] : tuile
-//			 * source.
-//			 * 
-//			 * RETOURNE : - [Scalaire, objet de la classe BranchGroup] : le
-//			 * BranchGroup construit avec objets du buffer graphique
-//			 **/
-//	
-//			// Cr�ation du BranchGroup de la tuile
-//			BranchGroup bg = new BranchGroup();
-//			bg.setCapability(BranchGroup.ALLOW_DETACH);
-//
-//	
-//
-//			//System.out.println("PLOUP: Dessin des elements du vecteur objet visible");
-//			Objet3d.dessin_obj_vecteur(
-//					bg,
-//					tabobj[2].pieces,
-////					buffer_objets.getObjet_Visible(buffer_objets.mailleobservateur_i, buffer_objets.mailleobservateur_j).elementAt(i));					
-////					buffer_objets.getObjet_Visible(tuileCourante.i_maille, tuileCourante.j_maille).elementAt(i));
-//					buffer_visible.elementAt(i)
-//					);
-//	
-//			return bg;
-//		}
 
 	// ---------------------------------------------------
 	public TriangleArray trace_MNT(MNT mnt) {
 		/**
-		 * FONCTION : Construire la g�om�trie du MNT, un ensemble de triangles
-		 * 3D. Chaque maille carr�e est divis�e en deux de ces triangles par une
+		 * FONCTION : Construire la geometrie du MNT, un ensemble de triangles
+		 * 3D. Chaque maille carree est divisee en deux de ces triangles par une
 		 * diagonale.
 		 * 
 		 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe MNT] : MNT
 		 * source.
 		 * 
-		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : G�om�trie
+		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : Geometrie
 		 * du MNT sous forme de triangles 3D.
 		 **/
 
-		// Instanciation de la g�om�trie avec indication du nombre total de
+		// Instanciation de la geometrie avec indication du nombre total de
 		// triangles.
 		TriangleArray mnt_graphique = new TriangleArray(6 * (mnt.getNX() - 1)
 				* (mnt.getNY() - 1), TriangleArray.COORDINATES
@@ -792,17 +525,17 @@ public class World extends JFrame {
 				X = Xmin + (j - 1) * DX; // Easting correspondant
 
 //				if (X == tunnel.getX() && Y == tunnel.getY()) {
-//					// Pr�voir un trou pour le tunnel
+//					// Prevoir un trou pour le tunnel
 //					continue;
 //				} else {
 //				}
 
 				// TRACE DE LA MAILLE D'ORIGINE (X,Y) (COIN SUD-OUEST)
 
-				k = (i + j) % 2; // Param�tre d'orientation de la diagonale
+				k = (i + j) % 2; // Parametre d'orientation de la diagonale
 
-				// Calcul des coordonn�es (X,Y,Z) des 4 coins de la maille
-				// La diagonale correspond � [p2 p3]. p1 et p2 sont au Sud, p3
+				// Calcul des coordonnees (X,Y,Z) des 4 coins de la maille
+				// La diagonale correspond e [p2 p3]. p1 et p2 sont au Sud, p3
 				// et p4 au Nord.
 				p1.set(X + k * DX, Y, mnt.getZAt(i - 1, j + k - 1));
 				p2.set(X + k * DX, Y - DY, mnt.getZAt(i, j + k - 1));
@@ -832,8 +565,8 @@ public class World extends JFrame {
 					mnt_graphique.setCoordinate(n + 5, p4);
 				}
 
-				for (int m = 0; m <= 5; m++) { // D�finition de la couleur en
-												// fonction de la r�solution
+				for (int m = 0; m <= 5; m++) { // Definition de la couleur en
+												// fonction de la resolution
 					switch (DX) {
 					case 25: {
 						color.set(Blue);
@@ -877,15 +610,15 @@ public class World extends JFrame {
 	// ---------------------------------------------------
 	public GeometryInfo[] trace_tunnel(Tunnel tunnel) {
 		/**
-		 * FONCTION : Construire la g�om�trie du MNT, un ensemble de triangles
-		 * 3D. Chaque maille carr�e est divis�e en deux de ces triangles par une
+		 * FONCTION : Construire la geometrie du MNT, un ensemble de triangles
+		 * 3D. Chaque maille carree est divisee en deux de ces triangles par une
 		 * diagonale. IMPORTANT : l'ordre des poins est choisi tel que le
-		 * culling ne laisse que l'int�rieur du tunnel visible.
+		 * culling ne laisse que l'interieur du tunnel visible.
 		 * 
 		 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe MNT] : MNT
 		 * source.
 		 * 
-		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : G�om�trie
+		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : Geometrie
 		 * du MNT sous forme de triangles 3D.
 		 **/
 
@@ -1007,16 +740,16 @@ public class World extends JFrame {
 			BufferedImage ortho, int Xmin, int Ymin, int Xmax, int Ymax,
 			int RX, int RY) throws IOException {
 		/**
-		 * FONCTION : Cr�er la texture orthophoto associ� au MNT. Les
-		 * coordonn�es textures sont calcul�es r�guli�rement en associant chaque
-		 * sommet � sa position dans l'image.
+		 * FONCTION : Creer la texture orthophoto associe au MNT. Les
+		 * coordonnees textures sont calculees regulierement en associant chaque
+		 * sommet e sa position dans l'image.
 		 * 
 		 * PARAMETRES EN ENTREE-SORTIE : - MNT_graphique [Scalaire, objet de la
-		 * classe TriangleArray] : MNT � plaquer. En sortie chaque sommet de
-		 * triangle est muni de ses coordonn�es texture.
+		 * classe TriangleArray] : MNT e plaquer. En sortie chaque sommet de
+		 * triangle est muni de ses coordonnees texture.
 		 * 
 		 * PARAMETRE EN ENTREE : - ortho [Scalaire, objet de la classe
-		 * BufferedImage] : Image de l'orthophoto � utiliser pour la texture. -
+		 * BufferedImage] : Image de l'orthophoto e utiliser pour la texture. -
 		 * Xmin [Scalaire, entier] : Borne Ouest du MNT. - Ymin [Scalaire,
 		 * entier] : Borne Nord du MNT. - Xmax [Scalaire, entier] : Borne Est du
 		 * MNT. - Ymax [Scalaire, entier] : Borne Sud du MNT. - RX [Scalaire,
@@ -1024,29 +757,29 @@ public class World extends JFrame {
 		 * Hauteur d'une maille de MNT.
 		 * 
 		 * RETOURNE : - [Scalaire, objet de la classe Texture] : La texture
-		 * cr��e � partir de l'orthophoto.
+		 * creee e partir de l'orthophoto.
 		 **/
 
 		Texture texture = new TextureLoader(ortho).getTexture(); // Chargement
 																	// de la
-																	// texture �
+																	// texture e
 																	// partir de
 																	// l'image
 		Point3d point3d = new Point3d();
 
-		// Etendue g�ographique de la maille
+		// Etendue geographique de la maille
 		int EX = Xmax - Xmin + 2 * RX;
 		int EY = Ymax - Ymin + 2 * RY;
 
 		for (int i = 0; i < MNT_graphique.getVertexCount(); i++) {
-			MNT_graphique.getCoordinate(i, point3d); // R�cup�ration des
-														// coordonn�es (X,Y,Z)
-														// du i� point de la
-														// g�om�trie
-			// Calcul des coordonn�es textures de ce point. Syst�me de
-			// coordonn�es : (x,y) variant de 0 � 1. L'origine (0,0) est le coin
+			MNT_graphique.getCoordinate(i, point3d); // Recuperation des
+														// coordonnees (X,Y,Z)
+														// du ie point de la
+														// geometrie
+			// Calcul des coordonnees textures de ce point. Systeme de
+			// coordonnees : (x,y) variant de 0 e 1. L'origine (0,0) est le coin
 			// Sud-Ouest de l'orthophoto. Le coin Nord-Est correspond aux
-			// coordonn�es maximales (1,1).
+			// coordonnees maximales (1,1).
 			MNT_graphique.setTextureCoordinate(0, i, new TexCoord2f(
 					(float) (point3d.x - Xmin + RX) / EX, (float) (point3d.y
 							- Ymin + RY)
@@ -1061,11 +794,11 @@ public class World extends JFrame {
 	// ---------------------------------------------------
 	public Appearance set_apparence(int polygon_mode, int culling_mode) {
 		/**
-		 * FONCTION : D�finir les param�tres d�finissant l'apparence de l'objet,
-		 * dans le cas o� il n'y a pas d'orthophoto.
+		 * FONCTION : Definir les parametres definissant l'apparence de l'objet,
+		 * dans le cas oe il n'y a pas d'orthophoto.
 		 * 
 		 * PARAMETRES EN ENTREE : - polygon_mode [Scalaire, entier] : choix de
-		 * repr�sentation des polygones : PolygonAttributes.LINE (filaire) ou
+		 * representation des polygones : PolygonAttributes.LINE (filaire) ou
 		 * PolygonAttributes.FILL (surface). - culling_mode [Scalaire, entier] :
 		 * choix de culling : PolygonAttributes.CULL_NONE,
 		 * PolygonAttributes.CULL_FRONT ou PolygonAttributes.CULL_BACK.
@@ -1077,9 +810,9 @@ public class World extends JFrame {
 		Appearance app = new Appearance();
 
 		PolygonAttributes polyAttrib = new PolygonAttributes();
-		polyAttrib.setCullFace(culling_mode); // Seules les faces orient�es dans
-												// le sens direct par rapport �
-												// la cam�ra seront visibles =>
+		polyAttrib.setCullFace(culling_mode); // Seules les faces orientees dans
+												// le sens direct par rapport e
+												// la camera seront visibles =>
 												// pas de vision en sous-sol
 		polyAttrib.setPolygonMode(polygon_mode);
 		app.setPolygonAttributes(polyAttrib);
@@ -1093,12 +826,12 @@ public class World extends JFrame {
 	public Appearance set_apparence(Texture texture, int polygon_mode,
 			int culling_mode) {
 		/**
-		 * FONCTION : D�finir les param�tres d�finissant l'apparence de l'objet,
-		 * dans le cas o� il y une pas d'orthophoto.
+		 * FONCTION : Definir les parametres definissant l'apparence de l'objet,
+		 * dans le cas oe il y une pas d'orthophoto.
 		 * 
 		 * PARAMETRES EN ENTREE : - texture [Scalaire, objet de la classe
-		 * Texture] : Texture (orthophoto) appliqu�e � l'objet (MNT). -
-		 * polygon_mode [Scalaire, entier] : choix de repr�sentation des
+		 * Texture] : Texture (orthophoto) appliquee e l'objet (MNT). -
+		 * polygon_mode [Scalaire, entier] : choix de representation des
 		 * polygones : PolygonAttributes.LINE (filaire) ou
 		 * PolygonAttributes.FILL (surface). - culling_mode [Scalaire, entier] :
 		 * choix de culling : PolygonAttributes.CULL_NONE,
@@ -1111,11 +844,11 @@ public class World extends JFrame {
 		Appearance app = new Appearance();
 		PolygonAttributes polyAttrib = new PolygonAttributes();
 		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE); // Seules les faces
-																// orient�es
+																// orientees
 																// dans le sens
 																// direct par
-																// rapport � la
-																// cam�ra seront
+																// rapport e la
+																// camera seront
 																// visibles =>
 																// pas de vision
 																// en sous-sol
@@ -1145,13 +878,13 @@ public class World extends JFrame {
 	// ---------------------------------------------------
 	static public int user_value_input(String mess) {
 		/**
-		 * FONCTION : Demander � l'utilisateur de saisir une valeur enti�re.
+		 * FONCTION : Demander e l'utilisateur de saisir une valeur entiere.
 		 * 
-		 * PARAMETRE EN ENTREE - mess [Scalaire, cha�ne de caract�re] : message
-		 * � afficher pour indiquer � l'utilisateur qu'il doit saisir une
+		 * PARAMETRE EN ENTREE - mess [Scalaire, chaene de caractere] : message
+		 * e afficher pour indiquer e l'utilisateur qu'il doit saisir une
 		 * valeur.
 		 * 
-		 * RETOURNE : - [Scalaire, entier] : valeur entr�e par l'utilisateur.
+		 * RETOURNE : - [Scalaire, entier] : valeur entree par l'utilisateur.
 		 **/
 
 		Scanner saisieUtilisateur = new Scanner(System.in);
@@ -1167,7 +900,7 @@ public class World extends JFrame {
 	static public void pause() {
 		/**
 		 * FONCTION : Effectuer une pause dans le programme. La pause se
-		 * prolonge jusqu'� ce que l'utilisateur appuie sur une touche.
+		 * prolonge jusqu'e ce que l'utilisateur appuie sur une touche.
 		 **/
 		Scanner saisieUtilisateur = new Scanner(System.in);
 		System.out.println("Appuyez sur une touche pour continuer...");

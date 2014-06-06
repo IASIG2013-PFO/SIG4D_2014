@@ -4,7 +4,7 @@ import dao.DAO;
 import dao.user.Arbre;
 import dao.user.Lampadaire;
 import dao.user.Maison;
-import dao.user.Buffer;
+import dao.user.Conteneur_objet;
 import dao.user.ObjetPonctuel;
 import dao.user.Objet_Postgre;
 import dao.user.Raster_img_mnt;
@@ -36,7 +36,7 @@ public class GenericDAO extends DAO {
 	/**
 	 * Methode Statique pour l'initialisation du Buffer
 	 */
-	public static void selection_geographique_init(Buffer obj, Float Xobs, Float Yobs, int interval_de_maille){
+	public static void selection_geographique_init(Conteneur_objet obj, Float Xobs, Float Yobs, int interval_de_maille){
 		
 		//recuperation de la maille observateur
 		//TODO ajouter False!!
@@ -170,7 +170,7 @@ public class GenericDAO extends DAO {
 	 * Methode Statique pour la MAJ globale du Buffer
 	 * le Buffer ne recharge pas les objets swappes dans le buffer des objets visibles
 	 */
-	public static void selection_geographique(Buffer obj, Float Xobs, Float Yobs, int interval_de_maille){
+	public static void selection_geographique(Conteneur_objet obj, Float Xobs, Float Yobs, int interval_de_maille){
 			
 		
 			//Vidage du buffer
@@ -396,10 +396,10 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
 		int demi_taille_buffer= obj.taille_buffer_memoire/2;
 		//ecriture du Polygone de requête selon paramètre de generation
 		//1-recuperation des mailles extremes de l'espace à mettre en memoire
-		int mailleMax_i = maille_observateur_i +  demi_taille_buffer - 1;
-		int mailleMin_i = maille_observateur_i -  demi_taille_buffer + 1;
-		int mailleMax_j = maille_observateur_j +  demi_taille_buffer - 1;
-		int mailleMin_j = maille_observateur_j -  demi_taille_buffer + 1;
+		int mailleMax_i = maille_observateur_i +  demi_taille_buffer ;
+		int mailleMin_i = maille_observateur_i -  demi_taille_buffer ;
+		int mailleMax_j = maille_observateur_j +  demi_taille_buffer ;
+		int mailleMin_j = maille_observateur_j -  demi_taille_buffer ;
 		
 		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
 		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );

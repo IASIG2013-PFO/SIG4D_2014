@@ -2,7 +2,7 @@ package dao;
 
 import dao.user.Lampadaire;
 import dao.user.Objet_Postgre;
-import dao.user.Buffer;
+import dao.user.Conteneur_objet;
 import dao.user.Raster_img_mnt;
 
 import org.postgis.PGgeometry;
@@ -41,7 +41,7 @@ public abstract class ObjectDao<T> extends DAO {
 	 * @param Yobs	Position géographique de l'observateur 
 	 * @param interval_de_maille le pas de maille
 	 */
-	public abstract void selection_geographique(Buffer obj, Float Xobs, Float Yobs, int interval_de_maille);
+	public abstract void selection_geographique(Conteneur_objet obj, Float Xobs, Float Yobs, int interval_de_maille);
 	
 	/**
 	 * Méthode abstraite. Permet la selection geographique d'objets Postgis par polygon; ne retourne rien

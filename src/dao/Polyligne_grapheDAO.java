@@ -3,7 +3,7 @@
  */
 package dao;
 
-import dao.user.Buffer;
+import dao.user.Conteneur_objet;
 import dao.user.Graphe;
 import dao.user.Lampadaire;
 import dao.user.Objet_Postgre;
@@ -89,7 +89,7 @@ public class Polyligne_grapheDAO extends ObjectDao<Polyligne_graphe> {
 	}
 
 	@Override
-	public void selection_geographique(Buffer obj, Float Xobs, Float Yobs,
+	public void selection_geographique(Conteneur_objet obj, Float Xobs, Float Yobs,
 			int interval_de_maille) {
 		// TODO Auto-generated method stub
 		

@@ -13,6 +13,7 @@ public class SuperBG {
 	public BranchGroup sbg;
 	public Shape3D mnt_plaque;
 	public BranchGroup objets;
+	public Tuile tuile;
 	
 	/**
 	 * Super Branchgroupe
@@ -29,6 +30,7 @@ public class SuperBG {
 			this.mnt_plaque=new Shape3D();
 		}
 		
+		this.tuile = tuile;
 		
 		this.objets = new BranchGroup();
 		

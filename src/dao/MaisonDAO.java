@@ -3,7 +3,7 @@ package dao;
 import dao.user.Lampadaire;
 import dao.user.Maison;
 import dao.user.Objet_Postgre;
-import dao.user.Buffer;
+import dao.user.Conteneur_objet;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -122,7 +122,7 @@ public class MaisonDAO extends ObjectDao<Maison> {
 	}
 	
 	@Override
-	public void selection_geographique(Buffer obj, Float Xobs, Float Yobs, int interval_de_maille){
+	public void selection_geographique(Conteneur_objet obj, Float Xobs, Float Yobs, int interval_de_maille){
 		
 		//recuperation de la maille observateur
 		//TODO ajouter False!!
