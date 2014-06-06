@@ -176,6 +176,8 @@ public class World extends JFrame {
 										// graphique
 		setVisible(true);
 		System.out.println("Temps de création de la fenêtre : "+(System.currentTimeMillis()-t));
+		
+
 	}
 
 	/**
@@ -530,7 +532,7 @@ public class World extends JFrame {
 		}// endfor(i)
 		
 		//Initialisation du buffer
-		buffer = new Buffer(11, 3, 32, 19, transform);
+		buffer = new Buffer(21, 9, 32, 19, transform);
 		
 	/*System.out.println(transform.numChildren());
 	

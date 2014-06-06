@@ -104,13 +104,25 @@ public class Buffer {
 		//Fin initialisation
 		
 		//Ajout des Objets
+		double t = System.currentTimeMillis();
 		GenericDAO.selection_geographique_buffer(this);
+		System.out.println("Temps de selection des objets : "+(System.currentTimeMillis()-t));
+
 		//Ajout des Tuiles
+		t = System.currentTimeMillis();
 		remplissage_Buffer_Tuile();
+		System.out.println("Temps de selection des tuiles : "+(System.currentTimeMillis()-t));
+
 		//remplissage du Buffer auxiliaire
+		t = System.currentTimeMillis();
 		remplissage_Buffer_Auxiliaire();
+		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-t));
+
 		//transfert du contenu du buffer auxiliaire vers le buffer mémoire
+		t = System.currentTimeMillis();
 		swap();
+		System.out.println("Temps de swap : "+(System.currentTimeMillis()-t));
+
 		//Initialisation du Buffer Visible
 		initialisation_buffer_visible();
 		
@@ -158,7 +170,7 @@ public class Buffer {
 	 * @throws IOException 
 	 */
 	public void remplissage_Buffer_Tuile() throws IOException {
-	
+		System.out.println("remplissage du buffer de tuiles");
 		int demi_taille_buffer= this.taille_buffer_memoire/2;
 		
 		for (int i = 0; i< taille_buffer_memoire; i++){
@@ -205,15 +217,15 @@ public class Buffer {
 	}
 	
 	public void swap(){
-		/*for (int i = 0; i< taille_buffer_memoire; i++){
+		for (int i = 0; i< taille_buffer_memoire; i++){
 			for(int j = 0; j< taille_buffer_memoire; j++){
 			
 				buffer_memoire.get(i).set(j, new SuperBG(buffer_auxiliaire.get(i).get(j)));
 				buffer_auxiliaire.get(i).set(j,null);
 			}
-		}*/
-		buffer_memoire = buffer_auxiliaire;
-		buffer_auxiliaire = null;
+		}
+//		buffer_memoire = buffer_auxiliaire;
+//		buffer_auxiliaire = null;
 		
 	}
 	

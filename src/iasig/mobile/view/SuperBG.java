@@ -42,7 +42,7 @@ public class SuperBG {
 		this.sbg.setCapability(BranchGroup.ALLOW_DETACH);
 		
 		this.sbg.addChild(mnt_plaque);
-		//this.sbg.addChild(objets);
+		this.sbg.addChild(objets);
 
 	}
 	
