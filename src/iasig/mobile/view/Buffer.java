@@ -272,6 +272,9 @@ public class Buffer {
 		 * @throws IOException 
 		 */
 		public void rafraichissement_visible(int delta_i, int delta_j) throws IOException {
+			int pas_i;
+			int pas_j;
+			
 			
 			System.out.println("Centre visible :"+centre_buffer_visible_i+" "+centre_buffer_visible_j+
 								" Centre memoire :"+centre_buffer_memoire_i+" "+centre_buffer_memoire_j+
@@ -279,57 +282,67 @@ public class Buffer {
 
 			
 			if ( delta_i !=0 /* && delta_j == 0*/  ){
-				this.centre_buffer_visible_i+=delta_i;
+				
+				pas_i = (delta_i > 0 ? 1 : -1);
 				//Calcul des determinants
-				int cas1 = (1 + delta_i)/2;
-				int cas2 = (1 - delta_i)/2;
+				int cas1 = (1 + pas_i)/2;
+				int cas2 = (1 - pas_i)/2;
 				
 				int i_detach = cas2 * (taille_buffer_visible - 1 ); 
 				int i_transfert = cas1 * (taille_buffer_visible - 1 ); 
-
-				for ( int j = 0; j < taille_buffer_visible; j++ ){
-					System.out.println("Mvmt horizontal, A detacher : "+i_detach+"/"+j);
-					
-					//Detachement des SuperBG qui sortent de la zone visible
-					buffer_visible.get(i_detach).get(j).sbg.detach();
-					
-					//Re-indexation des SuperBG à conserver
-					for ( int i = cas2 * ( taille_buffer_visible - 1 ) ; i*delta_i <= cas1*(taille_buffer_visible-2)+ cas2*(-1) ; i+=delta_i){
-						System.out.println("\tRe-indexation : "+(i+delta_i)+"/"+j+" -> "+i+"/"+j);
-						buffer_visible.get(i).set(j, buffer_visible.get(i+delta_i).get(j));		
+				
+				for(int k=0; k<Math.abs(delta_i); k++){
+					this.centre_buffer_visible_i+=pas_i;
+		
+					for ( int j = 0; j < taille_buffer_visible; j++ ){
+						//System.out.println("Mvmt horizontal, A detacher : "+i_detach+"/"+j);
+						
+						//Detachement des SuperBG qui sortent de la zone visible
+						buffer_visible.get(i_detach).get(j).sbg.detach();
+						
+						//Re-indexation des SuperBG à conserver
+						for ( int i = cas2 * ( taille_buffer_visible - 1 ) ; i*pas_i <= cas1*(taille_buffer_visible-2)+ cas2*(-1) ; i+=pas_i){
+							//System.out.println("\tRe-indexation : "+(i+delta_i)+"/"+j+" -> "+i+"/"+j);
+							buffer_visible.get(i).set(j, buffer_visible.get(i+pas_i).get(j));		
+						}
+						
+						//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
+						//System.out.println("A attacher : "+i_transfert+"/"+j);
+						buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j, this.buffer_memoire));				
 					}
-					
-					//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
-					System.out.println("A attacher : "+i_transfert+"/"+j);
-					buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j, this.buffer_memoire));				
 				}
 				
 			}
 			if (/* delta_i == 0 &&*/ delta_j != 0){
-				this.centre_buffer_visible_j+=delta_j;
+				
+				pas_j = (delta_j > 0 ? 1 : -1);
+				
 				//Calcul des determinants
-				int cas3 = (1 + delta_j )/2;
-				int cas4 = (1 - delta_j )/2;
+				int cas3 = (1 + pas_j )/2;
+				int cas4 = (1 - pas_j )/2;
 				
 				int j_detach = cas4 * (taille_buffer_visible - 1 ); 
 				int j_transfert = cas3 * (taille_buffer_visible -1);
 				
-				
-				for ( int i = 0; i < taille_buffer_visible; i++ ){
-					//Detachement des SuperBG qui sortent de la zone visible
-					System.out.println("Mvmt vertical, A detacher : "+i+"/"+j_detach);
-					buffer_visible.get(i).get(j_detach).sbg.detach();
+				for(int k=0; k<Math.abs(delta_j); k++){
+					this.centre_buffer_visible_j+=pas_j;
 					
-					//Re-indexation des SuperBG à conserver
-					for (int j = cas4 * ( taille_buffer_visible - 1 ) ; j*delta_j <= cas3 *(taille_buffer_visible-2)+cas4*(-1); j+=delta_j){
-						System.out.println("\tRe-indexation : "+i+"/"+(j+delta_j)+" -> "+i+"/"+j);
-						buffer_visible.get(i).set(j, buffer_visible.get(i).get(j+delta_j));		
+					for ( int i = 0; i < taille_buffer_visible; i++ ){
+						//Detachement des SuperBG qui sortent de la zone visible
+						//System.out.println("Mvmt vertical, A detacher : "+i+"/"+j_detach);
+						buffer_visible.get(i).get(j_detach).sbg.detach();
 						
+						//Re-indexation des SuperBG à conserver
+						for (int j = cas4 * ( taille_buffer_visible - 1 ) ; j*pas_j <= cas3 *(taille_buffer_visible-2)+cas4*(-1); j+=pas_j){
+							//System.out.println("\tRe-indexation : "+i+"/"+(j+delta_j)+" -> "+i+"/"+j);
+							buffer_visible.get(i).set(j, buffer_visible.get(i).get(j+pas_j));		
+							
+						}
+						
+						//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
+						//System.out.println("A attacher : "+i+"/"+j_transfert);
+						buffer_visible.get(i).set(j_transfert, copieAttache_SuperBG(i, j_transfert,this.buffer_memoire));
 					}
-					
-					//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
-					System.out.println("A attacher : "+i+"/"+j_transfert);
-					buffer_visible.get(i).set(j_transfert, copieAttache_SuperBG(i, j_transfert,this.buffer_memoire));
 				}
 				
 			}
@@ -389,9 +402,9 @@ public class Buffer {
 				//si le buffer est en cours de mise à jour; empêche le rechargement
 				if (t.isAlive()){return;}
 			}
-
+			
 				
-			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)==3|| Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)==3){
+			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)>=this.marge|| Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)>=this.marge){
 				
 				 t = new Thread(new Runnable() {
 					@Override
@@ -424,17 +437,17 @@ public class Buffer {
 				int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 				int i_memoire = i + ecart + centre_buffer_visible_i - centre_buffer_memoire_i;
 				int j_memoire = j + ecart + centre_buffer_visible_j - centre_buffer_memoire_j;	
-				System.out.println("etat avant copi: "+buffmem.get(i_memoire).get(j_memoire).sbg.isLive()+" "+buffmem.get(i_memoire).get(j_memoire).sbg);
+				//System.out.println("etat avant copi: "+buffmem.get(i_memoire).get(j_memoire).sbg.isLive()+" "+buffmem.get(i_memoire).get(j_memoire).sbg);
 				SuperBG copie_sbg = new SuperBG(buffmem.get(i_memoire).get(j_memoire));
 				tg.addChild(copie_sbg.sbg);
-				System.out.println("Etat : "+copie_sbg.sbg.isLive()+" "+copie_sbg.sbg);
+				//System.out.println("Etat : "+copie_sbg.sbg.isLive()+" "+copie_sbg.sbg);
 
 				return copie_sbg;
 			}
 			
 			public void rechargement_buffer_memoire() throws IOException{
 			
-
+				System.out.println("XXXXXXXXXXXXXXXXXXXXXRechargement BUFFERXXXXXXXXXXXXXXXXXXXXXXXXXXX");
 				//Refenetrage du buffer_memoire autour du buffer_auxiliaire
 				centre_buffer_auxiliaire_i=centre_buffer_visible_i;
 				centre_buffer_auxiliaire_j=centre_buffer_visible_j;
@@ -450,8 +463,14 @@ public class Buffer {
 				//remplissage du Buffer auxiliaire
 				remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
 				//transfert du contenu du buffer auxiliaire vers le buffer mémoire
+//				if(Math.abs(this.centre_buffer_visible_i - this.centre_buffer_auxiliaire_i) + this.marge >= this.taille_buffer_memoire/2 || Math.abs(this.centre_buffer_visible_i - this.centre_buffer_auxiliaire_i) + this.marge >= this.taille_buffer_memoire/2){
+//					System.out.println("RELANCEMENT DU RECHARGEMENT");
+//					rechargement_buffer_memoire();
+//				}
+//				else{
 				swap();
-				System.out.println("fin swap");
+//				}
+				System.out.println("XXXXXXXXXXXXXXXXXXXXXFIN Rechargement BUFFERXXXXXXXXXXXXXXXXXXXXXXXX");
 				
 			}
 			

@@ -244,18 +244,16 @@ public class World extends JFrame {
 		int i = (int) ((x - Tuile.Xmin)/ Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin)/ Tuile.DY);
 		
-		int delta_i = i - buffer.centre_buffer_memoire_i ;
-		int delta_j = j - buffer.centre_buffer_memoire_j ;
+		int delta_i = i - buffer.centre_buffer_memoire_i;
+		int delta_j = j - buffer.centre_buffer_memoire_j;
 
 		if (Math.abs(delta_i) > buffer.taille_buffer_memoire/2  || Math.abs(delta_j) > buffer.taille_buffer_memoire/2){
 			//out si on cherche une valeur non disponible
 			return 0;
 		}
 		
-		
 		int i_mem = ( buffer.taille_buffer_memoire - 1 )/2  + delta_i;
 		int j_mem = ( buffer.taille_buffer_memoire - 1 )/2  + delta_j;
-		
 		
 		SuperBG sbg1 = buffer.buffer_memoire.get(i_mem).get(j_mem);
 		Tuile t =  sbg1.tuile;
@@ -934,7 +932,7 @@ public class World extends JFrame {
 	
 	public void setTuileCourante(double x, double y){
 		
-		System.out.println("setTuileCourante");
+		//System.out.println("setTuileCourante");
 		int i = (int) ((x - Tuile.Xmin)/ Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin)/ Tuile.DY);
 		
