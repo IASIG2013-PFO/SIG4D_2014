@@ -1,5 +1,8 @@
 package iasig.mobile.view;
 
+import iasig.dao.MNTDAO;
+import iasig.dao.OrthoDAO;
+
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +23,6 @@ import javax.vecmath.Point3d;
 import javax.vecmath.TexCoord2f;
 
 import com.sun.j3d.utils.image.TextureLoader;
-
-import dao.MNTDAO;
-import dao.OrthoDAO;
 
 /**
  * @author jean

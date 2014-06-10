@@ -24,15 +24,16 @@ import javax.vecmath.Vector3d;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
 /**
- * <b><u>Class Listeners</u> :Permet l'interaction entre l'utilisateur et le
- * programme. Cette classe contient tous les listeners associ�s � la cam�ra.</b>
+ * <b><u>Class Listeners</u> : Permet l'interaction entre l'utilisateur et le
+ * programme. Cette classe contient tous les listeners associes a la camera.</b>
  * 
  * @see MouseListener
  * @see MouseWheelListener
  * @see MouseMotionListener
+ * @see KeyListener
  * 
  * @author Groupe gestion de l'affichage (Chassin,Collot,Pain)
- * @version 2
+ * @version 14.06.10 (Annee, mois, jour)
  * 
  */
 public class Listeners implements MouseListener, MouseWheelListener,
@@ -43,35 +44,35 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Camera associ�e au dessin.
+	 * Camera associee au dessin.
 	 * 
 	 * @see Camera
 	 */
 	private Camera view;
 
 	/**
-	 * Point enregistr� au moment d'un "released" de la souris. En pixel.
+	 * Point enregistre au moment d'un "released" de la souris. En pixel.
 	 * 
 	 * @see Point
 	 */
-	private Point LastPosition;
+	private Point ReleasedPosition;
 
 	/**
-	 * Point enregistr� au moment d'un "pressed" de la souris. En pixel.
+	 * Point enregistre au moment d'un "pressed" de la souris. En pixel.
 	 * 
 	 * @see Point
 	 */
-	private Point FirstPosition;
+	private Point PressedPosition;
 
 	/**
 	 * Point courant de la souris pendant un "dragged". En pixel.
 	 * 
 	 * @see Point
 	 */
-	Point pt = new Point();
+	private Point DraggedPosition;
 
 	/**
-	 * Booleen permettant de d�finir s'il s'agit oui ou non d'un nouveau clic.
+	 * Booleen permettant de definir s'il s'agit oui ou non d'un nouveau clic.
 	 * 
 	 */
 	private boolean nouvclick;
@@ -375,31 +376,31 @@ public class Listeners implements MouseListener, MouseWheelListener,
 
 		// aucun d�placement n'a encore �t� fait ou il s'agit d'un nouveau
 		// click
-		if (LastPosition == null | nouvclick == true) {
-			LastPosition = FirstPosition;
+		if (ReleasedPosition == null | nouvclick == true) {
+			ReleasedPosition = PressedPosition;
 		}
 
 		// r�cup�ration du Point courant
-		pt = arg0.getPoint();
+		DraggedPosition = arg0.getPoint();
 
 		if (SwingUtilities.isLeftMouseButton(arg0)) {
 			// click gauche
 			//System.out.println("click gauche");
 
 			// la souris se trouve dans l'�cran
-			if (pt.getX() == 0
-					| pt.getY() == 0
-					| pt.getX() == KeyboardFocusManager
+			if (DraggedPosition.getX() == 0
+					| DraggedPosition.getY() == 0
+					| DraggedPosition.getX() == KeyboardFocusManager
 							.getCurrentKeyboardFocusManager().getActiveWindow()
 							.getSize().width
-					| pt.getY() == KeyboardFocusManager
+					| DraggedPosition.getY() == KeyboardFocusManager
 							.getCurrentKeyboardFocusManager().getActiveWindow()
 							.getSize().height) {
 				System.out.println("souris en dehors de l'�cran");
 			} else {
-				// calcul du d�placement global
-				dx = (pt.getX() - LastPosition.getX());
-				dy = (pt.getY() - LastPosition.getY());
+				// calcul du d�placement iasig.global
+				dx = (DraggedPosition.getX() - ReleasedPosition.getX());
+				dy = (DraggedPosition.getY() - ReleasedPosition.getY());
 
 				if (InOutCar) { // dans la voiture
 					if (Math.abs(dx) > Math.abs(dy)) {
@@ -458,8 +459,8 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			Point pt_vis = arg0.getPoint();
 			
 			// on gere la rotation autour du point clique
-			double diffx = pt_vis.getX() - LastPosition.getX();
-			double diffy = pt_vis.getY() - LastPosition.getY();
+			double diffx = pt_vis.getX() - ReleasedPosition.getX();
+			double diffy = pt_vis.getY() - ReleasedPosition.getY();
 
 			
 			// Calcul des nouvelles coordonn�es de la cam�ra
@@ -503,7 +504,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 
 		}
 
-		LastPosition = pt;
+		ReleasedPosition = DraggedPosition;
 		nouvclick = false;
 	}
 
@@ -634,7 +635,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	@Override
 	public void mousePressed(java.awt.event.MouseEvent arg0) {
 		System.out.println("Initialisation pt vis� !");
-		FirstPosition = arg0.getPoint();
+		PressedPosition = arg0.getPoint();
 		nouvclick = true;
 
 	}
@@ -653,7 +654,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 */
 	@Override
 	public void mouseReleased(java.awt.event.MouseEvent arg0) {
-		LastPosition = arg0.getPoint();
+		ReleasedPosition = arg0.getPoint();
 
 		if (InOutCar)
 			view.mazAnglesByStep();
@@ -691,7 +692,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			if (FreeCar) {
 				phi = -89;
 				theta = 45;
-				view.GestionCamFree(listevehicule.firstElement(), simpleU);
+				view.IniCamFree(listevehicule.firstElement(), simpleU);
 			} else {
 				view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
 			}
@@ -911,7 +912,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 */
 	private void updateAngles(double diffx, double diffy) {
 		if (diffx > diffy) {
-			if (pt.getX() > LastPosition.getX()) {
+			if (DraggedPosition.getX() > ReleasedPosition.getX()) {
 				if (theta > 0) {
 					theta--;
 				}
@@ -928,7 +929,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			}
 		} else {
 			// on gere l'atterissage de la camera sur la terre (en gros)
-			if (pt.getY() > LastPosition.getY()) {
+			if (DraggedPosition.getY() > ReleasedPosition.getY()) {
 				if (phi > -89) {
 					phi--;
 				}

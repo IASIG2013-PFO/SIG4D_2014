@@ -1,5 +1,10 @@
 package iasig.mobile.view;
 
+import iasig.dao.GenericDAO;
+import iasig.dao.user.Arbre;
+import iasig.dao.user.Lampadaire;
+import iasig.dao.user.Maison;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -7,16 +12,12 @@ import java.util.Vector;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.TransformGroup;
 
-import dao.GenericDAO;
-import dao.user.Arbre;
-import dao.user.Lampadaire;
-import dao.user.Maison;
-
 public class Buffer {
 
 	/**
 	 * le transformGroup Principal
 	 */
+	public World world;
 	public final TransformGroup tg;
 	public int marge;
 	//le tread de rechargement du buffer
@@ -50,13 +51,11 @@ public class Buffer {
 	
 	public ArrayList<ArrayList<Tuile>> buffer_tuile;
 	
-	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int centre_i, int centre_j, TransformGroup tg ) throws IOException {
+	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int centre_i, int centre_j, TransformGroup tg, World world ) throws IOException {
 		
 		this.centre_buffer_auxiliaire_i=centre_i;
 		this.centre_buffer_auxiliaire_j=centre_j;
-		
-//		this.centre_buffer_memoire_i=centre_i;
-//		this.centre_buffer_memoire_j=centre_j;
+
 		
 		this.centre_buffer_visible_i=centre_i;
 		this.centre_buffer_visible_j=centre_j;
@@ -68,6 +67,9 @@ public class Buffer {
 		
 		//Référence sur le TransformGroup parent
 		this.tg = tg;
+		this.world = world;
+		
+		
 		
 		//Initialisation des Buffers (matrices) à vide		
 		buffer_memoire = new ArrayList<ArrayList<SuperBG>>();
@@ -171,12 +173,8 @@ public class Buffer {
 
 		}
 		
-			
-		//if (demi_taille_buffer + deltai < 0 || demi_taille_buffer + deltaj < 0 || demi_taille_buffer + deltai > taille_buffer_memoire - 1 || demi_taille_buffer + deltaj > taille_buffer_memoire -1 ){
-		
 		buffer_objet.get(demi_taille_buffer + deltai ).get(demi_taille_buffer + deltaj ).add(obj);
-		//}
-
+	
 	}
 	
 	/**
@@ -232,6 +230,11 @@ public class Buffer {
 	
 	public void swap(){
 		
+		world.getCanvas().removeMouseListener(world.getListeners());
+		world.getCanvas().removeMouseMotionListener(world.getListeners());
+		world.getCanvas().removeMouseWheelListener(world.getListeners());
+		world.getCanvas().removeKeyListener(world.getListeners());
+		
 		//Refenetrage du buffer_memoire autour du buffer_auxiliaire
 		this.centre_buffer_memoire_i = this.centre_buffer_auxiliaire_i;
 		this.centre_buffer_memoire_j = this.centre_buffer_auxiliaire_j;
@@ -243,12 +246,13 @@ public class Buffer {
 				buffer_auxiliaire.get(i).set(j,null);
 			}
 		}
-//		ArrayList<ArrayList<SuperBG>> tmp = buffer_memoire;
-//		ArrayList<ArrayList<SuperBG>> tmp2 = buffer_auxiliaire;
-//
-//		buffer_memoire = tmp2;
-//		buffer_auxiliaire = tmp;
-//		
+
+		world.getCanvas().addMouseListener(world.getListeners());
+		world.getCanvas().addMouseMotionListener(world.getListeners());
+		world.getCanvas().addMouseWheelListener(world.getListeners());
+		world.getCanvas().addKeyListener(world.getListeners());
+		
+		
 	}
 	
 	/**
@@ -269,6 +273,7 @@ public class Buffer {
 		
 		/**
 		 * Met à jour le visible sur déplacement de la caméra
+		 * Recharge le buffer en memoire sur condition de deplacement
 		 * @throws IOException 
 		 */
 		public void rafraichissement_visible(int delta_i, int delta_j) throws IOException {
@@ -281,7 +286,7 @@ public class Buffer {
 								" Rafraichissement du buffer visible : "+delta_i+":"+delta_j);
 
 			
-			if ( delta_i !=0 /* && delta_j == 0*/  ){
+			if ( delta_i !=0  ){
 				
 				pas_i = (delta_i > 0 ? 1 : -1);
 				//Calcul des determinants
@@ -313,7 +318,7 @@ public class Buffer {
 				}
 				
 			}
-			if (/* delta_i == 0 &&*/ delta_j != 0){
+			if (delta_j != 0){
 				
 				pas_j = (delta_j > 0 ? 1 : -1);
 				
@@ -346,56 +351,10 @@ public class Buffer {
 				}
 				
 			}
-			//deplacement diagonal (tous sens)
-			else{
-					
-				/*System.out.println("MVT DIAGONAL");
-				//Calcul des determinants
-				int cas1 = (1 + delta_i)/2;
-				int cas2 = (1 - delta_i)/2;
-				int cas3 = (1 + delta_j )/2;
-				int cas4 = (1 - delta_j )/2;
-				
-				int i_transfert = cas1 * ( taille_buffer_visible -1 );
-				int i_detach = cas2 * (taille_buffer_visible - 1 ); 
-				int j_transfert = cas3 * ( taille_buffer_visible -1 );
-				int j_detach = cas4 * (taille_buffer_visible - 1 ); 
-				
-				//Detachement des SuperBG qui sortent de la zone visible
-				for ( int i = 0 ; i < taille_buffer_visible; i++){
-					buffer_visible.get(i).set(j_detach, copieAttache_SuperBG(i, j_detach));
-				}
-				for ( int j = 0; j < taille_buffer_visible -1 ; j++){
-					buffer_visible.get(i_detach).set(j, copieAttache_SuperBG(i_detach, j));
-				}
-				
-				//Re-indexation des SuperBG à conserver
-				for ( int i = cas2 * ( taille_buffer_visible - 1 ) ; i*delta_i <= cas1*(taille_buffer_visible-2)+ cas2*(-1) ; i+=delta_i){
 
-				//for ( int i = (1 - delta_i)/2 * ( taille_buffer_visible - 1 ) ; i*delta_i <= ((delta_i + 1)/2)*(taille_buffer_visible-2)+( (-1)*(1 - delta_i)/2) ; i+=delta_i){
-					for (int j = cas4 * ( taille_buffer_visible - 1 ) ; i*delta_j <= cas3 *(taille_buffer_visible-2)+cas4*(-1); i+=delta_j){
-						
-						//buffer_visible[i][j] = buffer_visible[i-delta_i][j-delta_j]
-						buffer_visible.get(i).set(j, buffer_visible.get(i+delta_i).get(j+delta_j));		
-						
-					}	
-				}
-				
-				//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
-				for ( int i = 0 ; i < taille_buffer_visible; i++){
-					buffer_visible.get(i).set(j_transfert, copieAttache_SuperBG(i, j_transfert));
-				}
-				for ( int j = 0; j < taille_buffer_visible -1 ; j++){
-					buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j));
-				}
-				
-				*/
-			}
-			
-//			int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 			
 			
-			//Rafraichissement du buffer
+			//Rafraichissement du buffer si requis
 			
 			//Test si procesus de rechargement en cours
 			if (t != null){
@@ -403,8 +362,8 @@ public class Buffer {
 				if (t.isAlive()){return;}
 			}
 			
-				
-			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)>=this.marge|| Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)>=this.marge){
+			//Condition de rechargement basé sur l'attribut marge	
+			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)>=this.marge || Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)>=this.marge){
 				
 				 t = new Thread(new Runnable() {
 					@Override
@@ -463,13 +422,9 @@ public class Buffer {
 				//remplissage du Buffer auxiliaire
 				remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
 				//transfert du contenu du buffer auxiliaire vers le buffer mémoire
-//				if(Math.abs(this.centre_buffer_visible_i - this.centre_buffer_auxiliaire_i) + this.marge >= this.taille_buffer_memoire/2 || Math.abs(this.centre_buffer_visible_i - this.centre_buffer_auxiliaire_i) + this.marge >= this.taille_buffer_memoire/2){
-//					System.out.println("RELANCEMENT DU RECHARGEMENT");
-//					rechargement_buffer_memoire();
-//				}
-//				else{
+		
 				swap();
-//				}
+
 				System.out.println("XXXXXXXXXXXXXXXXXXXXXFIN Rechargement BUFFERXXXXXXXXXXXXXXXXXXXXXXXX");
 				
 			}

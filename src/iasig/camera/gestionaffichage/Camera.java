@@ -15,11 +15,11 @@ import iasig.mobile.elements.VehiculeLibre;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
 /**
- * <b><u>Class Camera</u> : Gestion de la cam�ra, initialisation et mise � jour
+ * <b><u>Class Camera</u> : Gestion de la camera, initialisation et mise a jour
  * de la position, getters et setters.</b>
  * 
  * @author Groupe gestion de l'affichage (Chassin, Collot, Pain)
- * @version 3 (28/05/2014)
+ * @version 14.06.10 (Annee, mois, jour)
  */
 
 public class Camera {
@@ -29,7 +29,7 @@ public class Camera {
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Position de la cam�ra
+	 * Position de la camera
 	 * 
 	 * @see Camera#getEye()
 	 * @see Camera#setEye(Point3d)
@@ -37,15 +37,15 @@ public class Camera {
 	Point3d eye;
 
 	/**
-	 * Position du point vis� par la cam�ra
+	 * Position du point vise par la camera
 	 * 
-	 * @see Camera#getAt()()
+	 * @see Camera#getAt()
 	 * @see Camera#setAt(Point3d)
 	 */
 	Point3d at;
 
 	/**
-	 * Vecteur normal de la cam�ra
+	 * Vecteur normal de la camera
 	 * 
 	 * @see Camera#getUp()
 	 * @see Camera#setUp(Point3d)
@@ -53,11 +53,21 @@ public class Camera {
 	Vector3d up;
 
 	/**
-	 * Latitude et longitude entre l'oeil de la camera et l'objet vise
+	 * Longitude entre l'oeil de la camera et l'objet vise
 	 * 
 	 */
 	public double longitude = 0;
+
+	/**
+	 * Latitude entre l'oeil de la camera et l'objet vise
+	 * 
+	 */
 	public double latitude = 0;
+
+	/**
+	 * Distance entre l'oeil de la camera et l'objet vise
+	 * 
+	 */
 	private double zoom = 0;
 
 	/**
@@ -78,7 +88,7 @@ public class Camera {
 
 	/**
 	 * Pointeur sur la classe d'ecouteurs d'evenement associe au monde dans
-	 * lequel la camera est situ�
+	 * lequel la camera est situe
 	 * 
 	 * @see Listeners
 	 */
@@ -91,32 +101,35 @@ public class Camera {
 	/**
 	 * Constructeur Camera
 	 * <p>
-	 * A la construction d'un objet Camera, on positionne par d�faut la cam�ra
-	 * au point (0,0,5) de fa�on � �tre au centre du MNT. Ce constructeur ne
-	 * prend aucun param�tre.
+	 * A la construction d'un objet Camera, on positionne par d�faut la camera
+	 * au point (0,0,5) de facon a etre au centre du MNT. Ce constructeur prend
+	 * en parametre le listenes auquel il est associe.
 	 * </p>
 	 */
 	Camera(Listeners ltn) {
-		this.eye = new Point3d(948000.0d,6532000.0d,20000);//948000.0d, 6532000.0d, 5000.0d);
-		this.at = new Point3d(948000.0d,6532000.0d,0);//948000.0d, 6532000.0d, 500.0d);
+
+		// Initialisation des coordonnées camera a la vertical au niveau de
+		// Annecy
+		this.eye = new Point3d(948000.0d, 6532000.0d, 20000);
+		this.at = new Point3d(948000.0d, 6532000.0d, 0);
 		this.up = new Vector3d(1.0d, 0.0d, 0.0d);
 		this.ltn = ltn;
-		
+
+		// initialisation par defaut des booleens et angles spheriques (phi,
+		// theta) permettant la gestion des listeners
 		ltn.setPhi(-.89);
 		ltn.setTheta(0);
 		ltn.setFreeCar(true);
 		ltn.setInOutCar(false);
 
-		// On initialise les deux quaternions avec leurs valeurs par d�faut
+		// On initialise les deux quaternions avec leurs valeurs par defaut
 		qRightLeft = new Quaternion();
 		qRightLeft.setIdentity();
 
 		qUpDown = new Quaternion();
 		qUpDown.setIdentity();
-		
-		
-		this.moveView(ltn.getWorld().getUnivers(), getEye(), getAt(),
-				getUp());
+
+		this.moveView(ltn.getWorld().getUnivers(), getEye(), getAt(), getUp());
 	}
 
 	// ///////////////////////////////////////////////////
@@ -124,30 +137,16 @@ public class Camera {
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * @return the qRightLeft
-	 */
-	public Quaternion getqRightLeft() {
-		return qRightLeft;
-	}
-
-	/**
-	 * @return the qUpDown
-	 */
-	public Quaternion getqUpDown() {
-		return qUpDown;
-	}
-
-	/**
-	 * Retourne la position de la cam�ra.
+	 * Retourne la position de la camera.
 	 * 
-	 * @return position de l'oeil.
+	 * @return eye position de l'oeil.
 	 */
 	public Point3d getEye() {
 		return eye;
 	}
 
 	/**
-	 * Met � jour la position de la cam�ra.
+	 * Met a jour la position de la camera.
 	 * 
 	 * @param eye
 	 */
@@ -156,16 +155,16 @@ public class Camera {
 	}
 
 	/**
-	 * Retourne la position du point vis�.
+	 * Retourne la position du point vise.
 	 * 
-	 * @return position du point vis�.
+	 * @return at position du point vise.
 	 */
 	public Point3d getAt() {
 		return at;
 	}
 
 	/**
-	 * Met � jour la position du point vis� de la cam�ra.
+	 * Met a jour la position du point vise par camera.
 	 * 
 	 * @param at
 	 */
@@ -174,16 +173,16 @@ public class Camera {
 	}
 
 	/**
-	 * Retourne le vecteur normal de la cam�ra.
+	 * Retourne le vecteur normal de la camera.
 	 * 
-	 * @return le vecteur normal de la cam�ra.
+	 * @return up vecteur normal de la camera.
 	 */
 	public Vector3d getUp() {
 		return up;
 	}
 
 	/**
-	 * Met � jour le vecteur normal de la cam�ra.
+	 * Met a jour le vecteur normal de la camera.
 	 * 
 	 * @param up
 	 */
@@ -191,24 +190,61 @@ public class Camera {
 		this.up = up;
 	}
 
+	/**
+	 * Retourne le quaternion longitude (droite/gauche).
+	 * 
+	 * @return the qRightLeft
+	 */
+	public Quaternion getqRightLeft() {
+		return qRightLeft;
+	}
+
+	/**
+	 * Retourne le quaternion latitude (haut/bas).
+	 * 
+	 * @return the qUpDown
+	 */
+	public Quaternion getqUpDown() {
+		return qUpDown;
+	}
+
+	/**
+	 * Retourne la distance entre entre l'oeil de la camera et l'objet vise
+	 * 
+	 * @return the zoom
+	 */
+	public double getZoom() {
+		return zoom;
+	}
+
+	/**
+	 * Met a jour la distance entre entre l'oeil de la camera et l'objet vise
+	 * 
+	 * @param zoom
+	 *            the zoom to set
+	 */
+	public void setZoom(double zoom) {
+		this.zoom = zoom;
+	}
+
 	// ///////////////////////////////////////////////////
 	// //////////////////Methodes/////////////////////////
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Met � jour les diff�rents param�tres de la cam�ra.
+	 * Met a jour les differents paramatres de la camera.
 	 * 
 	 * 
 	 * @param simpleU
-	 *            SimpleUniverse courant.
+	 *            SimpleUniverse dans lequel est rattachee la camera.
 	 * @param lookAt
-	 *            Transform3D dans lequel est rattach� la cam�ra.
+	 *            Transform3D dans lequel est rattachee la camera.
 	 * @param p1
-	 *            Point3d repr�sentant l'oeil.
+	 *            Point3d representant l'oeil (eye).
 	 * @param p2
-	 *            Point3d repr�sentant la position du point vis�.
+	 *            Point3d representant la position du point vise (at).
 	 * @param v
-	 *            Vector3d repr�sentant le vecteur normal.
+	 *            Vector3d representant le vecteur normal (up).
 	 */
 	public void moveView(SimpleUniverse simpleU, Point3d p1, Point3d p2,
 			Vector3d v) {
@@ -217,35 +253,39 @@ public class Camera {
 		lookAt.setTranslation(new Vector3f(0, 3f, -3f));
 		lookAt.lookAt(p1, p2, v);
 		lookAt.invert();
-		
+
 		try {
+			// Mise a jour de la position de la camera au sein du Buffer
+			// peut necessiter une requete à la base de donnees
 			ltn.getWorld().CameraMovedTo(at.x, at.y);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out
+					.println(e
+							+ " : Probleme de gestion du Buffer au moment d'un deplacement camera (cf. iasig.camera.gestionaffichage.camera.java)");
 			e.printStackTrace();
 		}
-		
+
 		simpleU.getViewingPlatform().getViewPlatformTransform()
 				.setTransform(lookAt);
 	}
 
 	/**
-	 * Methode de gestion de la cam�ra plac� dans un v�hicule.
+	 * Methode de gestion de la camera interieure placee dans un vehicule.
 	 * 
 	 * 
-	 * @param simpleU
-	 *            SimpleUniverse courant.
 	 * @param car
-	 *            Vehicule dans lequel la cam�ra est plac�e.
+	 *            Vehicule dans lequel la camera est placee.
+	 * @param simpleU
+	 *            SimpleUniverse courant dans lequel est placee la camera.
 	 */
 	public void GestionCamInterieure(VehiculeLibre car, SimpleUniverse simpleU) {
 
-		// Initialisation d'un tableau contenant la position cam�ra par rapport
-		// au vehicule
+		// Initialisation d'un tableau contenant la position camera par rapport
+		// au vehicule et mise en place du Point3d correspondant.
 		double[][] tab3 = car.getPositionCamConducteur();
-
 		Point3d old = new Point3d(tab3[1][0], tab3[1][1], tab3[1][2]);
 
+		// utilisation des quaternions lors des rotations de la camera
 		qRightLeft.setRotation(
 				new Vector3(this.getUp().x, this.getUp().y, this.getUp().z),
 				(float) Math.toRadians(longitude));
@@ -255,12 +295,9 @@ public class Camera {
 								- this.getEye().y, old.z - this.getEye().z)),
 				(float) Math.toRadians(latitude));
 
-		// MAJ Cam�ra
+		// MAJ Camera : position, point vise, normal
 		this.setEye(new Point3d(tab3[0][0], tab3[0][1], tab3[0][2]));
-		// this.setAt(new Point3d(tab3[1][0], tab3[1][1], tab3[1][2]));
-
 		this.setAt(Quaternion.translate(qUpDown, qRightLeft, this.getEye(), old));
-
 		this.setUp(new Vector3d(0., 0., 1.));
 
 		this.moveView(simpleU, this.getEye(), this.getAt(), this.getUp());
@@ -268,17 +305,17 @@ public class Camera {
 	}
 
 	/**
-	 * Methode de gestion de la cam�ra plac� � l'exterieure d'un v�hicule.
+	 * Methode de gestion de la camera placee a l'exterieure d'un vehicule.
 	 * 
 	 * 
-	 * @param simpleU
-	 *            SimpleUniverse courant.
 	 * @param car
-	 *            Vehicule auquel la cam�ra est rattach�e.
+	 *            Vehicule auquel la camera est rattachee.
+	 * @param simpleU
+	 *            SimpleUniverse courant dans lequel est placee la camera.
 	 */
 	public void GestionCamExterieure(VehiculeLibre car, SimpleUniverse simpleU) {
 
-		// Initialisation de deux tableau comprenant la position du v�hicule
+		// Initialisation de deux tableau comprenant la position du vehicule
 		// dans un monde 3D
 		double[] tab2 = null;
 		double[] tab = null;
@@ -286,14 +323,14 @@ public class Camera {
 		tab2 = car.getVWorldPosition();
 		tab = car.getPositionCamExt();
 
-
-		// MAJ Cam�ra
+		// MAJ Camera : point vise, position, normal
 
 		this.setAt(new Point3d(tab2[0], tab2[1], tab2[2]));
 
-		System.out.println(latitude + "   " + longitude);
-		Point3d old = new Point3d(tab[0]+zoom*(tab2[0]-tab[0]), tab[1]+zoom*(tab2[1]-tab[1]), tab[2]);
+		Point3d old = new Point3d(tab[0] + zoom * (tab2[0] - tab[0]), tab[1]
+				+ zoom * (tab2[1] - tab[1]), tab[2]);
 
+		// rotation quaternionique
 		qRightLeft.setRotation(
 				new Vector3(this.getUp().x, this.getUp().y, this.getUp().z),
 				(float) Math.toRadians(longitude));
@@ -304,42 +341,27 @@ public class Camera {
 						.toRadians(latitude));
 
 		this.setEye(Quaternion.translate(qUpDown, qRightLeft, this.getAt(), old));
-
-		// this.setEye(new Point3d(tab[0], tab[1], tab[2] + 10));
 		this.setUp(new Vector3d(0., 0., 1.));
 
 		this.moveView(simpleU, this.getEye(), this.getAt(), this.getUp());
 	}
 
 	/**
-	 * @return the zoom
-	 */
-	public double getZoom() {
-		return zoom;
-	}
-
-	/**
-	 * @param zoom the zoom to set
-	 */
-	public void setZoom(double zoom) {
-		this.zoom = zoom;
-	}
-
-	/**
-	 * Methode de gestion de la cam�ra FreeCam.
+	 * Initialisation de la camera FreeCam par rapport au dernier vehicule dans
+	 * lequel a ete rattache la camera pour creer une animation.
 	 * 
 	 * 
-	 * @param simpleU
-	 *            SimpleUniverse courant.
 	 * @param car
-	 *            Vehicule auquel la cam�ra est rattach�e.
+	 *            Vehicule auquel la cam�ra est rattachee.
+	 * @param simpleU
+	 *            SimpleUniverse courant dans lequel est placee la camera.
 	 */
-	public void GestionCamFree(VehiculeLibre car, SimpleUniverse simpleU) {
+	public void IniCamFree(VehiculeLibre car, SimpleUniverse simpleU) {
 
-		// Initialisation d'un tableau contenant les position du v�hicule
+		// Initialisation d'un tableau contenant les position du vehicule
 		double[] tab2 = car.getVWorldPosition();
 
-		// MAJ cam�ra
+		// MAJ camera : point vise, position
 		this.setAt(new Point3d(tab2[0] + 15, tab2[1], tab2[2]));
 		this.setEye(new Point3d(tab2[0], tab2[1] - 15, tab2[2] + 0.3));
 
@@ -349,27 +371,25 @@ public class Camera {
 	/**
 	 * Methode permettant d'incrementer la latitude
 	 * 
-	 * @see Camera#zoom
+	 * @see Camera#latitude
 	 */
-	public void incrZoom() {
-
-		zoom += Geometrie.distance(this.getEye(),this.getAt())/100;
-		if (zoom > 0.9){
-			ltn.setInOutCar(true);
-			this.mazAngles();
-			zoom = 0.9;
-		}
-
+	public void incrLat() {
+		if (ltn.isInOutCar() && latitude > 45 || !ltn.isInOutCar()
+				&& latitude > 84)
+			return; // on limite a l'interieur de la voiture
+		this.latitude += .5;
 	}
 
 	/**
 	 * Methode permettant de decrementer la latitude
 	 * 
-	 * @see Camera#zoom
+	 * @see Camera#latitude
 	 */
-	public void decrZoom() {
-
-		zoom -= Geometrie.distance(this.getEye(),this.getAt())/100;
+	public void decrLat() {
+		if (ltn.isInOutCar() && latitude < -45 || !ltn.isInOutCar()
+				&& latitude < 0)
+			return; // on limite a l'interieur de la voiture
+		this.latitude -= .5;
 	}
 
 	/**
@@ -403,47 +423,78 @@ public class Camera {
 	}
 
 	/**
-	 * Methode permettant d'incrementer la latitude
+	 * Methode permettant d'incrementer la distance entre la position de l'oeil
+	 * et le vehicule.
 	 * 
-	 * @see Camera#latitude
+	 * @see Camera#zoom
 	 */
-	public void incrLat() {
-		if (ltn.isInOutCar() && latitude > 45 || !ltn.isInOutCar()
-				&& latitude > 84)
-			return; // on limite a l'interieur de la voiture
-		this.latitude += .5;
+	public void incrZoom() {
+		zoom += Geometrie.distance(this.getEye(), this.getAt()) / 100;
+		if (zoom > 0.9) {
+			ltn.setInOutCar(true);
+			this.mazAngles();
+			zoom = 0.9;
+		}
 	}
 
 	/**
-	 * Methode permettant de decrementer la latitude
+	 * Methode permettant de decrementer la distance entre la position de l'oeil
+	 * et le vehicule.
 	 * 
-	 * @see Camera#latitude
+	 * @see Camera#zoom
 	 */
-	public void decrLat() {
-		if (ltn.isInOutCar() && latitude < -45 || !ltn.isInOutCar()
-				&& latitude < 0)
-			return; // on limite a l'interieur de la voiture
-		this.latitude -= .5;
+	public void decrZoom() {
+		zoom -= Geometrie.distance(this.getEye(), this.getAt()) / 100;
+	}
+
+	/**
+	 * Methode permettant de savoir si un point est au-dessus du mnt
+	 * 
+	 * @param z
+	 *            altitude du point
+	 * @param zmnt
+	 *            altitude du mnt en ce point (x, y)
+	 * @return Boolean
+	 */
+	public boolean mntAlt(double z, double zmnt) {
+		// prise en compte de la valeur en Z du mnt plus un delta (50m)
+		// permettant de palier aux erreurs d'arrondie dues a une interpolation
+		// quadratique du zmnt.
+		zmnt += 50;
+		if (z <= zmnt) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	/**
 	 * Methode permettant de gerer la mise a zero des angles longitude/latitude
-	 * grace a une animation
+	 * grace a une animation.
+	 * <p>
+	 * Il s'agit dans cette methode une fois que la camera a ete bougee en vue
+	 * interieure de replacer la camera a une position "normale" afin de simuler
+	 * le comportement d'un conducteur bougeant la tete pendnat la conduite.
+	 * </p>
 	 * 
 	 * @see Camera#latitude
 	 * @see Camera#longitude
 	 */
 	public void mazAnglesByStep() {
+		// ccreation d'un pas de rotation
 		float pasLon = (float) (longitude / 100);
 		float pasLat = (float) (latitude / 100);
+		// boucle gerant l'animation
 		for (int i = 0; i < 100; i++) {
 			longitude -= pasLon;
 			latitude -= pasLat;
+			// utilisation de sleep permettant de ralentir l'execution de la
+			// methode afin d'arriver a une animation progressive.
 			try {
 				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				System.out
-						.println("Probl�me sur la MAZ de la cam @see mazAngles");
+						.println(e + " : Probleme sur l'animation de la MAZ de la cam (cf. iasig.camera.gestionaffichage.camera.java)");
 				e.printStackTrace();
 			}
 		}
@@ -458,23 +509,5 @@ public class Camera {
 	public void mazAngles() {
 		longitude = 0;
 		latitude = 0;
-	}
-
-	/**
-	 * Methode permettant de savoir si un point est au-dessus du mnt
-	 * 
-	 * @param z
-	 *            altitude du point
-	 * @param zmnt
-	 *            altitude du mnt en ce point (x, y)
-	 * @return Boolean
-	 */
-	public boolean mntAlt(double z, double zmnt) {
-		zmnt += 50;
-		if (z <= zmnt) {
-			return false;
-		} else {
-			return true;
-		}
 	}
 }

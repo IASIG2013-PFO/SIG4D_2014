@@ -2,6 +2,9 @@ package iasig.mobile.view;
 /** @author emilie
  *
  */
+import iasig.dao.user.Arbre;
+import iasig.dao.user.Lampadaire;
+
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,9 +31,6 @@ import com.sun.j3d.loaders.IncorrectFormatException;
 import com.sun.j3d.loaders.ParsingErrorException;
 import com.sun.j3d.loaders.Scene;
 import com.sun.j3d.loaders.objectfile.ObjectFile;
-
-import dao.user.Arbre;
-import dao.user.Lampadaire;
 
 /**
  * @author emilie

@@ -3,6 +3,7 @@ package iasig.mobile.view;
 import iasig.mobile.elements.VehiculeLibre;
 import iasig.mobile.elements.VoitureLibre;
 import iasig.camera.gestionaffichage.*;
+import iasig.dao.GenericDAO;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -47,10 +48,8 @@ import com.sun.j3d.utils.image.TextureLoader;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.Viewer;
 
-import dao.GenericDAO;
-//import dao.user.Buffer;
 
-public class World extends JFrame {
+	public class World extends JFrame {
 	public float[][] MNT = null;
 	//private Tuile[] liste_tuiles;
 	private Tuile tuileCourante = null;
@@ -63,7 +62,7 @@ public class World extends JFrame {
 	//private TransformGroup transformMNT;
 	private TransformGroup tg2;
 	
-	
+	private Canvas3D canvas3d;
 	
 	Buffer buffer;
 	
@@ -106,18 +105,18 @@ public class World extends JFrame {
 		conteneur.setLayout(new BorderLayout());
 		GraphicsConfiguration config = SimpleUniverse
 				.getPreferredConfiguration();
-		Canvas3D c = new Canvas3D(config);
-		System.out.println(c.getDoubleBufferEnable());
-		conteneur.add("Center", c);
+		canvas3d = new Canvas3D(config);
+		System.out.println(canvas3d.getDoubleBufferEnable());
+		conteneur.add("Center", canvas3d);
 
-		univers = new SimpleUniverse(c);
+		univers = new SimpleUniverse(canvas3d);
 		
 
 		ltn = new Listeners(univers, this, listevehicule);
-		c.addMouseListener(ltn);
-		c.addMouseMotionListener(ltn);
-		c.addMouseWheelListener(ltn);
-		c.addKeyListener(ltn);
+		canvas3d.addMouseListener(ltn);
+		canvas3d.addMouseMotionListener(ltn);
+		canvas3d.addMouseWheelListener(ltn);
+		canvas3d.addKeyListener(ltn);
 		
 		racine = new BranchGroup();
 		BranchGroup bg = new BranchGroup();
@@ -470,7 +469,7 @@ public class World extends JFrame {
 		int i_init = (int) ((948000.0 - Tuile.Xmin)/ Tuile.DX);
 		int j_init = (int) ((6532000.0 - Tuile.Ymin)/ Tuile.DY);
 		//Initialisation du buffer
-		buffer = new Buffer(25, 5, i_init , j_init, transform);
+		buffer = new Buffer(25, 5, i_init , j_init, transform, this);
 		
 		System.out.println("Initialisation buffer terminée !!!");
 
@@ -950,6 +949,9 @@ public class World extends JFrame {
 		
 	}
 	
+	public Canvas3D getCanvas(){
+		return canvas3d;
+	}
 	
 }
 /* CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC */

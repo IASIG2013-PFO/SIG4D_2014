@@ -1,12 +1,12 @@
 package iasig.mobile.view;
 
+import iasig.dao.Polyligne_grapheDAO;
+
 import java.sql.SQLException;
 
 import javax.media.j3d.Shape3D;
 
 import org.postgis.PGgeometry;
-
-import dao.Polyligne_grapheDAO;
 
 /**
  * @author jean
@@ -14,7 +14,7 @@ import dao.Polyligne_grapheDAO;
  */
 /*CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC*/
 public class Tunnel {
-	/** Cette classe définit un tunnel à partir de sa forme et ses coordonnées de percement du MNT.*/
+	/** Cette classe dï¿½finit un tunnel ï¿½ partir de sa forme et ses coordonnï¿½es de percement du MNT.*/
 	
 	/*public final int I_tuile = 58;
 	public final int J_tuile = 84;
@@ -26,11 +26,11 @@ public class Tunnel {
 	public final int j_maille = 9;*/
 	
 	/*/////////////////////ATTRIBUTS////////////////////*/
-	private int X; //Borne Ouest de la maille du MNT à percer 
-	private int Y; //Borne Sud de la maille du MNT à percer
+	private int X; //Borne Ouest de la maille du MNT ï¿½ percer 
+	private int Y; //Borne Sud de la maille du MNT ï¿½ percer
 	private int Z; //Altitude du bas du tunnel
 	private int H; //Auteur du tunnel
-	private PGgeometry forme; //Forme du tunnel : polygone fermé
+	private PGgeometry forme; //Forme du tunnel : polygone fermï¿½
 	/*//////////////////////////////////////////////////*/
 	
 	
@@ -42,7 +42,7 @@ public class Tunnel {
 	public Tunnel(int x, int y, int z, int h) throws SQLException{
 		/** 
 		 * FONCTION :
-		 * Construire un objet tunnel à partir d'une forme chargée depuis la BDD.
+		 * Construire un objet tunnel ï¿½ partir d'une forme chargï¿½e depuis la BDD.
 		 * 
 		 * PARAMETRES EN ENTREE
 		 * - x [Scalaire, entier] : renseignement de l'attribut X
@@ -51,7 +51,7 @@ public class Tunnel {
 		 * - h [Scalaire, entier] : renseignement de l'attribut H
 		 * 		 
 		 * CONSTRUIT :
-		 * - [Scalaire, objet de la classe Tunnel] : un nouveau tunnel avec tous ses attributs renseignés.
+		 * - [Scalaire, objet de la classe Tunnel] : un nouveau tunnel avec tous ses attributs renseignï¿½s.
 		 * */
 		X=x;
 		Y=y;
@@ -72,7 +72,7 @@ public class Tunnel {
 	public int getX(){
 		/** 
 		 * FONCTION :
-		 * Récupérer l'attribut private X.
+		 * Rï¿½cupï¿½rer l'attribut private X.
 		 * 
 		 * RETOUR :
 		 * - [Scalaire, entier] : this.X.
@@ -86,7 +86,7 @@ public class Tunnel {
 	public int getY(){
 		/** 
 		 * FONCTION :
-		 * Récupérer l'attribut private Y.
+		 * Rï¿½cupï¿½rer l'attribut private Y.
 		 * 
 		 * RETOUR :
 		 * - [Scalaire, entier] : this.Y.
@@ -100,7 +100,7 @@ public class Tunnel {
 	public int getZ(){
 		/** 
 		 * FONCTION :
-		 * Récupérer l'attribut private Z.
+		 * Rï¿½cupï¿½rer l'attribut private Z.
 		 * 
 		 * RETOUR :
 		 * - [Scalaire, entier] : this.Z.
@@ -114,7 +114,7 @@ public class Tunnel {
 	public int getH(){
 		/** 
 		 * FONCTION :
-		 * Récupérer l'attribut private H.
+		 * Rï¿½cupï¿½rer l'attribut private H.
 		 * 
 		 * RETOUR :
 		 * - [Scalaire, entier] : this.H.
@@ -128,7 +128,7 @@ public class Tunnel {
 		PGgeometry getForme(){
 			/** 
 			 * FONCTION :
-			 * Récupérer l'attribut private forme.
+			 * Rï¿½cupï¿½rer l'attribut private forme.
 			 * 
 			 * RETOUR :
 			 * - [Scalaire, entier] : this.forme.
@@ -151,7 +151,7 @@ public class Tunnel {
 		 * Programme.
 		 * 
 		 * PARAMETRE EN ENTREE :
-		 * -args [Vecteur(longueur quelconque >=0) de chaînes de caractères] : Eventuels paramètres passés à l'exécuteur. ICI AUCUN.
+		 * -args [Vecteur(longueur quelconque >=0) de chaï¿½nes de caractï¿½res] : Eventuels paramï¿½tres passï¿½s ï¿½ l'exï¿½cuteur. ICI AUCUN.
 		 */	
 	}
 	//---------------------------------------------------
