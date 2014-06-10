@@ -19,6 +19,8 @@ public class Buffer {
 	 */
 	public final TransformGroup tg;
 	public int marge;
+	//le tread de rechargement du buffer
+	Thread t;
 	
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
@@ -109,28 +111,30 @@ public class Buffer {
 		//Fin initialisation
 		
 		//Ajout des Objets
-		double t = System.currentTimeMillis();
+		double time = System.currentTimeMillis();
 		GenericDAO.selection_geographique_buffer(this);
-		System.out.println("Temps de selection des objets : "+(System.currentTimeMillis()-t));
+		System.out.println("Temps de selection des objets : "+(System.currentTimeMillis()-time));
 
 		//Ajout des Tuiles
-		t = System.currentTimeMillis();
+		time = System.currentTimeMillis();
 		remplissage_Buffer_Tuile();
-		System.out.println("Temps de selection des tuiles : "+(System.currentTimeMillis()-t));
+		System.out.println("Temps de selection des tuiles : "+(System.currentTimeMillis()-time));
 
 		//remplissage du Buffer auxiliaire
 		//initialisation de son propre buufer auxiliaire
-		t = System.currentTimeMillis();
+		time = System.currentTimeMillis();
 		remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
-		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-t));
+		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-time));
 
 		//transfert du contenu du buffer auxiliaire vers le buffer mémoire
-		t = System.currentTimeMillis();
+		time = System.currentTimeMillis();
 		swap();
-		System.out.println("Temps de swap : "+(System.currentTimeMillis()-t));
+		System.out.println("Temps de swap : "+(System.currentTimeMillis()- time));
 
 		//Initialisation du Buffer Visible
 		initialisation_buffer_visible(this.buffer_memoire);
+		
+	
 		
 		
 	}
@@ -150,24 +154,28 @@ public class Buffer {
 		
 		if(obj instanceof Maison){
 
-			 deltai = ((Maison) obj).getMaille_i() - this.centre_buffer_visible_i;
-			 deltaj = ((Maison) obj).getMaille_j() - this.centre_buffer_visible_j;
+			 deltai = ((Maison) obj).getMaille_i() - this.centre_buffer_auxiliaire_i;
+			 deltaj = ((Maison) obj).getMaille_j() - this.centre_buffer_auxiliaire_j;
 		}
 		
 		if(obj instanceof Lampadaire){
 
-			deltai = ((Lampadaire) obj).getMaille_i() - this.centre_buffer_visible_i;
-			deltaj = ((Lampadaire) obj).getMaille_j() - this.centre_buffer_visible_j;
+			deltai = ((Lampadaire) obj).getMaille_i() - this.centre_buffer_auxiliaire_i;
+			deltaj = ((Lampadaire) obj).getMaille_j() - this.centre_buffer_auxiliaire_j;
 		
 		}
 
 		if(obj instanceof Arbre){
-			deltai = ((Arbre) obj).getMaille_i() - this.centre_buffer_visible_i;
-			deltaj = ((Arbre) obj).getMaille_j() - this.centre_buffer_visible_j;
+			deltai = ((Arbre) obj).getMaille_i() - this.centre_buffer_auxiliaire_i;
+			deltaj = ((Arbre) obj).getMaille_j() - this.centre_buffer_auxiliaire_j;
 
 		}
 		
+			
+		//if (demi_taille_buffer + deltai < 0 || demi_taille_buffer + deltaj < 0 || demi_taille_buffer + deltai > taille_buffer_memoire - 1 || demi_taille_buffer + deltaj > taille_buffer_memoire -1 ){
+		
 		buffer_objet.get(demi_taille_buffer + deltai ).get(demi_taille_buffer + deltaj ).add(obj);
+		//}
 
 	}
 	
@@ -265,15 +273,13 @@ public class Buffer {
 		 */
 		public void rafraichissement_visible(int delta_i, int delta_j) throws IOException {
 			
-			this.centre_buffer_visible_i+=delta_i;
-			this.centre_buffer_visible_j+=delta_j;
-			
 			System.out.println("Centre visible :"+centre_buffer_visible_i+" "+centre_buffer_visible_j+
 								" Centre memoire :"+centre_buffer_memoire_i+" "+centre_buffer_memoire_j+
 								" Rafraichissement du buffer visible : "+delta_i+":"+delta_j);
 
 			
 			if ( delta_i !=0 /* && delta_j == 0*/  ){
+				this.centre_buffer_visible_i+=delta_i;
 				//Calcul des determinants
 				int cas1 = (1 + delta_i)/2;
 				int cas2 = (1 - delta_i)/2;
@@ -282,23 +288,25 @@ public class Buffer {
 				int i_transfert = cas1 * (taille_buffer_visible - 1 ); 
 
 				for ( int j = 0; j < taille_buffer_visible; j++ ){
+					System.out.println("Mvmt horizontal, A detacher : "+i_detach+"/"+j);
+					
 					//Detachement des SuperBG qui sortent de la zone visible
 					buffer_visible.get(i_detach).get(j).sbg.detach();
 					
 					//Re-indexation des SuperBG à conserver
 					for ( int i = cas2 * ( taille_buffer_visible - 1 ) ; i*delta_i <= cas1*(taille_buffer_visible-2)+ cas2*(-1) ; i+=delta_i){
-				
+						System.out.println("\tRe-indexation : "+(i+delta_i)+"/"+j+" -> "+i+"/"+j);
 						buffer_visible.get(i).set(j, buffer_visible.get(i+delta_i).get(j));		
-				
 					}
 					
 					//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
+					System.out.println("A attacher : "+i_transfert+"/"+j);
 					buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j, this.buffer_memoire));				
 				}
 				
 			}
 			if (/* delta_i == 0 &&*/ delta_j != 0){
-				
+				this.centre_buffer_visible_j+=delta_j;
 				//Calcul des determinants
 				int cas3 = (1 + delta_j )/2;
 				int cas4 = (1 - delta_j )/2;
@@ -314,12 +322,13 @@ public class Buffer {
 					
 					//Re-indexation des SuperBG à conserver
 					for (int j = cas4 * ( taille_buffer_visible - 1 ) ; j*delta_j <= cas3 *(taille_buffer_visible-2)+cas4*(-1); j+=delta_j){
-						
+						System.out.println("\tRe-indexation : "+i+"/"+(j+delta_j)+" -> "+i+"/"+j);
 						buffer_visible.get(i).set(j, buffer_visible.get(i).get(j+delta_j));		
 						
 					}
 					
 					//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
+					System.out.println("A attacher : "+i+"/"+j_transfert);
 					buffer_visible.get(i).set(j_transfert, copieAttache_SuperBG(i, j_transfert,this.buffer_memoire));
 				}
 				
@@ -370,12 +379,21 @@ public class Buffer {
 				*/
 			}
 			
-			int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
+//			int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 			
-			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)==3|| Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)==3){
+			
+			//Rafraichissement du buffer
+			
+			//Test si procesus de rechargement en cours
+			if (t != null){
+				//si le buffer est en cours de mise à jour; empêche le rechargement
+				if (t.isAlive()){return;}
+			}
 
-				Thread t = new Thread(new Runnable() {
-					
+				
+			if(Math.abs(centre_buffer_visible_i-centre_buffer_memoire_i)==3|| Math.abs(centre_buffer_visible_j-centre_buffer_memoire_j)==3){
+				
+				 t = new Thread(new Runnable() {
 					@Override
 					public void run() {
 						// TODO Auto-generated method stub
@@ -388,7 +406,11 @@ public class Buffer {
 
 					}
 				});
+				System.out.println("etat ante rechargement: "+t.getState());
+
 				t.start();
+				System.out.println(t.getState());
+
 			}
 		}
 			
@@ -402,10 +424,11 @@ public class Buffer {
 				int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 				int i_memoire = i + ecart + centre_buffer_visible_i - centre_buffer_memoire_i;
 				int j_memoire = j + ecart + centre_buffer_visible_j - centre_buffer_memoire_j;	
-				
+				System.out.println("etat avant copi: "+buffmem.get(i_memoire).get(j_memoire).sbg.isLive()+" "+buffmem.get(i_memoire).get(j_memoire).sbg);
 				SuperBG copie_sbg = new SuperBG(buffmem.get(i_memoire).get(j_memoire));
 				tg.addChild(copie_sbg.sbg);
-				
+				System.out.println("Etat : "+copie_sbg.sbg.isLive()+" "+copie_sbg.sbg);
+
 				return copie_sbg;
 			}
 			

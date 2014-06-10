@@ -175,6 +175,8 @@ public class World extends JFrame {
 
 		univers.addBranchGraph(racine); // Ajout de l'univers e la racine
 										// graphique
+		
+		ltn.getView().moveView(univers, ltn.getView().getEye(), ltn.getView().getAt(), ltn.getView().getUp() );
 		setVisible(true);
 		System.out.println("Temps de création de la fenêtre : "+(System.currentTimeMillis()-t));
 		
@@ -238,18 +240,26 @@ public class World extends JFrame {
 	 */
 	public double GetZMNTPlan(double x, double y) {
 		
+		
 		int i = (int) ((x - Tuile.Xmin)/ Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin)/ Tuile.DY);
 		
-		int delta_i = i - buffer.centre_buffer_memoire_i;
-		int delta_j = j - buffer.centre_buffer_memoire_j;
+		int delta_i = i - buffer.centre_buffer_memoire_i ;
+		int delta_j = j - buffer.centre_buffer_memoire_j ;
+
+		if (Math.abs(delta_i) > buffer.taille_buffer_memoire/2  || Math.abs(delta_j) > buffer.taille_buffer_memoire/2){
+			//out si on cherche une valeur non disponible
+			return 0;
+		}
 		
-		int i_mem = (buffer.taille_buffer_memoire/2) + delta_i;
-		int j_mem = (buffer.taille_buffer_memoire/2) + delta_j;
 		
-		SuperBG sbg = buffer.buffer_memoire.get(i_mem).get(j_mem);
-		Tuile t = (Tuile) sbg.tuile;
-		System.out.println(t);
+		int i_mem = ( buffer.taille_buffer_memoire - 1 )/2  + delta_i;
+		int j_mem = ( buffer.taille_buffer_memoire - 1 )/2  + delta_j;
+		
+		
+		SuperBG sbg1 = buffer.buffer_memoire.get(i_mem).get(j_mem);
+		Tuile t =  sbg1.tuile;
+		//System.out.println(t);
 		return t.mnt.altitude(x, y);
 
 	}
@@ -353,6 +363,9 @@ public class World extends JFrame {
 		
 		if(buffer==null){return;}
 		
+		setTuileCourante(x, y);
+
+		
 //		System.out.println("setT");
 //		System.out.println(x+" "+y);
 		int i = (int) ((x - Tuile.Xmin) / Tuile.DX);
@@ -366,7 +379,6 @@ public class World extends JFrame {
 			//la camera n'a pas change de tuile
 			return;
 		}
-		
 		buffer.rafraichissement_visible(delta_i, delta_j);
 		
 	}
@@ -456,8 +468,11 @@ public class World extends JFrame {
 			tabobj[i] = new Objet3d(nbobj, listeobj[i][0]);
 		}// endfor(i)
 		
+
+		int i_init = (int) ((948000.0 - Tuile.Xmin)/ Tuile.DX);
+		int j_init = (int) ((6532000.0 - Tuile.Ymin)/ Tuile.DY);
 		//Initialisation du buffer
-		buffer = new Buffer(25, 7, 32, 19, transform);
+		buffer = new Buffer(25, 5, i_init , j_init, transform);
 		
 		System.out.println("Initialisation buffer terminée !!!");
 
@@ -917,6 +932,25 @@ public class World extends JFrame {
 	}
 	
 	
+	public void setTuileCourante(double x, double y){
+		
+		System.out.println("setTuileCourante");
+		int i = (int) ((x - Tuile.Xmin)/ Tuile.DX);
+		int j = (int) ((y - Tuile.Ymin)/ Tuile.DY);
+		
+		int delta_i = buffer.centre_buffer_memoire_i - i;
+		int delta_j = buffer.centre_buffer_memoire_j - j;
+
+			
+		int i_mem = (int) ( ( buffer.taille_buffer_memoire - 1 )/2 )  + delta_i;
+		int j_mem = (int) ( ( buffer.taille_buffer_memoire - 1 )/2 )  + delta_j;
+		
+		
+		SuperBG sbg1 = buffer.buffer_memoire.get(i_mem).get(j_mem);
+		tuileCourante =  sbg1.tuile;
+
+		
+	}
 	
 	
 }

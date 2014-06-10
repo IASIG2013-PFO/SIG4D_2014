@@ -31,6 +31,8 @@ public class SuperBG {
 		}
 		
 		this.tuile = tuile;
+		//on conserve uniquement le mnt
+		this.tuile.ortho = null;
 		
 		this.objets = new BranchGroup();
 		
@@ -56,7 +58,8 @@ public class SuperBG {
 	public SuperBG(SuperBG s){
 		this.mnt_plaque = s.mnt_plaque;
 		this.objets = s.objets;
-		this.sbg = s.sbg;
+		this.sbg = (BranchGroup) s.sbg.cloneTree();
+		this.tuile = s.tuile;
 	}
 
 }

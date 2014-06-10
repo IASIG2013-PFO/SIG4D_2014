@@ -790,6 +790,10 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		//double Ymax = world.getTuileCourante().Ymax;
 		//double Ymin = world.getTuileCourante().Ymin;
 		
+		System.out.println("tuile courante " + this.getWorld().getTuileCourante());
+		System.out.println("mnt de la tuile " + this.getWorld().getTuileCourante().getMNT());
+
+		
 		double Xmean = this.getWorld().getTuileCourante().getMNT().getXmean();
 		double Ymean = this.getWorld().getTuileCourante().getMNT().getYmean();
 		//-- TEST

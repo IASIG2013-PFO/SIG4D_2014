@@ -1,5 +1,7 @@
 package dao.user;
 
+import iasig.mobile.view.Tuile;
+
 import org.postgis.PGgeometry;
 import org.postgis.Point;
 
@@ -48,7 +50,7 @@ public class Lampadaire {
 					this.geom = geom;
 					this.centroid = centroid;
 					Point pt = (Point)centroid.getGeometry();
-//TODO envoyer les coordonnées du coin de l'univers proprement
+//TODO envoyer les coordonnï¿½es du coin de l'univers proprement
 					int x0=916000;
 					int y0=6513000;
 					int interval_de_maille = 1000;
@@ -64,13 +66,11 @@ public class Lampadaire {
 					this.type = type;
 					this.geom = geom;
 					this.centroid = centroid;
+					
 					Point pt = (Point)centroid.getGeometry();
-//TODO envoyer les coordonnées du coin de l'univers proprement
-					int x0=916000;
-					int y0=6513000;
-					int interval_de_maille = 1000;
-					this.maillei = (int) (((int)pt.x-x0)/interval_de_maille); 
-					this.maillej = (int) (((int)pt.y-y0)/interval_de_maille); 
+			
+					this.maillei = (int) ((pt.x-Tuile.Xmin)/Tuile.DX); 
+					this.maillej = (int) ((pt.y-Tuile.Ymin)/Tuile.DY); 
 				}
 
 	

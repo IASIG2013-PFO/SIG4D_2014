@@ -396,10 +396,10 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
 		int demi_taille_buffer= obj.taille_buffer_memoire/2;
 		//ecriture du Polygone de requête selon paramètre de generation
 		//1-recuperation des mailles extremes de l'espace à mettre en memoire
-		int mailleMax_i = maille_observateur_i +  demi_taille_buffer ;
-		int mailleMin_i = maille_observateur_i -  demi_taille_buffer ;
-		int mailleMax_j = maille_observateur_j +  demi_taille_buffer ;
-		int mailleMin_j = maille_observateur_j -  demi_taille_buffer ;
+		int mailleMax_i = maille_observateur_i +  demi_taille_buffer - 1 ;
+		int mailleMin_i = maille_observateur_i -  demi_taille_buffer + 1 ;
+		int mailleMax_j = maille_observateur_j +  demi_taille_buffer - 1 ;
+		int mailleMin_j = maille_observateur_j -  demi_taille_buffer + 1 ;
 		
 		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
 		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
@@ -431,6 +431,7 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
         	Lampadaire lamp = new Lampadaire();
         	Arbre arbre = new Arbre();
         	ObjetPonctuel objet_ponctuel = new ObjetPonctuel();
+        	
        	 System.out.println("parcours du resultSet");
 
      while(result.next()){
