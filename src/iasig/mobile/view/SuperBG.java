@@ -13,6 +13,7 @@ public class SuperBG {
 	public BranchGroup sbg;
 	public Shape3D mnt_plaque;
 	public BranchGroup objets;
+	public BranchGroup bati;
 	public Tuile tuile;
 	
 	/**
@@ -21,7 +22,7 @@ public class SuperBG {
 	 * @param args
 	 * @throws IOException 
 	 */
-	public SuperBG(Tuile tuile, ArrayList<Object> vecteur_objet) throws IOException {
+	public SuperBG(Tuile tuile, ArrayList<Object> vecteur_objet, ArrayList<Batiment> vecteur_bati) throws IOException {
 		
 		if(tuile!=null){
 			this.mnt_plaque=tuile.draw(World.WITHORTHO);
@@ -33,8 +34,11 @@ public class SuperBG {
 		this.tuile = tuile;
 		
 		this.objets = new BranchGroup();
-		
 		Objet3d.dessin_obj_vecteur(this.objets, World.tabobj[2].pieces, vecteur_objet);
+
+		this.bati = new BranchGroup();
+		Batiment.draw(this.bati, vecteur_bati);
+		
 		
 		sbg = new BranchGroup();
 		
@@ -45,6 +49,7 @@ public class SuperBG {
 		
 		this.sbg.addChild(mnt_plaque);
 		this.sbg.addChild(objets);
+		this.sbg.addChild(bati);
 
 	}
 	
@@ -56,6 +61,7 @@ public class SuperBG {
 	public SuperBG(SuperBG s){
 		this.mnt_plaque = (Shape3D) s.mnt_plaque.cloneTree();
 		this.objets = (BranchGroup) s.objets.cloneTree();
+		this.bati = (BranchGroup) s.bati.cloneTree();
 		this.sbg = (BranchGroup) s.sbg.cloneTree();
 		this.tuile = s.tuile;
 	}

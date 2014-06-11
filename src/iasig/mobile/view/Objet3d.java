@@ -261,6 +261,8 @@ public class Objet3d {
 				//vecteur d'objets ponctuels
 				ObjetPonctuel objpt = new ObjetPonctuel();
 				
+				//System.out.println("objet: "+vect.get(j).getClass());
+
 				if (vect.get(j) instanceof Lampadaire) {
 					Lampadaire obj = (Lampadaire)(vect.get(j));
 		//			System.out.println("lamp: "+ obj.getX1()+"  "+  obj.getY1()+"   "+ obj.getZ1());

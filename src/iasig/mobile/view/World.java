@@ -443,7 +443,7 @@ import com.sun.j3d.utils.universe.Viewer;
 		 * attacher e la racine.
 		 **/
 
-		// creation du BranchGroup principal
+		//Creation du BranchGroup principal
 		BranchGroup bg = new BranchGroup();
 
 		// Creation du TransformGroup principal
@@ -470,7 +470,8 @@ import com.sun.j3d.utils.universe.Viewer;
 		int j_init = (int) ((6532000.0 - Tuile.Ymin)/ Tuile.DY);
 		//Initialisation du buffer
 		buffer = new Buffer(25, 5, i_init , j_init, transform, this);
-		
+		//buffer = new Buffer(50, 10, i_init , j_init, transform, this);
+
 		System.out.println("Initialisation buffer terminée !!!");
 
 

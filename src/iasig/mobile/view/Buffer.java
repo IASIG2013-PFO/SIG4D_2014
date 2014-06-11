@@ -7,9 +7,7 @@ import iasig.dao.user.Maison;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Vector;
 
-import javax.media.j3d.BranchGroup;
 import javax.media.j3d.TransformGroup;
 
 public class Buffer {
@@ -22,6 +20,12 @@ public class Buffer {
 	public int marge;
 	//le tread de rechargement du buffer
 	Thread t;
+	Thread t_select;
+	Thread t_bati;
+	Thread t_tuile;
+	
+	Thread t_buff_aux;
+	Thread t_swap;
 	
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
@@ -49,9 +53,11 @@ public class Buffer {
 	 */
 	public ArrayList<ArrayList<ArrayList<Object>>>buffer_objet;
 	
+	public ArrayList<ArrayList<ArrayList<Batiment>>>buffer_bati;
+
 	public ArrayList<ArrayList<Tuile>> buffer_tuile;
 	
-	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int centre_i, int centre_j, TransformGroup tg, World world ) throws IOException {
+	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int centre_i, int centre_j, TransformGroup tg, World world ) throws IOException  {
 		
 		this.centre_buffer_auxiliaire_i=centre_i;
 		this.centre_buffer_auxiliaire_j=centre_j;
@@ -93,12 +99,15 @@ public class Buffer {
 		}
 		
 		buffer_objet = new ArrayList<ArrayList<ArrayList<Object>>>();
+		buffer_bati =  new ArrayList<ArrayList<ArrayList<Batiment>>>();
 		
 		for (int i = 0; i < taille_buffer_memoire; i++) {
 			buffer_objet.add(new ArrayList<ArrayList<Object>>());
+			buffer_bati.add(new ArrayList<ArrayList<Batiment>>());
 			
 			for (int j = 0; j < taille_buffer_memoire; j++) {
 				buffer_objet.get(i).add(new ArrayList<Object>());
+				buffer_bati.get(i).add(new ArrayList<Batiment>());
 			}
 		}
 		
@@ -112,18 +121,75 @@ public class Buffer {
 		}
 		//Fin initialisation
 		
-		//Ajout des Objets
-		double time = System.currentTimeMillis();
-		GenericDAO.selection_geographique_buffer(this);
-		System.out.println("Temps de selection des objets : "+(System.currentTimeMillis()-time));
 
-		//Ajout des Tuiles
-		time = System.currentTimeMillis();
-		remplissage_Buffer_Tuile();
-		System.out.println("Temps de selection des tuiles : "+(System.currentTimeMillis()-time));
+		
+		//Thread Ajout des Objets
+		
+		 t_select = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				selection_Objet();
+			}
+		 });
+		 
+		//Thread Ajout du bati
+		 
+		 t_bati = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					selection_Bati();
+				}
+			 });
+		 
+		//Thread Ajout du tuilage
+
+		 t_tuile = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						remplissage_Buffer_Tuile();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			 });
+		 
+		double time = System.currentTimeMillis();
+		
+		t_select.start();
+		t_bati.start();
+		t_tuile.start();
+		
+		
+		//Attendre completion des threads de selections BDD
+		//avant MAJ du buffer auxilliaire
+		try {
+			t_select.join();
+			t_bati.join();
+			t_tuile.join();
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Temps des selections d'objets (tuile/bati/objet) : "+(System.currentTimeMillis()-time));
+
+		//Fin Join(); thread terminated
+
+
+		
+//		//Selection d'objets sans thread
+//		//selection des objets
+//		GenericDAO.selection_geographique_buffer(this);
+//		System.out.println("Temps de selection des objets : "+(System.currentTimeMillis()-time));
+//		//Ajout des Tuiles
+//		time = System.currentTimeMillis();
+//		remplissage_Buffer_Tuile();
+//		System.out.println("Temps de selection des tuiles : "+(System.currentTimeMillis()-time));
 
 		//remplissage du Buffer auxiliaire
-		//initialisation de son propre buufer auxiliaire
+		//initialisation de son propre buffer auxiliaire
 		time = System.currentTimeMillis();
 		remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
 		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-time));
@@ -172,8 +238,35 @@ public class Buffer {
 			deltaj = ((Arbre) obj).getMaille_j() - this.centre_buffer_auxiliaire_j;
 
 		}
+	
 		
 		buffer_objet.get(demi_taille_buffer + deltai ).get(demi_taille_buffer + deltaj ).add(obj);
+	
+	}
+	
+	
+	/**
+	 * Permet d'ajouter un objet 
+	 * Recupere la maille de rattachement et calcul de la position relative par rapport 
+	 * aux coordonnees de la maille centrale du buffer
+	 * Insertion à l'index correspondant dans le vecteur de vecteur selon typage!
+	 * @param obj Un objet
+	 */
+	public void AjoutBati(Batiment obj) {
+		
+		int demi_taille_buffer= this.taille_buffer_memoire/2;
+		int deltai = 0;
+		int deltaj = 0;
+		
+		
+		
+		if(obj instanceof Batiment){
+			deltai = ((Batiment) obj).getMaille_i() - this.centre_buffer_auxiliaire_i;
+			deltaj = ((Batiment) obj).getMaille_j() - this.centre_buffer_auxiliaire_j;
+
+		}
+		
+		buffer_bati.get(demi_taille_buffer + deltai ).get(demi_taille_buffer + deltaj ).add(obj);
 	
 	}
 	
@@ -217,11 +310,12 @@ public class Buffer {
 			
 				buffaux.get(i).set(j, new SuperBG(buffer_tuile.get(i).get(j),
 			
-						buffer_objet.get(i).get(j)));
+						buffer_objet.get(i).get(j), buffer_bati.get(i).get(j) ));
 				
 				//Liberation mémoire
 				buffer_tuile.get(i).set(j, null);
 				buffer_objet.get(i).set(j, new ArrayList<Object>());
+				buffer_bati.get(i).set(j, new ArrayList<Batiment>());
 				
 			}
 		}
@@ -412,14 +506,87 @@ public class Buffer {
 				centre_buffer_auxiliaire_j=centre_buffer_visible_j;
 
 				
-				//Ajout des Objets
-				GenericDAO.selection_geographique_buffer(this);
-				System.out.println("fin rafraichissement des objets");
-				//Ajout des Tuiles
-				remplissage_Buffer_Tuile();
-				System.out.println("fin rafraichissement des tuiles");
+//				//Ajout des Objets
+//				//GenericDAO.selection_geographique_buffer(this);
+//				
+//				 t_select = new Thread(new Runnable() {
+//					@Override
+//					public void run() {
+//						selection_Objet();
+//					}
+//				});
+//				 
+//				 
+//				t_select.start();
+//				
+//				
+//				
+//				
+//				
+//				System.out.println("fin rafraichissement des objets");
+//				//Ajout des Tuiles
+//				remplissage_Buffer_Tuile();
+//				System.out.println("fin rafraichissement des tuiles");
+				
+				
+				//Thread Ajout des Objets
+				
+				 t_select = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						selection_Objet();
+					}
+				 });
+				 
+				//Thread Ajout du bati
+				 
+				 t_bati = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							selection_Bati();
+						}
+					 });
+				 
+				//Thread Ajout du tuilage
 
+				 t_tuile = new Thread(new Runnable() {
+						@Override
+						public void run() {
+							try {
+								remplissage_Buffer_Tuile();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					 });
+				 
+				double time = System.currentTimeMillis();
+				
+				t_select.start();
+				t_bati.start();
+				t_tuile.start();
+				
+				
+				//Attendre completion des threads de selections BDD
+				//avant MAJ du buffer auxilliaire
+				try {
+					t_select.join();
+					t_bati.join();
+					t_tuile.join();
+
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				System.out.println("Temps des selections d'objets (tuile/bati/objet) : "+(System.currentTimeMillis()-time));
+
+				//Fin Join(); thread terminated
+
+				
+				
 				//remplissage du Buffer auxiliaire
+				//if (t_select.isAlive() == false ){
 				remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
 				//transfert du contenu du buffer auxiliaire vers le buffer mémoire
 		
@@ -428,6 +595,21 @@ public class Buffer {
 				System.out.println("XXXXXXXXXXXXXXXXXXXXXFIN Rechargement BUFFERXXXXXXXXXXXXXXXXXXXXXXXX");
 				
 			}
+				
+
+			
+			public void selection_Objet(){
+				//Ajout des Objets
+				GenericDAO.selection_geographique_buffer(this);
+				System.out.println("fin rafraichissement des objets");
+			}
+			
+			public void selection_Bati(){
+				//Ajout des Objets
+				GenericDAO.selection_geographique_bati_buffer(this);
+				System.out.println("fin rafraichissement du bati");
+			}
+			
 			
 	
 		
