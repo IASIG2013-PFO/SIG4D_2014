@@ -3,7 +3,11 @@ package iasig.dao.user;
 import org.postgis.MultiPolygon;
 import org.postgis.PGgeometry;
 
-
+/**
+ * Classe prototype définissant un élement de bâti indifférencié
+ * Obsolète - le constructeur des instances du bati est déplacé vers iasig.mobile.view
+ * Les attributs sont un extrait avec les champs de la BDD de la table du bâti
+ */
 public class Bati {
 
 	private String id;

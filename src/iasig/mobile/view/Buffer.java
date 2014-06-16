@@ -5,10 +5,14 @@ import iasig.dao.user.Arbre;
 import iasig.dao.user.Lampadaire;
 import iasig.dao.user.Maison;
 
+import java.sql.SQLException;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.TransformGroup;
+
+import org.postgis.PGgeometry;
 
 public class Buffer {
 
@@ -26,6 +30,12 @@ public class Buffer {
 	
 	Thread t_buff_aux;
 	Thread t_swap;
+	
+	private int taille_default_buffer = 60;
+	
+	public PGgeometry polygone_bufferB;
+	public PGgeometry polygone_bufferA;
+
 	
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
@@ -59,10 +69,11 @@ public class Buffer {
 	
 	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int centre_i, int centre_j, TransformGroup tg, World world ) throws IOException  {
 		
+		this.polygone_bufferB = dummy_polygon();
+		
 		this.centre_buffer_auxiliaire_i=centre_i;
 		this.centre_buffer_auxiliaire_j=centre_j;
 
-		
 		this.centre_buffer_visible_i=centre_i;
 		this.centre_buffer_visible_j=centre_j;
 		
@@ -80,20 +91,20 @@ public class Buffer {
 		//Initialisation des Buffers (matrices) à vide		
 		buffer_memoire = new ArrayList<ArrayList<SuperBG>>();
 		buffer_auxiliaire = new ArrayList<ArrayList<SuperBG>>();
-		for (int i = 0; i < taille_buffer_memoire; i++) {
+		for (int i = 0; i < taille_default_buffer; i++) {
 			buffer_memoire.add(new ArrayList<SuperBG>());
 			buffer_auxiliaire.add(new ArrayList<SuperBG>());
-			for (int j = 0; j < taille_buffer_memoire; j++) {
+			for (int j = 0; j < taille_default_buffer; j++) {
 				buffer_memoire.get(i).add(null);
 				buffer_auxiliaire.get(i).add(null);
 			}
 		}
 
 		buffer_tuile = new ArrayList<ArrayList<Tuile>>();
-		for (int i = 0; i < taille_buffer_memoire; i++) {
+		for (int i = 0; i < taille_default_buffer; i++) {
 			buffer_tuile.add(new ArrayList<Tuile>());
 			
-			for (int j = 0; j < taille_buffer_memoire; j++) {
+			for (int j = 0; j < taille_default_buffer; j++) {
 				buffer_tuile.get(i).add(null);
 			}
 		}
@@ -101,21 +112,21 @@ public class Buffer {
 		buffer_objet = new ArrayList<ArrayList<ArrayList<Object>>>();
 		buffer_bati =  new ArrayList<ArrayList<ArrayList<Batiment>>>();
 		
-		for (int i = 0; i < taille_buffer_memoire; i++) {
+		for (int i = 0; i < taille_default_buffer; i++) {
 			buffer_objet.add(new ArrayList<ArrayList<Object>>());
 			buffer_bati.add(new ArrayList<ArrayList<Batiment>>());
 			
-			for (int j = 0; j < taille_buffer_memoire; j++) {
+			for (int j = 0; j < taille_default_buffer; j++) {
 				buffer_objet.get(i).add(new ArrayList<Object>());
 				buffer_bati.get(i).add(new ArrayList<Batiment>());
 			}
 		}
 		
 		buffer_visible = new ArrayList<ArrayList<SuperBG>>();
-		for (int i = 0; i < taille_buffer_visible; i++) {
+		for (int i = 0; i < taille_default_buffer; i++) {
 			buffer_visible.add(new ArrayList<SuperBG>());
 			
-			for (int j = 0; j < this.taille_buffer_visible; j++) {
+			for (int j = 0; j < this.taille_default_buffer; j++) {
 				buffer_visible.get(i).add(null);
 			}
 		}
@@ -191,7 +202,7 @@ public class Buffer {
 		//remplissage du Buffer auxiliaire
 		//initialisation de son propre buffer auxiliaire
 		time = System.currentTimeMillis();
-		remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
+		remplissage_Buffer_Auxiliaire_init();
 		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-time));
 
 		//transfert du contenu du buffer auxiliaire vers le buffer mémoire
@@ -287,28 +298,33 @@ public class Buffer {
 					int deltaj = j - demi_taille_buffer;
 					int j_terrain = this.centre_buffer_auxiliaire_j +  deltaj;
 					
-					if(i_terrain>=0 && i_terrain<=Tuile.PX-1 && j_terrain>=0 && j_terrain<=Tuile.PY ){
-						buffer_tuile.get(i).set(j,new Tuile(i_terrain, j_terrain, Tuile.R40, Tuile.DB) );
+					int i_memoire = demi_taille_buffer + i_terrain - centre_buffer_memoire_i;
+					int j_memoire = demi_taille_buffer + j_terrain - centre_buffer_memoire_j;
+					
+					if(i_memoire>=0 && i_memoire <taille_buffer_memoire && j_memoire>=0 && j_memoire <taille_buffer_memoire){
+						buffer_tuile.get(i).set(j, null);
 					}
 					else{
-						buffer_tuile.get(i).set(j,null);
+						buffer_tuile.get(i).set(j,new Tuile(i_terrain, j_terrain, Tuile.R10));
 					}
-					
+
 				}
 		}
 			
 	}
 	
+	
+	
 	/**
 	 * Permet de remplir le Buffer Memoire de Tuiles auxiliaire
 	 * @throws IOException 
 	 */
-	public void remplissage_Buffer_Auxiliaire(ArrayList<ArrayList<SuperBG>> buffaux) throws IOException{
+	public void remplissage_Buffer_Auxiliaire_init() throws IOException{
 		
 		for (int i = 0; i< taille_buffer_memoire; i++){
 			for(int j = 0; j< taille_buffer_memoire; j++){
 			
-				buffaux.get(i).set(j, new SuperBG(buffer_tuile.get(i).get(j),
+				buffer_auxiliaire.get(i).set(j, new SuperBG(buffer_tuile.get(i).get(j),
 			
 						buffer_objet.get(i).get(j), buffer_bati.get(i).get(j) ));
 				
@@ -320,6 +336,50 @@ public class Buffer {
 			}
 		}
 		
+	}
+
+	
+	
+	
+	/**
+	 * Permet de remplir le Buffer Memoire de Tuiles auxiliaire
+	 * @throws IOException 
+	 */
+public void remplissage_Buffer_Auxiliaire() throws IOException{
+		
+		int i_terrain,j_terrain;
+		int i_memoire, j_memoire;
+		int demi_taille_buffer = taille_buffer_memoire/2;
+		
+		for (int i = 0; i< taille_buffer_memoire; i++){
+			for(int j = 0; j< taille_buffer_memoire; j++){
+				
+				if(buffer_tuile.get(i).get(j)==null){ //La case est à remplir à partir du buffer mémoire
+//					System.out.println(i +" "+ j +" "+ centre_buffer_auxiliaire_i+" "+centre_buffer_auxiliaire_j);
+//					System.out.println(centre_buffer_memoire_i+" "+centre_buffer_memoire_j);
+					i_terrain = centre_buffer_auxiliaire_i + i -demi_taille_buffer;
+					j_terrain = centre_buffer_auxiliaire_j + j -demi_taille_buffer;
+//					System.out.println("Indice terrain: "+i_terrain +" "+ j_terrain);
+
+					i_memoire = demi_taille_buffer + i_terrain - centre_buffer_memoire_i;
+					j_memoire = demi_taille_buffer + j_terrain - centre_buffer_memoire_j;
+					
+//					System.out.println("Indice memoire: "+i_memoire +" "+ j_memoire);
+					
+					buffer_auxiliaire.get(i).set(j, buffer_memoire.get(i_memoire).get(j_memoire));
+				}
+				else{
+					buffer_auxiliaire.get(i).set(j, new SuperBG(buffer_tuile.get(i).get(j),
+							buffer_objet.get(i).get(j),
+							buffer_bati.get(i).get(j) ));
+
+					//Liberation mÃ©moire
+					buffer_tuile.get(i).set(j, null);
+					buffer_objet.get(i).set(j, new ArrayList<Object>());
+					buffer_bati.get(i).set(j, new ArrayList<Batiment>());
+				}
+			}
+		}
 	}
 	
 	public void swap(){
@@ -346,6 +406,8 @@ public class Buffer {
 		world.getCanvas().addMouseWheelListener(world.getListeners());
 		world.getCanvas().addKeyListener(world.getListeners());
 		
+		//MAJ du polygone d'emprise
+		this.polygone_bufferB = this.polygone_bufferA;
 		
 	}
 	
@@ -396,17 +458,22 @@ public class Buffer {
 					for ( int j = 0; j < taille_buffer_visible; j++ ){
 						//System.out.println("Mvmt horizontal, A detacher : "+i_detach+"/"+j);
 						
-						//Detachement des SuperBG qui sortent de la zone visible
-						buffer_visible.get(i_detach).get(j).sbg.detach();
 						
+						//Detachement des SuperBG qui sortent de la zone visible
+						
+						buffer_visible.get(i_detach).get(j).sbg.removeAllChildren();
+						buffer_visible.get(i_detach).get(j).sbg.detach();
 						//Re-indexation des SuperBG à conserver
 						for ( int i = cas2 * ( taille_buffer_visible - 1 ) ; i*pas_i <= cas1*(taille_buffer_visible-2)+ cas2*(-1) ; i+=pas_i){
 							//System.out.println("\tRe-indexation : "+(i+delta_i)+"/"+j+" -> "+i+"/"+j);
-							buffer_visible.get(i).set(j, buffer_visible.get(i+pas_i).get(j));		
+							
+							buffer_visible.get(i).set(j, buffer_visible.get(i+pas_i).get(j));
+
 						}
 						
 						//Copie et attachement de nouveaux SuperBG à partir du buffer_memoire
 						//System.out.println("A attacher : "+i_transfert+"/"+j);
+						
 						buffer_visible.get(i_transfert).set(j, copieAttache_SuperBG(i_transfert, j, this.buffer_memoire));				
 					}
 				}
@@ -490,10 +557,12 @@ public class Buffer {
 				int ecart = (taille_buffer_memoire - taille_buffer_visible ) / 2 ;
 				int i_memoire = i + ecart + centre_buffer_visible_i - centre_buffer_memoire_i;
 				int j_memoire = j + ecart + centre_buffer_visible_j - centre_buffer_memoire_j;	
-				//System.out.println("etat avant copi: "+buffmem.get(i_memoire).get(j_memoire).sbg.isLive()+" "+buffmem.get(i_memoire).get(j_memoire).sbg);
+				
 				SuperBG copie_sbg = new SuperBG(buffmem.get(i_memoire).get(j_memoire));
+				
+				copie_sbg.attachAllComponents();
+			
 				tg.addChild(copie_sbg.sbg);
-				//System.out.println("Etat : "+copie_sbg.sbg.isLive()+" "+copie_sbg.sbg);
 
 				return copie_sbg;
 			}
@@ -584,12 +653,9 @@ public class Buffer {
 				//Fin Join(); thread terminated
 
 				
-				
 				//remplissage du Buffer auxiliaire
-				//if (t_select.isAlive() == false ){
-				remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
+				remplissage_Buffer_Auxiliaire();
 				//transfert du contenu du buffer auxiliaire vers le buffer mémoire
-		
 				swap();
 
 				System.out.println("XXXXXXXXXXXXXXXXXXXXXFIN Rechargement BUFFERXXXXXXXXXXXXXXXXXXXXXXXX");
@@ -599,21 +665,79 @@ public class Buffer {
 
 			
 			public void selection_Objet(){
+						
+				//Calcul de l'emprise de la selection
+				this.polygone_bufferA = calcul_polygone();
 				//Ajout des Objets
 				GenericDAO.selection_geographique_buffer(this);
 				System.out.println("fin rafraichissement des objets");
 			}
 			
 			public void selection_Bati(){
+				
+				//Calcul de l'emprise de la selection
+				this.polygone_bufferA = calcul_polygone();
+
+				
 				//Ajout des Objets
 				GenericDAO.selection_geographique_bati_buffer(this);
 				System.out.println("fin rafraichissement du bati");
 			}
 			
 			
-	
+			public void Attache(BranchGroup bg, SuperBG sbg){
+
+				
+			}
 		
-		
+			public PGgeometry dummy_polygon(){
+				
+				String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+-666+" "+ -666+ ","+-666+" "+-999+","+ -999+" "+ -999+","+ -999+" "+ -666+","+ -666+" "+-666+"))";
+				PGgeometry polygone = null;
+				try {
+					polygone = new PGgeometry(Polygone);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				return polygone;			
+			}
 	
-	
+			
+			
+			
+			public PGgeometry calcul_polygone(){
+				//recuperation de la maille observateur
+				
+				int maille_observateur_i = this.centre_buffer_auxiliaire_i;
+				int maille_observateur_j = this.centre_buffer_auxiliaire_j;
+				
+				System.out.println(maille_observateur_i+" "+maille_observateur_j);
+
+				int demi_taille_buffer= this.taille_buffer_memoire/2;
+				//ecriture du Polygone de requête selon paramètre de generation
+				//1-recuperation des mailles extremes de l'espace à mettre en memoire
+				int mailleMax_i = maille_observateur_i +  demi_taille_buffer  ;
+				int mailleMin_i = maille_observateur_i -  demi_taille_buffer  ;
+				int mailleMax_j = maille_observateur_j +  demi_taille_buffer  ;
+				int mailleMin_j = maille_observateur_j -  demi_taille_buffer  ;
+				
+				int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
+				int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
+				int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
+				int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
+				
+				
+				String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
+				PGgeometry polygone = null;
+				try {
+					polygone = new PGgeometry(Polygone);
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return polygone;	
+				
+				
+			}
 }

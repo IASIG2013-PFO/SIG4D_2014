@@ -105,8 +105,10 @@ public class Batiment {
 		 for (int j = 0; j < vect.size(); j++) {
 		 
 			 	//cr�ation du BranchGroup Objet
+			 
 			   	BranchGroup bgObj = new BranchGroup ( ) ;
-				
+			   	bgObj.setCapability(BranchGroup.ALLOW_DETACH);
+			   	
 				//vecteur d'objets ponctuels
 				ObjetPonctuel objpt = new ObjetPonctuel();
 				
@@ -123,7 +125,10 @@ public class Batiment {
 //					shape3d.addGeometry(geometrie[k-1]);
 //				}
 				bgObj.addChild(shape3d);
+				bgObj.setName("BATI");
 				
+				
+				//DECOMMENTER POUR ATTACHER le BATI au chargement
 			    bg.addChild(bgObj);
 				
 		 

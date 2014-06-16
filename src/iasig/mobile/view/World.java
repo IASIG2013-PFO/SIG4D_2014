@@ -61,7 +61,6 @@ import com.sun.j3d.utils.universe.Viewer;
 	//private TransformGroup transformObjet;
 	//private TransformGroup transformMNT;
 	private TransformGroup tg2;
-	
 	private Canvas3D canvas3d;
 	
 	Buffer buffer;
@@ -78,6 +77,17 @@ import com.sun.j3d.utils.universe.Viewer;
 	static final Color3f Yellow = new Color3f(1.f,1.f,0.f);
 	static final Color3f Magenta = new Color3f(1.f,0.f,1.f);
 	static final Color3f Cyan = new Color3f(0.f,1.f,1.f);
+	
+	
+	/**********************Booleen affichage*********************/
+	static final Boolean Objet_attach = true;
+	static final Boolean Objet_detach = false;
+	
+	static final Boolean Bati_attach = true;
+	static final Boolean Bati_detach = false;
+	
+	static final Boolean Mnt_attach = true;
+	static final Boolean Mnt_detach = false;
 	
 	
 	/**
@@ -239,7 +249,6 @@ import com.sun.j3d.utils.universe.Viewer;
 	 */
 	public double GetZMNTPlan(double x, double y) {
 		
-		
 		int i = (int) ((x - Tuile.Xmin)/ Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin)/ Tuile.DY);
 		
@@ -357,7 +366,6 @@ import com.sun.j3d.utils.universe.Viewer;
 	}
 
 	public void CameraMovedTo(double x, double y) throws IOException {
-		
 		if(buffer==null){return;}
 		
 		setTuileCourante(x, y);
@@ -409,7 +417,6 @@ import com.sun.j3d.utils.universe.Viewer;
 	/****************************************************/
 
 	/***************** CHOIX DES OPTIONS ******************/
-	private boolean source = Tuile.DB;
 	private boolean orthophoto = WITHORTHO;
 	/****************************************************/
 
@@ -445,7 +452,7 @@ import com.sun.j3d.utils.universe.Viewer;
 
 		//Creation du BranchGroup principal
 		BranchGroup bg = new BranchGroup();
-
+		
 		// Creation du TransformGroup principal
 		TransformGroup transform = new TransformGroup();
 		transform.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);

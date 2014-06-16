@@ -12,7 +12,6 @@ import iasig.dao.user.Objet_Postgre;
 import iasig.dao.user.Raster_img_mnt;
 import iasig.mobile.view.Batiment;
 import iasig.mobile.view.Tuile;
-import iasig.mobile.view.World;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -22,8 +21,10 @@ import java.sql.SQLException;
 
 import javax.imageio.ImageIO;
 
-
-
+/**
+ * Classe Fournit les méthodes statiques dédiée pour lancer des requêtes géographiques sur les tables de la BDD
+ * Les attributs sont homogènes avec les champs de la BDD de la table des lampadaires
+ */
 public class GenericDAO extends DAO {
 
  
@@ -34,7 +35,7 @@ public class GenericDAO extends DAO {
 	}
 	
 	/**
-	 * Methode Statique pour l'initialisation du Buffer
+	 * Methode "legacy" - Methode Statique pour l'initialisation d'un Conteneur_objet - Obsolete
 	 */
 	public static void selection_geographique_init(Conteneur_objet obj, Float Xobs, Float Yobs, int interval_de_maille){
 		
@@ -169,7 +170,7 @@ public class GenericDAO extends DAO {
 		
 	}
 	/**
-	 * Methode Statique pour la MAJ globale du Buffer
+	 * Methode "legacy"  - Methode Statique pour la MAJ globale d'un Conteneur_objet - Obsolete
 	 * le Buffer ne recharge pas les objets swappes dans le buffer des objets visibles
 	 */
 	public static void selection_geographique(Conteneur_objet obj, Float Xobs, Float Yobs, int interval_de_maille){
@@ -179,9 +180,6 @@ public class GenericDAO extends DAO {
 			obj.vide_Objet_en_memoire();
 		
 			//recuperation de la maille observateur
-			//TODO ajouter False!!
-//			int maille_observateur_i = (int)(Xobs/interval_de_maille);
-//			int maille_observateur_j = (int)(Yobs/interval_de_maille);
 			int maille_observateur_i = (int)((Xobs-Tuile.Xmin)/Tuile.DX);
 			int maille_observateur_j = (int)((Yobs-Tuile.Ymin)/Tuile.DY);
 			
@@ -195,12 +193,12 @@ public class GenericDAO extends DAO {
 			int mailleMax_j = maille_observateur_j + obj.demi_espace_memoire_maille();
 			int mailleMin_j = maille_observateur_j - obj.demi_espace_memoire_maille();
 			
-			//Decommenter si tu veux le swap
-//			//2-Calcul de l'espace de swap ( zone du buffer correspondant à l'espace de "SWAP" du visible)
-//			int mailleSwapMax_i = maille_observateur_i + (int)obj.dimension_espace_visible/2;
-//			int mailleSwapMin_i = maille_observateur_i - (int)obj.dimension_espace_visible/2;
-//			int mailleSwapMax_j = maille_observateur_j + (int)obj.dimension_espace_visible/2;
-//			int mailleSwapMin_j = maille_observateur_j - (int)obj.dimension_espace_visible/2;	
+			
+			//2-Calcul de l'espace de swap ( zone du buffer correspondant à l'espace de "SWAP" du visible)
+			int mailleSwapMax_i = maille_observateur_i + (int)obj.dimension_espace_visible/2;
+			int mailleSwapMin_i = maille_observateur_i - (int)obj.dimension_espace_visible/2;
+			int mailleSwapMax_j = maille_observateur_j + (int)obj.dimension_espace_visible/2;
+			int mailleSwapMin_j = maille_observateur_j - (int)obj.dimension_espace_visible/2;	
 			
 			//3-passage en coordonnees geographiques - Extension Buffer
 			int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
@@ -208,19 +206,19 @@ public class GenericDAO extends DAO {
 			int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
 			int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
 
-			//Decommenter si tu veux le swap
-//			//4-passage en coordonnees geographiques - Extension Swap
-//			int Xswapmin = mailleSwapMin_i * interval_de_maille;
-//			int Yswapmin = mailleSwapMin_j * interval_de_maille;
-//			int Xswapmax = (mailleSwapMax_i +1) * interval_de_maille;
-//			int Yswapmax = (mailleSwapMax_j +1) * interval_de_maille;
-
-			//Decommenter si tu veux le swap
-//			String Polygone = "SRID=" + "4326" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+")"
-//					+ ",("+Xswapmin+" "+ Yswapmin+ ","+Xswapmax+" "+Yswapmin+","+ Xswapmax+" "+ Yswapmax+","+ Xswapmin+" "+ Yswapmax+","+ Xswapmin+" "+ Yswapmin +"))";
 			
-			//commenter si tu veux le swap
-			String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
+			//4-passage en coordonnees geographiques - Extension Swap
+			int Xswapmin = mailleSwapMin_i * interval_de_maille;
+			int Yswapmin = mailleSwapMin_j * interval_de_maille;
+			int Xswapmax = (mailleSwapMax_i +1) * interval_de_maille;
+			int Yswapmax = (mailleSwapMax_j +1) * interval_de_maille;
+
+			//Polygon a trou
+			String Polygone = "SRID=" + "4326" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+")"
+					+ ",("+Xswapmin+" "+ Yswapmin+ ","+Xswapmax+" "+Yswapmin+","+ Xswapmax+" "+ Yswapmax+","+ Xswapmin+" "+ Yswapmax+","+ Xswapmin+" "+ Yswapmin +"))";
+			
+//			//Polygon plein
+//			String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
 
 			PGgeometry polygone;
 			try {
@@ -231,14 +229,13 @@ public class GenericDAO extends DAO {
 		                                            ResultSet.TYPE_SCROLL_INSENSITIVE
 		                                         ).executeQuery(
 		                                        		
-		     //" SELECT *, ST_Centroid(geom) FROM maison2 WHERE ST_WITHIN(ST_Centroid(geom), ST_GeomFromText('POLYGON((2000 2000,8000 2000, 8000 8000, 2000 8000, 2000 2000))', 4326) )  ;" 
-		     //" SELECT *, ST_Centroid(centroid) FROM maison2 WHERE ST_WITHIN(ST_Centroid(centroid), ST_GeomFromText('"+polygone.getValue()+"', 4326) ) ;"
-		     //Multifoncteur - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
+		     
+		      //"Multifoncteur" - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
 		      " SELECT *, ST_CENTROID(geom) FROM generic_object1 WHERE ST_WITHIN(ST_CENTROID(geom), ST_GeomFromText('"+polygone.getValue()+"', 2154) ) ;"
 
 		                               );
 		        
-		        //Mise a disposition des conteneurs
+		        //Mise a disposition des conteneurs d'objet (instance vide)
 	        	Maison home1 = new Maison();
 	        	Lampadaire lamp = new Lampadaire();
 	        	Arbre arbre = new Arbre();
@@ -313,7 +310,10 @@ public class GenericDAO extends DAO {
 			    }
 		}
 	
-	
+	/**
+	 * Methode "legacy"  - Methode Statique pour la selection globale d'un Conteneur_objet - Obsolete
+	 * Cette methode est un prototype ayant servi pour la definition de la classe iasig.dao.OrthoDAO
+	 */
 	public static void selection_raster(Objet_Postgre<Raster_img_mnt> obj, int i, int j){
 		
 	    byte[] content = null;
@@ -341,7 +341,6 @@ public class GenericDAO extends DAO {
 
 			while(result.next()){
 				if(result.absolute(result.getRow()))
-				//System.out.println(result.getInt("maison_id"));
 					
 					content = result.getBytes("img");
                 	ByteArrayInputStream bis = new ByteArrayInputStream(content);
@@ -356,10 +355,7 @@ public class GenericDAO extends DAO {
 						raster_img_mnt = new Raster_img_mnt(
 		        					result.getInt("rid"),
 		        					image,i,j,"img",1
-//		        					result.getInt("I"),
-//		        					result.getInt("J"),
-//		        					result.getString("type_Raster_img_mnt"),
-//		        					result.getInt("Resolution")
+
 		        		);
 					}
 					else{
@@ -367,14 +363,9 @@ public class GenericDAO extends DAO {
 	        					result.getInt("rid"),
 	        					(PGgeometry)result.getObject("raster"),
 	        					i,j,"mnt",1
-//	        					result.getInt("I"),
-//	        					result.getInt("J"),
-//	        					result.getString("type_Raster_img_mnt"),
-//	        					result.getInt("Resolution")
+
 						);
 					}
-	        		//retourne adresses objets	
-//					System.out.print("Maison_id "+home1.get_ID()+" ");System.out.println("@ "+home1.toString());
 					obj.AjoutObjet(raster_img_mnt);
 					System.out.println("id_ortho "+obj.getElement(0).get_ID()+" ");
 	        	}
@@ -385,57 +376,67 @@ public class GenericDAO extends DAO {
 		
 	}
 
-	
-public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
+	/**
+	 * Methode Statique pour la selection globale des objets contenu dans la BDD
+	 * Arbres/Lampadaires/Maisons/....
+	 * Cette méthode est dédiée à l'interrogation de la vue matérialisée "generic_object" indexant 
+	 * les objets ponctuels au sein d'un table unique, indexée géographiquement (index GiST)
+	 * Les objets sont instanciés séquentiellement lors du parcours du resultat de la requete SQL
+	 * et sont distribués dans le Buffer, selon leur indexation au maillage "monde" 
+	 * ...
+	 * Cette méthode construit une requête géographique sur l'étendue des objets à selectionner
+	 * en se basant sur l'indexation géographique de la Base permise par l'extension POSTGIS de POSTGRESQL
+	 * @param obj, le buffer en cours d'utilisation
+	 */
+	public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
 		
-		//recuperation de la maille observateur
-	
-		int maille_observateur_i = obj.centre_buffer_auxiliaire_i;
-		int maille_observateur_j = obj.centre_buffer_auxiliaire_j;
-		
-		System.out.println(maille_observateur_i+" "+maille_observateur_j);
-
-		int demi_taille_buffer= obj.taille_buffer_memoire/2;
-		//ecriture du Polygone de requête selon paramètre de generation
-		//1-recuperation des mailles extremes de l'espace à mettre en memoire
-		int mailleMax_i = maille_observateur_i +  demi_taille_buffer - 1 ;
-		int mailleMin_i = maille_observateur_i -  demi_taille_buffer + 1 ;
-		int mailleMax_j = maille_observateur_j +  demi_taille_buffer - 1 ;
-		int mailleMin_j = maille_observateur_j -  demi_taille_buffer + 1 ;
-		
-		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
-		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
-		int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
-		int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
-		
-		
+//		//recuperation de la maille observateur
+//	
+//		int maille_observateur_i = obj.centre_buffer_auxiliaire_i;
+//		int maille_observateur_j = obj.centre_buffer_auxiliaire_j;
+//		
+//		System.out.println(maille_observateur_i+" "+maille_observateur_j);
+//
+//		int demi_taille_buffer= obj.taille_buffer_memoire/2;
+//		//ecriture du Polygone de requête selon paramètre de generation
+//		//1-recuperation des mailles extremes de l'espace à mettre en memoire
+//		int mailleMax_i = maille_observateur_i +  demi_taille_buffer - 1 ;
+//		int mailleMin_i = maille_observateur_i -  demi_taille_buffer + 1 ;
+//		int mailleMax_j = maille_observateur_j +  demi_taille_buffer - 1 ;
+//		int mailleMin_j = maille_observateur_j -  demi_taille_buffer + 1 ;
+//		
+//		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
+//		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
+//		int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
+//		int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
 		
 		
-		String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
-		PGgeometry polygone;
+		
+//		//Construction du polygone à partir des paramètres de taille du Buffer (taille memoire)
+//		String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
+//		PGgeometry polygone;
 		try {
-			polygone = new PGgeometry(Polygone);			
+//			polygone = new PGgeometry(Polygone);	
+			//connection statique à la BDD et envoi d'une requête géographiqe SQL compilée pour rapidité d'execution
 	        ResultSet result = connection_statique
 	                                .createStatement(
 	                                        	ResultSet.TYPE_SCROLL_INSENSITIVE, 
 	                                            ResultSet.TYPE_SCROLL_INSENSITIVE
 	                                         ).executeQuery(
-	                                        		
-	     //" SELECT * FROM maison2 WHERE ST_WITHIN(centroid, ST_GeomFromText('POLYGON((2000 2000,8000 2000, 8000 8000, 2000 8000, 2000 2000))', 4326) )  ;" 
-	     // " SELECT *, ST_CENTROID(geom) FROM maison2 WHERE ST_WITHIN(centroid, ST_GeomFromText('"+polygone.getValue()+"', 4326) ) ;"
 	      //Multifoncteur - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
-	      " SELECT *, ST_CENTROID(geom) FROM generic_object1 WHERE ST_WITHIN(ST_CENTROID(geom), ST_GeomFromText('"+polygone.getValue()+"', 2154) ) ;"
+	   //   " SELECT *, ST_CENTROID(geom) FROM generic_object1 WHERE ST_WITHIN(ST_CENTROID(geom), ST_Difference(ST_GeomFromText('"+/*polygone A; nouveau*/obj.polygone_bufferA.getValue()+"', 2154), ST_GeomFromText('"+/*polygone B; Ancien*/obj.polygone_bufferB.getValue()+"', 2154) )) ;"
+	      " SELECT *, ST_CENTROID(geom) FROM generic_object1 WHERE ST_WITHIN(ST_CENTROID(geom), ST_GeomFromText('"+/*polygone A; nouveau*/obj.polygone_bufferA.getValue()+"', 2154) ) ;"
 
 	                               );
 	        //System.out.println(polygone.getValue());
 	        
-	        //Mise a disposition des conteneurs
+	        //Mise a disposition des conteneurs d'objets
         	Maison home1 = new Maison();
         	Lampadaire lamp = new Lampadaire();
         	Arbre arbre = new Arbre();
         	ObjetPonctuel objet_ponctuel = new ObjetPonctuel();
         	
-       	 System.out.println("parcours du resultSet");
+       	 System.out.println("Objet: parcours du resultSet de la requête");
 
      while(result.next()){
  		if(result.absolute(result.getRow()))
@@ -452,7 +453,7 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
  							(PGgeometry)result.getObject("geom"),
  							(PGgeometry)result.getObject("st_centroid")
  						 	);
- 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					//Ajout de l'objet dans le buffer (arraylist de arraylist)
  					obj.AjoutObjet(home1);
  					break;
  				case "lampadaire":
@@ -467,7 +468,7 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
  							(PGgeometry)result.getObject("geom"),
  							(PGgeometry)result.getObject("st_centroid")
  						 	);
- 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					//Ajout de l'objet dans le buffer (arraylist de arraylist)
  					obj.AjoutObjet(lamp);
  					
  				case "arbre":
@@ -480,7 +481,7 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
  							(PGgeometry)result.getObject("geom"),
  							(PGgeometry)result.getObject("st_centroid")
  						 	);
- 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					//Ajout de l'objet dans le buffer (arraylist de arraylist)
  					obj.AjoutObjet(arbre);
  					
  					break;
@@ -496,7 +497,7 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
  							(PGgeometry)result.getObject("geom"),
  							(PGgeometry)result.getObject("st_centroid")
  							);
- 					//Ajout de l'objet dans le vecteur de vecteur d'objet
+ 					//Ajout de l'objet dans le buffer (arraylist de arraylist)
  					obj.AjoutObjet(objet_ponctuel);
  			}
      }
@@ -508,52 +509,66 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
 		
 	}
 
-
+	/**
+	 * Methode Statique pour la selection globale des élément du bâti indiférenciée contenu dans la BDD
+	 * Issu de la BDTOPO74 IGN
+	 * Cette méthode est dédiée à l'interrogation de la table du bâti indiférenciée indexant 
+	 * Indexés géographiquement (index GiST)
+	 * Les objets sont instanciés séquentiellement lors du parcours du resultat de la requete SQL
+	 * et sont distribués dans le Buffer, selon leur indexation au maillage "monde" 
+	 * ...
+	 * Cette méthode construit une requête géographique sur l'étendue des objets à selectionner
+	 * en se basant sur l'indexation géographique de la Base permise par l'extension POSTGIS de POSTGRESQL
+	 * @param obj, le buffer en cours d'utilisation
+	 */
 	public static void selection_geographique_bati_buffer(iasig.mobile.view.Buffer obj){
 		
-		//recuperation de la maille observateur
-	
-		int maille_observateur_i = obj.centre_buffer_auxiliaire_i;
-		int maille_observateur_j = obj.centre_buffer_auxiliaire_j;
-		
-		System.out.println(maille_observateur_i+" "+maille_observateur_j);
-	
-		int demi_taille_buffer= obj.taille_buffer_memoire/2;
-		//ecriture du Polygone de requête selon paramètre de generation
-		//1-recuperation des mailles extremes de l'espace à mettre en memoire
-		int mailleMax_i = maille_observateur_i +  demi_taille_buffer - 1 ;
-		int mailleMin_i = maille_observateur_i -  demi_taille_buffer + 1 ;
-		int mailleMax_j = maille_observateur_j +  demi_taille_buffer - 1 ;
-		int mailleMin_j = maille_observateur_j -  demi_taille_buffer + 1 ;
-		
-		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
-		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
-		int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
-		int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
-		
-
-		String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
-		PGgeometry polygone;
+//		//recuperation de la maille observateur
+//	
+//		int maille_observateur_i = obj.centre_buffer_auxiliaire_i;
+//		int maille_observateur_j = obj.centre_buffer_auxiliaire_j;
+//		
+//		System.out.println(maille_observateur_i+" "+maille_observateur_j);
+//	
+//		int demi_taille_buffer= obj.taille_buffer_memoire/2;
+//		//ecriture du Polygone de requête selon paramètre de generation
+//		//1-recuperation des mailles extremes de l'espace à mettre en memoire
+//		int mailleMax_i = maille_observateur_i +  demi_taille_buffer - 1 ;
+//		int mailleMin_i = maille_observateur_i -  demi_taille_buffer + 1 ;
+//		int mailleMax_j = maille_observateur_j +  demi_taille_buffer - 1 ;
+//		int mailleMin_j = maille_observateur_j -  demi_taille_buffer + 1 ;
+//		
+//		int Xmin =  ( Tuile.Xmin + mailleMin_i * Tuile.DX );
+//		int Ymin =  ( Tuile.Ymin + mailleMin_j * Tuile.DY );
+//		int Xmax =  ( Tuile.Xmin + (mailleMax_i + 1) * Tuile.DX ); 
+//		int Ymax =  ( Tuile.Ymin + (mailleMax_j + 1) * Tuile.DY ); 
+//		
+//		//Construction du polygone à partir des paramètres de taille du Buffer (taille memoire)
+//		String Polygone = "SRID=" + "2154" + ";" + "POLYGON(("+Xmin+" "+ Ymin+ ","+Xmax+" "+Ymin+","+ Xmax+" "+ Ymax+","+ Xmin+" "+ Ymax+","+ Xmin+" "+ Ymin+"))";
+//		PGgeometry polygone;
 		try {
-			polygone = new PGgeometry(Polygone);			
+			//connection statique à la BDD et envoi d'une requête géographiqe SQL compilée pour rapidité d'execution
+//			polygone = new PGgeometry(Polygone);			
 	        ResultSet result = connection_statique
 	                                .createStatement(
 	                                        	ResultSet.TYPE_SCROLL_INSENSITIVE, 
 	                                            ResultSet.TYPE_SCROLL_INSENSITIVE
 	                                         ).executeQuery(
-	                                        		
+	      //Multifoncteur - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
+	      " SELECT *, ST_CENTROID(geom) FROM bati_indif_74 WHERE ST_WITHIN(ST_CENTROID(geom), ST_Difference(ST_GeomFromText('"+/*polygone A; nouveau*/obj.polygone_bufferA.getValue()+"', 2154), ST_GeomFromText('"+/*polygone B; Ancien*/obj.polygone_bufferB.getValue()+"', 2154) )) ;"
+                                   		
 	     //" SELECT * FROM maison2 WHERE ST_WITHIN(centroid, ST_GeomFromText('POLYGON((2000 2000,8000 2000, 8000 8000, 2000 8000, 2000 2000))', 4326) )  ;" 
 	     // " SELECT *, ST_CENTROID(geom) FROM maison2 WHERE ST_WITHIN(centroid, ST_GeomFromText('"+polygone.getValue()+"', 4326) ) ;"
-	      //Multifoncteur - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
-	      " SELECT hauteur,geom,ST_CENTROID(geom) FROM source.bati_indiferencie WHERE ST_WITHIN(ST_CENTROID(geom), ST_GeomFromText('"+polygone.getValue()+"', 2154) ) ;"
+	     //Multifoncteur - Selectionne l'integralite des champs de la table de objets generiques inclus dans le polygone passe en argument
+	     //" SELECT hauteur,geom,ST_CENTROID(geom) FROM bati_indif_74 WHERE ST_WITHIN(ST_CENTROID(geom), ST_GeomFromText('"+polygone.getValue()+"', 2154) ) ;"
 	                               );
-	        //System.out.println(polygone.getValue());
+	     //System.out.println(polygone.getValue());
 	        
 	     //Mise a disposition du conteneur bati_indiferencie
-	    Batiment bati = new Batiment();
+	     Batiment bati = new Batiment();
 	    	
 	    	
-	   	 System.out.println("Bati: parcours du resultSet");
+	   	 System.out.println("Bati: parcours du resultSet de la requête");
 	
 	   	 while(result.next()){
 			if(result.absolute(result.getRow()))
@@ -565,9 +580,8 @@ public static void selection_geographique_buffer(iasig.mobile.view.Buffer obj){
 	 							(PGgeometry)result.getObject("st_centroid"),
 								result.getInt("hauteur")
 							 	);
-						//Ajout de l'objet dans le vecteur de vecteur d'objet
-						obj.AjoutBati(bati);
-						
+						//Ajout de l'objet dans le buffer (arraylist de arraylist)
+						obj.AjoutBati(bati);	
 	   	 }
 	 
 	    	

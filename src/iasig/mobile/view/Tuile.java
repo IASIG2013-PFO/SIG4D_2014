@@ -4,12 +4,10 @@ import iasig.dao.MNTDAO;
 import iasig.dao.OrthoDAO;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.util.Vector;
 
-import javax.imageio.ImageIO;
 import javax.media.j3d.Appearance;
+import javax.media.j3d.BranchGroup;
 import javax.media.j3d.PolygonAttributes;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Texture;
@@ -18,27 +16,28 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TriangleArray;
 import javax.vecmath.Color3f;
 import javax.vecmath.Color4f;
-import javax.vecmath.Point2i;
 import javax.vecmath.Point3d;
 import javax.vecmath.TexCoord2f;
 
 import com.sun.j3d.utils.image.TextureLoader;
 
 /**
- * @author jean
+ * @author Jean
  *
  */
 /*CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC*/
 public class Tuile {
-	/** Cette classe d�finit une tuile, c'est � dire un carr� de MNT associ� � un  carr� d'orthophoto, � une certaine r�solution.*/
-	/** Le maillage est d�fini par les constantes.*/
+	/** Cette classe definit une tuile, c'est a dire un carre de MNT associe a un carre d'orthophoto, a une certaine resolution.*/
+	/** Le maillage est defini par les constantes.*/
 	
 	/*/////////////////////CONSTANTES///////////////////*/
 
 	/********************OBJETS DE DAO*******************/
-	public static final MNTDAO mntDAO =new MNTDAO(); //Cr�ation du loader
-	public static final OrthoDAO orthoDAO=new OrthoDAO(); //Cr�ation du loader
+	public static final MNTDAO mntDAO =new MNTDAO(); //Creation du loader de MNT
+	public static final OrthoDAO orthoDAO=new OrthoDAO(); //Creation du loader d'orthophotos
 	/****************************************************/
+	
+	
 	
 	/***************PARAMETRES DU MAILLAGE***************/
 	public static final int Xmin = 916000;
@@ -50,20 +49,12 @@ public class Tuile {
 	public static final int PX = 99;
 	public static final int PY = 85;
 	/****************************************************/
-		
-	/***********OPTIONS DE CREATION DES TUILES***********/
-	public static final boolean DB = true; //Charger � partir de la BDD
-	public static final boolean FILE = false; //Charger � partir de fichiers
-	
-	public static final boolean LOADALL = true; //Charger les MNT d�j� d�coup�s
-	public static final boolean DIVISION = false; //G�n�rer les MNT par division d'un MNT plus grand
-	/****************************************************/
-	
+
 	
 	
 	/****************CLASSES DE RESOLUTION***************/
-	//La r�solution de base est celle de l'orthophoto
-	//R�solution MNT = 5 * r�solution de base
+	//La resolution de base est celle de l'orthophoto
+	//Resolution MNT = 5 * resolution de base
 	public static final int[] resolution={5,10,20,40,100,200};
 	public static final int R5 = 1;
 	public static final int R10 = 2;
@@ -189,8 +180,8 @@ public class Tuile {
 	/*/////////////////////ATTRIBUTS////////////////////*/
 	MNT mnt;
 	BufferedImage ortho;
-	int i_maille; //coordonn�es dans le maillage
-	int j_maille; //coordonn�es dans le maillage
+	int i_maille; //coordonnees dans le maillage
+	int j_maille; //coordonnees dans le maillage
 	/*//////////////////////////////////////////////////*/
 	
 	
@@ -200,54 +191,33 @@ public class Tuile {
 	/*/////////////////////METHODES/////////////////////*/
 	
 	/*********************CONSTRUCTEUR*******************/
-	
 
 	//---------------------------------------------------
-	public Tuile(int i, int j, int r, boolean source) throws IOException{
+	public Tuile(int i, int j, int r) throws IOException{
 		/** 
 		 * FONCTION :
-		 * Cr�er la tuile d'indices i, j, � partir de la souce indiqu�e
+		 * Creer la tuile d'indices i, j, a la resolution r
 		 * 
 		 * PARAMETRES EN ENTREE :
-		 * - i [Scalaire, entier] : indice de ligne de la tuile � charger
-		 * - j [Scalaire, entier] : indice de colonne de la tuile � charger
-		 * - r [Scalaire, entier] : classe de r�solution choisie (1-6)
-		 * - source [Scalaire, bool�en] : provenance : soit DB pour la base de donn�es, soit FILE pour les fichiers
+		 * - i [Scalaire, entier] : indice de ligne de la tuile a charger
+		 * - j [Scalaire, entier] : indice de colonne de la tuile a charger
+		 * - r [Scalaire, entier] : classe de resolution choisie (1-6)
 		 * 
 		 * CONSTRUIT :
 		 * - [Scalaire, objet de la classe Tuile] : une nouvelle tuile de position voulue.
 		 * */
-	
-		int res = resolution[r-1];
-
-		if(source){ //DB
-			//R�cup�ration du mnt dans la base de donn�es
-			mnt= mntDAO.load_mnt(i, j, r);
-
-			//R�cup�ration de l'orthophoto dans la base de donn�es
-			ortho = orthoDAO.load_ortho(i, j, r);
-			
-			//calcul des coordonn�es du maillage
-			int X=Xmin+i*DX; //
-			int Y=Ymin+j*DY; // Coin Sud-Ouest du MNT � charger
-
-			this.i_maille=i;
-			this.j_maille=j;
-			
+		
+		if(i<0 || i>PX-1 || j<0 || j>PY || masque_noir[i][j]){
+			mnt = null;
+			ortho = null;
+			return;
 		}
-		else{ //FILE
-			String file_mnt; //Chemin du fichier de MNT
-			String file_ortho; //Chemin du fichier d'ortho
-			
-			int X=Xmin+i*DX; //
-			int Y=Ymin+j*DY; // Coin Sud-Ouest du MNT � charger
-			
-			file_mnt="Tuiles_"+5*res+"_MNT/MNT_"+X+"_"+Y+".txt";
-			file_ortho="Tuiles_"+res+"_jpeg/Ortho_"+(X-res)+"_"+(Y-res)+".jpeg";
-			
-			mnt = new MNT(file_mnt);
-			ortho = ImageIO.read(new File(file_ortho));
-		}
+		
+		//Recuperation du mnt dans la base de donnees
+		mnt= mntDAO.load_mnt(i, j, r);
+
+		//Recuperation de l'orthophoto dans la base de donnees
+		ortho = orthoDAO.load_ortho(i, j, r);
 	}
 	//---------------------------------------------------
 	
@@ -261,7 +231,7 @@ public class Tuile {
 	public MNT getMNT(){
 		/** 
 		 * FONCTION :
-		 * R�cup�rer l'attribut private mnt.
+		 * Recuperer l'attribut private mnt.
 		 *
 		 * RETOUR :
 		 * - [Scalaire, objet de la classe MNT] : this.mnt.
@@ -274,7 +244,7 @@ public class Tuile {
 		public BufferedImage getOrtho(){
 			/** 
 			 * FONCTION :
-			 * R�cup�rer l'attribut private ortho.
+			 * Recuperer l'attribut private ortho.
 			 * 
 			 * RETOUR :
 			 * - [Scalaire, objet de la classe BufferedImage] : this.ortho.
@@ -287,7 +257,7 @@ public class Tuile {
 		public int get_i_maille(){
 			/** 
 			 * FONCTION :
-			 * R�cup�rer l'attribut private i_maille.
+			 * Recuperer l'attribut private i_maille.
 			 */
 			return this.i_maille;
 		}
@@ -297,7 +267,7 @@ public class Tuile {
 		public int get_j_maille(){
 			/** 
 			 * FONCTION :
-			 * R�cup�rer l'attribut private j_maille.
+			 * Recuperer l'attribut private j_maille.
 			 */
 			return this.j_maille;
 		}
@@ -310,228 +280,10 @@ public class Tuile {
 	/*******************AUTRES METHODES******************/
 	
 	//---------------------------------------------------
-	public boolean DarkTile(){
-		/** 
-		 * FONCTION :
-		 * Tester si la tuile ne contient que des pixels noirs.
-		 * 
-		 * RETOUR :
-		 * - [Scalaire, bool�en] : VRAI si la tuile est totalement noire, FAUX sinon.
-		 */
-		
-		int[] Pixels = ortho.getData().getPixels(0, 0, ortho.getWidth(), ortho.getHeight(), new int[1000000]);
-		
-		for(int i=1;i<=Pixels.length;i++){
-			if(Pixels[i-1]!=0){
-				return false;
-			}
-			else{}
-		}
-		return true;
-	}
-	//---------------------------------------------------
-	
-	//---------------------------------------------------
-	public static boolean[][] getAllDarkTiles() throws IOException{
-		/** 
-		 * FONCTION :
-		 * R�cup�rer le masque matriciel des tuiles noires sur l'ensemble du maillage.
-		 * 
-		 * RETOUR :
-		 * - [Matrice<PY lignes, PX colonnes> d'entiers] : masque : l'�l�ment (i,j) est VRAI si et seulement si la tuile (i,j) est noire.
-		 * LE RESULTAT EST STOCKE EN DUR EN TANT QUE CONSTANTE DE LA CLASSE => GAIN DE RAPIDITE. 
-		 */
-		
-		//Instanciation du masque
-		boolean[][] masque = new boolean[PX][PY];
-		
-		for(int i=0;i<PX;i++){
-			for(int j=0;j<PY;j++){
-				Tuile t = new Tuile(i,j,R5,DB);
-				masque[i][j]=t.DarkTile();
-			}
-		}
-		
-		return masque;
-	}
-	//---------------------------------------------------	
-		
-	//---------------------------------------------------
-	public static Point2i Center(Vector<int[]> listeIndices){
-		/** 
-		 * FONCTION :
-		 * R�cup�rer le centre du rectangle englobant une collection de tuiles.
-		 * 
-		 * PARAMETRES EN ENTREE :
-		 * - listeIndices [Matrice(nombre de lignes quelconque>=1, 3 colonnes) d'entiers] : liste des indices et des classes de r�solutions des tuiles de la collection.
-		 * 
-		 * RETOUR :
-		 * - [Scalaire, objet de la classe Point2i] : centre de la s�lection, en plani.
-		 */
+	public BranchGroup draw(boolean b_orthophoto) throws IOException{
 
-		if(listeIndices.size()==0){
-			return new Point2i(0,0);
-		}
-		else{}
-
-		int nb_tuiles = listeIndices.size();
-		
-		int imin=listeIndices.elementAt(0)[0];
-		int imax=imin;
-		int jmin=listeIndices.elementAt(0)[1];
-		int jmax=jmin;
-		
-		int i;
-		int j;
-		
-		//Recherche des indices minimaux et maximaux de la s�lection
-		for(int k=1;k<=nb_tuiles;k++){
-			i=listeIndices.elementAt(k-1)[0];
-			
-			if(i<imin){
-				imin=i;
-			}
-			else if(i>imax){
-				imax=i;
-			}
-			else{}
-			
-			j=listeIndices.elementAt(k-1)[1];
-			
-			if(j<jmin){
-				jmin=j;
-			}
-			else if(j>jmax){
-				jmax=j;
-			}
-			else{}
-		}
-		
-		//Calcul du rectangle englobant la s�lection
-		int Xmi=Xmin+imin*DX;
-		int Xma=Xmin+(imax+1)*DX;
-		
-		int Ymi=Ymin+jmin*DY;
-		int Yma=Ymin+(jmax+1)*DY;
-		
-		//Calcul du centre g�ographique de la s�lection
-		return new Point2i((Xmi+Xma)/2,(Ymi+Yma)/2);
-	}
-	//---------------------------------------------------	
-	
-	//---------------------------------------------------
-	public static Vector<int[]> getAllIndicesBetween(int imin, int jmin, int imax, int jmax, int r){
-		/** 
-		 * FONCTION :
-		 * R�cup�rer tous le indices de tuiles entre des bornes. Les tuiles noires sont �limin�es lors du processus.
-		 * 
-		 * PARAMETRES EN ENTREE :
-		 * - imin [Scalaire, entier] : indice de ligne minimal (borne Nord).
-		 * - jmin [Scalaire, entier] : indice de colonne minimal (borne Ouest).
-		 * - imax [Scalaire, entier] : indice de ligne maximal (borne Sud).
-		 * - jmax [Scalaire, entier] : indice de colonne maximal (borne Est).
-		 * - r [Scalaire, entier] : classe de r�solution choisi (1-6) pour toutes les tuiles.
-		 * 
-		 * RETOUR :
-		 * - listeIndices [Matrice(nombre de lignes quelconque>=0, 3 colonnes) d'entiers] : liste des indices des tuiles de la s�lection et leur classe de r�solution (r), tuiles noires exclues.
-		 */
-		
-		//Instanciation de la liste de sortie
-		Vector<int[]> listeIndices = new Vector<int[]>();
-		
-		for(int i=imin;i<=imax;i++){
-			for(int j=jmin;j<=jmax;j++){
-				if(masque_noir[i][j]){
-					//Tuile noire : on l'ignore
-					continue;
-				}
-				else{}
-				
-				//Ajout dans la liste
-				int[] triplet = {i,j,r};
-				listeIndices.addElement(triplet);
-			}
-		}		
-		return listeIndices;
-	}
-	//---------------------------------------------------
-	
-	//---------------------------------------------------
-	public static Vector<int[]> removeBlackTiles(Vector<int[]> listeIndices){
-		/** 
-		 * FONCTION :
-		 * Filtrer une liste d'indices de tuiles en �liminant les noires.
-		 * 
-		 * PARAMETRE EN ENTREE :
-		 * - [Matrice(nombre de lignes quelconque>=1, 3 colonnes) d'entiers] : liste des indices des tuiles de la s�lection � filtrer.
-		 * 
-		 * RETOUR :
-		 * - [Matrice(nombre de lignes quelconque>=0, 3 colonnes) d'entiers] : liste des indices des tuiles de la s�lection et leur classe de r�solution (r), tuiles noires exclues.
-		 */
-		
-		//Instanciation de la liste de sortie
-		Vector<int[]> listeIndicesSortie = new Vector<int[]>();
-		
-		int[] triplet;
-		
-		for(int k=1;k<=listeIndices.size();k++){
-			triplet = listeIndices.elementAt(k-1);
-			
-			if(masque_noir[triplet[0]][triplet[1]]){
-				//Tuile noire : on l'ignore
-				continue;
-			}
-			else{}
-			
-			//Ajout dans la liste
-			listeIndicesSortie.addElement(triplet);
-		}
-		
-		return listeIndicesSortie;
-	}
-	//---------------------------------------------------
-	
-	//---------------------------------------------------
-	public static Tuile[] load(Vector<int[]> listeIndices, boolean source) throws IOException {
-		/** 
-		 * FONCTION :
-		 * Charger une liste de tuiles � partir de leurs indices � partir de la BDD ou de fichiers.
-		 * 
-		 * PARAMETRES EN ENTREE :
-		 * - listeIndices [Matrice(nombre de lignes quelconque>=1, 3 colonnes) d'entiers] : liste des indices des tuiles � charger et leurs classes de r�solutions.
-		 * - source [Scalaire, bool�en] : indication de la provenance des donn�es : DB or FILE.
-		 * 
-		 * RETOUR :
-		 * - [Matrice(PY lignes,PX colonnes) d'objets de la classe MNT] : grille de MNT, l'�l�ment (1,1) de la matrice correspond au MNT Nord-Ouest.
-		 */
-		
-		int nb_tuiles = listeIndices.size();
-		
-		int i;
-		int j;
-	
-		//Instanciation de la liste des tuiles
-		Tuile[] listeTuiles = new Tuile[nb_tuiles];
-		
-		int r;
-		//Chargement des tuiles
-		for(int k=1;k<=nb_tuiles;k++){
-			i=listeIndices.elementAt(k-1)[0];
-			j=listeIndices.elementAt(k-1)[1];
-			r=listeIndices.elementAt(k-1)[2];
-			
-			listeTuiles[k-1]=new Tuile(i,j,r,source);
-		}
-			
-		return listeTuiles;
-	}
-	//---------------------------------------------------
-	
-	//---------------------------------------------------
-	public Shape3D draw(boolean b_orthophoto) throws IOException{
-
-		TriangleArray MNT_graphique = trace_MNT(mnt); // D�finition de la
-														// g�om�trie du MNT
+		TriangleArray MNT_graphique = trace_MNT(mnt); // Definition de la
+														// geometrie du MNT
 														// graphique
 
 		Appearance apparence = new Appearance();
@@ -548,7 +300,7 @@ public class Tuile {
 																			// MNT
 																			// graphique
 			apparence = set_apparence(textureOrtho,
-					PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE); // D�finition
+					PolygonAttributes.POLYGON_FILL, PolygonAttributes.CULL_NONE); // Definition
 																					// de
 																					// l'apparence
 																					// du
@@ -556,37 +308,41 @@ public class Tuile {
 																					// graphique
 																					// incluant
 																					// les
-																					// param�tres
+																					// parametres
 																					// de
 																					// la
 																					// texture
 		} else { // WITHOUTORTHO
 			apparence = set_apparence(PolygonAttributes.POLYGON_LINE,
-					PolygonAttributes.CULL_NONE); // D�finition de l'apparence
+					PolygonAttributes.CULL_NONE); // Definition de l'apparence
 													// du MNT graphique non
-													// textur�
+													// texture
 		}
-
-		// Shape du MNT graphique = Geom�trie + apparence
-		return new Shape3D(MNT_graphique, apparence);
+			
+		BranchGroup bg = new BranchGroup();
+		
+		// Shape du MNT graphique = Geometrie + apparence
+		bg.addChild(new Shape3D(MNT_graphique, apparence));
+		
+		return bg;
 	}
 	//---------------------------------------------------
 	
 	// ---------------------------------------------------
 	public TriangleArray trace_MNT(MNT mnt) {
 		/**
-		 * FONCTION : Construire la g�om�trie du MNT, un ensemble de triangles
-		 * 3D. Chaque maille carr�e est divis�e en deux de ces triangles par une
+		 * FONCTION : Construire la geometrie du MNT, un ensemble de triangles
+		 * 3D. Chaque maille carree est divisee en deux de ces triangles par une
 		 * diagonale.
 		 * 
 		 * PARAMETRES EN ENTREE : - [Scalaire, objet de la classe MNT] : MNT
 		 * source.
 		 * 
-		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : G�om�trie
+		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : Geometrie
 		 * du MNT sous forme de triangles 3D.
 		 **/
 
-		// Instanciation de la g�om�trie avec indication du nombre total de
+		// Instanciation de la geometrie avec indication du nombre total de
 		// triangles.
 		TriangleArray mnt_graphique = new TriangleArray(6 * (mnt.getNX() - 1)
 				* (mnt.getNY() - 1), TriangleArray.COORDINATES
@@ -620,17 +376,17 @@ public class Tuile {
 				X = Xmin + (j - 1) * DX; // Easting correspondant
 
 //					if (X == tunnel.getX() && Y == tunnel.getY()) {
-//						// Pr�voir un trou pour le tunnel
+//						// Prevoir un trou pour le tunnel
 //						continue;
 //					} else {
 //					}
 
 				// TRACE DE LA MAILLE D'ORIGINE (X,Y) (COIN SUD-OUEST)
 
-				k = (i + j) % 2; // Param�tre d'orientation de la diagonale
+				k = (i + j) % 2; // Parametre d'orientation de la diagonale
 
-				// Calcul des coordonn�es (X,Y,Z) des 4 coins de la maille
-				// La diagonale correspond � [p2 p3]. p1 et p2 sont au Sud, p3
+				// Calcul des coordonnees (X,Y,Z) des 4 coins de la maille
+				// La diagonale correspond a [p2 p3]. p1 et p2 sont au Sud, p3
 				// et p4 au Nord.
 				p1.set(X + k * DX, Y, mnt.getZAt(i - 1, j + k - 1));
 				p2.set(X + k * DX, Y - DY, mnt.getZAt(i, j + k - 1));
@@ -660,8 +416,8 @@ public class Tuile {
 					mnt_graphique.setCoordinate(n + 5, p4);
 				}
 
-				for (int m = 0; m <= 5; m++) { // D�finition de la couleur en
-												// fonction de la r�solution
+				for (int m = 0; m <= 5; m++) { // Definition de la couleur en
+												// fonction de la resolution
 					switch (DX) {
 					case 25: {
 						color.set(World.Blue);
@@ -706,16 +462,16 @@ public class Tuile {
 			BufferedImage ortho, int Xmin, int Ymin, int Xmax, int Ymax,
 			int RX, int RY) throws IOException {
 		/**
-		 * FONCTION : Cr�er la texture orthophoto associ� au MNT. Les
-		 * coordonn�es textures sont calcul�es r�guli�rement en associant chaque
-		 * sommet � sa position dans l'image.
+		 * FONCTION : Creer la texture orthophoto associe au MNT. Les
+		 * coordonnees textures sont calculees regulierement en associant chaque
+		 * sommet a sa position dans l'image.
 		 * 
 		 * PARAMETRES EN ENTREE-SORTIE : - MNT_graphique [Scalaire, objet de la
-		 * classe TriangleArray] : MNT � plaquer. En sortie chaque sommet de
-		 * triangle est muni de ses coordonn�es texture.
+		 * classe TriangleArray] : MNT a plaquer. En sortie chaque sommet de
+		 * triangle est muni de ses coordonnees texture.
 		 * 
 		 * PARAMETRE EN ENTREE : - ortho [Scalaire, objet de la classe
-		 * BufferedImage] : Image de l'orthophoto � utiliser pour la texture. -
+		 * BufferedImage] : Image de l'orthophoto a utiliser pour la texture. -
 		 * Xmin [Scalaire, entier] : Borne Ouest du MNT. - Ymin [Scalaire,
 		 * entier] : Borne Nord du MNT. - Xmax [Scalaire, entier] : Borne Est du
 		 * MNT. - Ymax [Scalaire, entier] : Borne Sud du MNT. - RX [Scalaire,
@@ -723,29 +479,29 @@ public class Tuile {
 		 * Hauteur d'une maille de MNT.
 		 * 
 		 * RETOURNE : - [Scalaire, objet de la classe Texture] : La texture
-		 * cr��e � partir de l'orthophoto.
+		 * creee a partir de l'orthophoto.
 		 **/
 
 		Texture texture = new TextureLoader(ortho).getTexture(); // Chargement
 																	// de la
-																	// texture �
+																	// texture e
 																	// partir de
 																	// l'image
 		Point3d point3d = new Point3d();
 
-		// Etendue g�ographique de la maille
+		// Etendue geographique de la maille
 		int EX = Xmax - Xmin + 2 * RX;
 		int EY = Ymax - Ymin + 2 * RY;
 
 		for (int i = 0; i < MNT_graphique.getVertexCount(); i++) {
-			MNT_graphique.getCoordinate(i, point3d); // R�cup�ration des
-														// coordonn�es (X,Y,Z)
-														// du i� point de la
-														// g�om�trie
-			// Calcul des coordonn�es textures de ce point. Syst�me de
-			// coordonn�es : (x,y) variant de 0 � 1. L'origine (0,0) est le coin
+			MNT_graphique.getCoordinate(i, point3d); // Recuperation des
+														// coordonnees (X,Y,Z)
+														// du ie point de la
+														// geometrie
+			// Calcul des coordonnees textures de ce point. Systeme de
+			// coordonnees : (x,y) variant de 0 a 1. L'origine (0,0) est le coin
 			// Sud-Ouest de l'orthophoto. Le coin Nord-Est correspond aux
-			// coordonn�es maximales (1,1).
+			// coordonnees maximales (1,1).
 			MNT_graphique.setTextureCoordinate(0, i, new TexCoord2f(
 					(float) (point3d.x - Xmin + RX) / EX, (float) (point3d.y
 							- Ymin + RY)
@@ -760,11 +516,11 @@ public class Tuile {
 	// ---------------------------------------------------
 	public Appearance set_apparence(int polygon_mode, int culling_mode) {
 		/**
-		 * FONCTION : D�finir les param�tres d�finissant l'apparence de l'objet,
-		 * dans le cas o� il n'y a pas d'orthophoto.
+		 * FONCTION : Definir les parametres definissant l'apparence de l'objet,
+		 * dans le cas oe il n'y a pas d'orthophoto.
 		 * 
 		 * PARAMETRES EN ENTREE : - polygon_mode [Scalaire, entier] : choix de
-		 * repr�sentation des polygones : PolygonAttributes.LINE (filaire) ou
+		 * representation des polygones : PolygonAttributes.LINE (filaire) ou
 		 * PolygonAttributes.FILL (surface). - culling_mode [Scalaire, entier] :
 		 * choix de culling : PolygonAttributes.CULL_NONE,
 		 * PolygonAttributes.CULL_FRONT ou PolygonAttributes.CULL_BACK.
@@ -776,9 +532,9 @@ public class Tuile {
 		Appearance app = new Appearance();
 
 		PolygonAttributes polyAttrib = new PolygonAttributes();
-		polyAttrib.setCullFace(culling_mode); // Seules les faces orient�es dans
-												// le sens direct par rapport �
-												// la cam�ra seront visibles =>
+		polyAttrib.setCullFace(culling_mode); // Seules les faces orientees dans
+												// le sens direct par rapport e
+												// la camera seront visibles =>
 												// pas de vision en sous-sol
 		polyAttrib.setPolygonMode(polygon_mode);
 		app.setPolygonAttributes(polyAttrib);
@@ -792,12 +548,12 @@ public class Tuile {
 	public Appearance set_apparence(Texture texture, int polygon_mode,
 			int culling_mode) {
 		/**
-		 * FONCTION : D�finir les param�tres d�finissant l'apparence de l'objet,
-		 * dans le cas o� il y une pas d'orthophoto.
+		 * FONCTION : Definir les parametres definissant l'apparence de l'objet,
+		 * dans le cas oe il y une pas d'orthophoto.
 		 * 
 		 * PARAMETRES EN ENTREE : - texture [Scalaire, objet de la classe
-		 * Texture] : Texture (orthophoto) appliqu�e � l'objet (MNT). -
-		 * polygon_mode [Scalaire, entier] : choix de repr�sentation des
+		 * Texture] : Texture (orthophoto) appliquee a l'objet (MNT). -
+		 * polygon_mode [Scalaire, entier] : choix de representation des
 		 * polygones : PolygonAttributes.LINE (filaire) ou
 		 * PolygonAttributes.FILL (surface). - culling_mode [Scalaire, entier] :
 		 * choix de culling : PolygonAttributes.CULL_NONE,
@@ -810,11 +566,11 @@ public class Tuile {
 		Appearance app = new Appearance();
 		PolygonAttributes polyAttrib = new PolygonAttributes();
 		polyAttrib.setCullFace(PolygonAttributes.CULL_NONE); // Seules les faces
-																// orient�es
+																// orientees
 																// dans le sens
 																// direct par
-																// rapport � la
-																// cam�ra seront
+																// rapport a la
+																// camera seront
 																// visibles =>
 																// pas de vision
 																// en sous-sol

@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.media.j3d.View;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -49,7 +50,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * @see Camera
 	 */
 	private Camera view;
-
+	
 	/**
 	 * Point enregistre au moment d'un "released" de la souris. En pixel.
 	 * 
@@ -181,7 +182,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		view = new Camera(this);
 		view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)), Math
 				.sin(Math.toRadians(theta)), 0));
-
+		
 	}
 
 	// ///////////////////////////////////////////////////
