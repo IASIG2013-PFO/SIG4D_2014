@@ -3,7 +3,7 @@ package iasig.mobile.elements;
 import iasig.mobile.deplacement.AvanceVoiture;
 import iasig.mobile.deplacement.DetecteurCollision;
 import iasig.mobile.deplacement.Dynamique;
-import iasig.mobile.view.*;
+import iasig.univers.view.*;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BoundingSphere;
@@ -379,18 +379,21 @@ public BranchGroup GetBranchGroup(World world){
 	sun1.setEnable(true);
 	sun1.setInfluencingBounds(sphere);
 	transformpitch.addChild(sun1);
-	transformroll.addChild(this.getCaisse());
+	Transform3D t3d2 = new Transform3D();
+	t3d.setScale(0.000001);
 	
+	transformroll.addChild(this.getCaisse());
+	transformroll.setTransform(t3d2);
 	//__TEST COLLISION_______________________________________________________
 	transformG.setUserData("voiture");
 	Transform3D t3ddevant = new Transform3D();
 	TransformGroup transformG2 = new TransformGroup();
 	TransformGroup transformG3 = new TransformGroup();
-	transformG.addChild(transformG2);
+	transformpitch.addChild(transformG2);
 	transformG2.addChild(transformG3);
-	t3ddevant.setTranslation(new Vector3f(40,0,5));
-	ColorCube cc = new ColorCube(10);
-	ColorCube cc2 = new ColorCube(10);
+	t3ddevant.setTranslation(new Vector3f(15,0,5));
+	ColorCube cc = new ColorCube(2);
+	ColorCube cc2 = new ColorCube(2);
 	Appearance app = new Appearance();
 	TransparencyAttributes tapp = new TransparencyAttributes(TransparencyAttributes.NICEST,0.8f);
 	app.setTransparencyAttributes(tapp);
@@ -399,7 +402,7 @@ public BranchGroup GetBranchGroup(World world){
 	transformG2.setTransform(t3ddevant);
 	transformG2.addChild(cc);
 	Transform3D t3dderriere = new Transform3D();
-	t3dderriere.setTranslation(new Vector3f(-80,0,5));
+	t3dderriere.setTranslation(new Vector3f(-30,0,0));
 	transformG3.setTransform(t3dderriere);
 	cc2.setAppearance(app);
 	cc2.setUserData("arriere");
@@ -420,15 +423,15 @@ public BranchGroup GetBranchGroup(World world){
 	collision2.setCollidable(true);
 	//__________________________________________________________
 	
-	AvanceVoiture avance1 = new AvanceVoiture(world,this,directionroue0,null,false,true,-10,null,null);
-	AvanceVoiture avance2 = new AvanceVoiture(world,this,directionroue1,null,false,true,-10,null,null);
+	AvanceVoiture avance1 = new AvanceVoiture(world,this,directionroue0,null,false,true,true,-10,null,null);
+	AvanceVoiture avance2 = new AvanceVoiture(world,this,directionroue1,null,false,true,false,-10,null,null);
 	directionroue0.addChild(avance1);
 	directionroue1.addChild(avance2);
 	
 	avance1.setSchedulingBounds(sphere);
 	avance2.setSchedulingBounds(sphere);
 	
-	AvanceVoiture avance = new AvanceVoiture(world,this,transformG,null,false,false,-10,collision,collision2);
+	AvanceVoiture avance = new AvanceVoiture(world,this,transformG,null,false,false,false,-10,collision,collision2);
 	
     avance.setSchedulingBounds(sphere);
 	transformG.addChild(avance);
@@ -442,8 +445,8 @@ public BranchGroup GetBranchGroup(World world){
 	TransformGroup camera = new TransformGroup();
 	Transform3D tcam = new Transform3D() ;
 	if(this.typevoiture == 1){
-	tcam.setTranslation(new Vector3f(-30,0,2));}
-	else{tcam.setTranslation(new Vector3f(-50,0,5));}
+	tcam.setTranslation(new Vector3f(-30,0,5));}
+	else{tcam.setTranslation(new Vector3f(-50,0,10));}
 	
 	camera.setTransform(tcam);
 	camera.addChild(this.spherecam);
@@ -471,8 +474,8 @@ public BranchGroup GetBranchGroup(World world){
 	cameraconducteur.setUserData("cam2");
 	
 	//-----------------------------------------
-	transformG.addChild(camera);
-	transformroll.addChild(cameraconducteur);
+	transformpitch.addChild(camera);
+	transformpitch.addChild(cameraconducteur);
 	//-----------------------------------------		
 	Transform3D trans0 = new Transform3D();
 	Transform3D trans1 = new Transform3D();
@@ -480,30 +483,30 @@ public BranchGroup GetBranchGroup(World world){
 	Transform3D trans3 = new Transform3D();
 	//_________________________________________________________
 	//ROUE 0____________________________________________________________________________
-	AvanceVoiture rotroue = new AvanceVoiture(world,this,null,rotationroue0,true,false,0,null,null);
+	AvanceVoiture rotroue = new AvanceVoiture(world,this,null,rotationroue0,true,false,false,0,null,null);
 	rotroue.setSchedulingBounds(sphere);
 	BranchGroup BG0 = this.getRoues(0).getTGroue(rotroue, directionroue0, this, 0, rotationroue0, transformroue0, suiviMNTroue0, trans0);
 	//__________________________________________________________
 	//ROUE 1___________________________________________________________________________
-	AvanceVoiture rotroue1 = new AvanceVoiture(world,this,null,rotationroue1,true,false,1,null,null);
+	AvanceVoiture rotroue1 = new AvanceVoiture(world,this,null,rotationroue1,true,false,false,1,null,null);
 	rotroue1.setSchedulingBounds(sphere);
 	BranchGroup BG1 =  this.getRoues(1).getTGroue(rotroue1, directionroue1, this, 1, rotationroue1, transformroue1, suiviMNTroue1, trans1);
 	//__________________________________________________________
 	//ROUE 2___________________________________________________________________________
-	AvanceVoiture rotroue2 = new AvanceVoiture(world,this,null,rotationroue2,true,false,2,null,null);
+	AvanceVoiture rotroue2 = new AvanceVoiture(world,this,null,rotationroue2,true,false,false,2,null,null);
 	rotroue2.setSchedulingBounds(sphere);
 	BranchGroup BG2 =  this.getRoues(2).getTGroue(rotroue2,null, this, 2, rotationroue2, transformroue2, suiviMNTroue2, trans2);
 	//__________________________________________________________	
 	//ROUE 3___________________________________________________________________________
-	AvanceVoiture rotroue3 = new AvanceVoiture(world,this,null,rotationroue3,true,false,3,null,null);
+	AvanceVoiture rotroue3 = new AvanceVoiture(world,this,null,rotationroue3,true,false,false,3,null,null);
 	rotroue3.setSchedulingBounds(sphere);
 	BranchGroup BG3 =  this.getRoues(3).getTGroue(rotroue3, null, this, 3, rotationroue3, transformroue3, suiviMNTroue3, trans3);
 	//__________________________________________________________	
 	
-	transformG.addChild(BG0);
-	transformG.addChild(BG1);
-	transformG.addChild(BG2);
-	transformG.addChild(BG3);
+	transformroll.addChild(BG0);
+	transformroll.addChild(BG1);
+	transformroll.addChild(BG2);
+	transformroll.addChild(BG3);
 	transform.addChild(transformG);
 	BG.addChild(transform);
 	BG.compile();

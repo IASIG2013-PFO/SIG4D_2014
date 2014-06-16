@@ -1,7 +1,7 @@
 package iasig.dao.user;
 
 import iasig.dao.GenericDAO;
-import iasig.mobile.view.Tuile;
+import iasig.univers.view.Tuile;
 
 import java.util.Vector;
 

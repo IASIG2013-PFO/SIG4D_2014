@@ -1,8 +1,8 @@
 package iasig.mobile.elements;
 
 import iasig.mobile.deplacement.AvanceDirigeable;
-import iasig.mobile.view.Constante;
-import iasig.mobile.view.World;
+import iasig.univers.view.Constante;
+import iasig.univers.view.World;
 
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.BranchGroup;

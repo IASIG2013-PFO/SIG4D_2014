@@ -1,9 +1,9 @@
 package iasig.mobile.deplacement;
 
 import iasig.mobile.elements.VoitureLibre;
-import iasig.mobile.view.Constante;
-import iasig.mobile.view.World;
-import iasig.camera.gestionaffichage.*;
+import iasig.univers.view.Constante;
+import iasig.univers.view.World;
+
 import java.awt.AWTEvent;
 import java.awt.event.KeyEvent;
 import java.util.Enumeration;
@@ -21,9 +21,10 @@ public class AvanceVoiture extends Deplacement implements Constante{
 	private TransformGroup t1 = null; //TG ROUE 
 	private Boolean bool = null;
 	private Boolean bool1 = null; //Gestion direction de la voiture
+	private Boolean bool2 = null; //Gestion direction de la voiture
 	private DetecteurCollision collision = null;
 	private DetecteurCollision collision2 = null;
-	
+
 	private int numroue;
 	double ancienroll=0,ancienpitch=0,zinitial=0;
 	double zapres=0,zancien = 0;
@@ -44,15 +45,17 @@ public class AvanceVoiture extends Deplacement implements Constante{
 	 * @param DetecteurCollision collision (avant de la voiture )
 	 * @param DetecteurCollision collision2 (arrière de la voiture)
 	 */
-	public AvanceVoiture(World world, VoitureLibre voiture, TransformGroup t,TransformGroup t1,Boolean bool,Boolean bool1, int numroue,DetecteurCollision collision,DetecteurCollision collision2) {
+	public AvanceVoiture(World world, VoitureLibre voiture, TransformGroup t,TransformGroup t1,Boolean bool,Boolean bool1,Boolean bool2, int numroue,DetecteurCollision collision,DetecteurCollision collision2) {
 		super(world,voiture,t);
 		this.t1 = t1;
 		this.bool = bool;
 		this.bool1 = bool1;
+		this.bool2 = bool2;
 		this.numroue = numroue;
 		this.collision = collision;
 		this.collision2 = collision2;
 		zapres = vehicule.getZ();
+
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -80,45 +83,47 @@ public class AvanceVoiture extends Deplacement implements Constante{
 					//_________________________________________________
 
 					if(!this.bool && !this.bool1){
-					if(this.fwd && !this.back && !this.collision.avant && this.vehicule.getVitesse() <50){
+						if(this.fwd && !this.back && /*!this.collision.avant &&*/ this.vehicule.getVitesse() <50){
 							this.vehicule.setVitesse((float) (this.vehicule.getVitesse()+1)); //ON ACCELERE
 							System.out.println(this.vehicule.getVitesse());
-						}else if(this.back && !this.fwd && !this.collision.arriere && this.vehicule.getVitesse() > -5){
+						}else if(this.back && !this.fwd /*&& !this.collision.arriere*/ && this.vehicule.getVitesse() > -5){
 							this.vehicule.setVitesse((float) (this.vehicule.getVitesse()-1)); // ON DECCELERE
 							System.out.println(this.vehicule.getVitesse());
 						}
 					}
 					//__________________________________________________________________________
 					if(this.bool1 && !this.bool){ //Gestion rotation roue
-						if(right && !left && !fwd && !back){
+						if(right && !left && !fwd && !back ){
 
 							if(vehicule.getangle()>=-15){
-								save.rotZ(-1*Math.PI/180);
-								this.rot.mul(rot, save);
-								this.t.setTransform(rot);
-								vehicule.setangle(vehicule.getangle()-0.5);
-								System.out.println("angle roue " + vehicule.getangle());	
+								if(bool2){
+									vehicule.setangle(vehicule.getangle()-0.5);
+									save.rotZ(-0.5*Math.PI/180);
+									this.rot.mul(rot, save);
+									this.t.setTransform(rot);
+								}			    
+
+								System.out.println("angle roue " + vehicule.getangle());
 							}
 						}else if (!right && left && !fwd && !back){
-
 							if(vehicule.getangle() <=15){
-								save.rotZ(Math.PI/180);
-								this.rot.mul(rot, save);
-								this.t.setTransform(rot);
-								vehicule.setangle(vehicule.getangle()+0.5);
+								if(bool2){
+									vehicule.setangle(vehicule.getangle()+0.5);
+									save.rotZ(0.5* Math.PI/180);
+									this.rot.mul(rot, save);
+									this.t.setTransform(rot);
+								}
+
 								System.out.println("angle roue " + vehicule.getangle());	
 							}
 						}
-					
+
 					}
-				}
-				
-//				if(this.vehicule.getCamera()){this.world.GestionCamera(0);}
-//				else{this.world.GestionCameraConducteur(0);}
+				}			
 				if(!this.world.getListeners().isFreeCar()){
 					if(!this.world.getListeners().isInOutCar()){
 						this.world.getListeners().getView().GestionCamExterieure(this.world.getlistevehicule().firstElement(),this.world.getUnivers());
-								
+
 					}else{ this.world.getListeners().getView().GestionCamInterieure(this.world.getlistevehicule().firstElement(),this.world.getUnivers());
 					}
 				}
@@ -135,63 +140,42 @@ public class AvanceVoiture extends Deplacement implements Constante{
 			}
 
 			if(!this.bool && !this.bool1){
-					
-				if(vehicule.getVitesse() > 0 && vehicule.getangle() == 0){
+				this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
+				if((vehicule.getVitesse() > 0 || vehicule.getVitesse() < 0) && vehicule.getangle() == 0){
 
-					this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
 					save.mul(this.MouvementVertical(true)); //Gestion suivi de MNT
-					this.t.setTransform(save); //Modification du TG de la voiture		
-
-				}else if(vehicule.getVitesse() < 0 && vehicule.getangle() == 0){
-					this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
-					save.mul(this.MouvementVertical(true)); //Gestion suivi de MNT
-					this.t.setTransform(save); //Modification du TG de la voiture	
-
 				}else if(vehicule.getVitesse() > 0 && vehicule.getangle() < 0){
 
-					this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
 					this.Virage(1,1,save);
-					this.t.setTransform(save);
 					save.mul(this.MouvementVertical(false)); //Gestion suivi de MNT
-					this.t.setTransform(save);
 
 				}else if(vehicule.getVitesse() > 0 && vehicule.getangle() > 0){
 
-					this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
 					this.Virage(-1,-1,save);
-					this.t.setTransform(save);
 					save.mul(this.MouvementVertical(false)); //Gestion suivi de MNT
-					this.t.setTransform(save);
 
 				}else if(vehicule.getVitesse() < 0 && vehicule.getangle() < 0){
 
-					this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
 					this.Virage(-1,1,save);
-					this.t.setTransform(save);	
 					save.mul(this.MouvementVertical(false)); //Gestion suivi de MNT
-					this.t.setTransform(save);		
 
 				}else if(vehicule.getVitesse() < 0 && vehicule.getangle() > 0){
 
-					this.t.getTransform(save); //Sauvegarde rotation au moment du behavior
 					this.Virage(1,-1,save);
-					this.t.setTransform(save);	
 					save.mul(this.MouvementVertical(false)); //Gestion suivi de MNT
-					this.t.setTransform(save);}
-
+				}
+				this.t.setTransform(save); //Modification du TG de la voiture			
 			}
-		}
-//		if(this.vehicule.getCamera()){this.world.GestionCamera(0);}
-//		else{this.world.GestionCameraConducteur(0);}
-		if(!this.world.getListeners().isFreeCar()){
-			if(!this.world.getListeners().isInOutCar()){
-				this.world.getListeners().getView().GestionCamExterieure(this.world.getlistevehicule().firstElement(),this.world.getUnivers());
-						
-			}else{ this.world.getListeners().getView().GestionCamInterieure(this.world.getlistevehicule().firstElement(),this.world.getUnivers());
-			}
-		}
-		this.wakeupOn(keyCriterion);
 
+			if(!this.world.getListeners().isFreeCar()){
+				if(!this.world.getListeners().isInOutCar()){
+					this.world.getListeners().getView().GestionCamExterieure(this.world.getlistevehicule().firstElement(),this.world.getUnivers());
+
+				}else{ this.world.getListeners().getView().GestionCamInterieure(this.world.getlistevehicule().firstElement(),this.world.getUnivers());
+				}
+			}
+			this.wakeupOn(keyCriterion);
+		}
 
 
 	}
@@ -205,26 +189,36 @@ public class AvanceVoiture extends Deplacement implements Constante{
 		Transform3D trans = new Transform3D();	
 		double zactuel=0;
 
-		if(vehicule.getVitesse() > 0){
-			if(this.collision.avant == true){
-				this.vehicule.setVitesse(0);}}
+				if(vehicule.getVitesse() > 0){
+					if(this.collision.avant == true){
+						this.vehicule.setVitesse(0);}}
+		
+				if(vehicule.getVitesse() < 0){
+					if(this.collision2.arriere == true ){
+						this.vehicule.setVitesse(0);
+					}}
 
-		if(vehicule.getVitesse() < 0){
-			if(this.collision2.arriere == true ){
-				this.vehicule.setVitesse(0);
-			}}
 
-		if(bool){
-			newvecteur.setX((float)(vehicule.getVitesse()));};
-		if(((VoitureLibre) this.vehicule).getTypevoiture() ==1){
-			zactuel = (float)(this.world.GetZMNTPlan(this.vehicule.getVWorldPosition()[0]+vehicule.getVitesse(),this.vehicule.getVWorldPosition()[1])-8.5);
-		}else if(((VoitureLibre) this.vehicule).getTypevoiture() == 2){
-			zactuel = (float)(this.world.GetZMNTPlan(this.vehicule.getVWorldPosition()[0]+vehicule.getVitesse(),this.vehicule.getVWorldPosition()[1]) - 1.5);
+
+
+		if((float)(this.world.GetZMNTPlan(this.vehicule.getVWorldPosition()[0]+vehicule.getVitesse(),this.vehicule.getVWorldPosition()[1])) < 800){
+			if(bool){
+				newvecteur.setX((float)(vehicule.getVitesse()));
+			}
+
+			if(((VoitureLibre) this.vehicule).getTypevoiture() ==1){
+				zactuel = (float)(this.world.GetZMNTPlan(this.vehicule.getVWorldPosition()[0]+vehicule.getVitesse(),this.vehicule.getVWorldPosition()[1])-7.5);
+								
+			}else if(((VoitureLibre) this.vehicule).getTypevoiture() == 2){
+				zactuel = (float)(this.world.GetZMNTPlan(this.vehicule.getVWorldPosition()[0]+vehicule.getVitesse(),this.vehicule.getVWorldPosition()[1])+9 );
+				}
+			newvecteur.setZ((float)(zactuel - zapres));
+			zapres= zactuel;
+		}else {
+			this.vehicule.setVitesse(0);
+			newvecteur.set(0,0,0);
 		}
-
-		newvecteur.setZ((float)(zactuel - zapres));
 		trans.setTranslation(newvecteur);
-		zapres= zactuel;
 		return trans;
 	}
 	/**
@@ -245,7 +239,7 @@ public class AvanceVoiture extends Deplacement implements Constante{
 		float[] tab = this.CalculCIR(j); // Calcul position CIR
 		trans.setTranslation(new Vector3d(-tab[0], -tab[1], -tab[2]));
 		save2.set(trans);
-		rot.rotZ(-i * Math.abs(this.vehicule.getVitesse()) *Math.cos(this.vehicule.getangle()*Math.PI/180)*Math.PI / 180);
+		rot.rotZ(-i * Math.abs(this.vehicule.getVitesse())/3 *Math.cos(this.vehicule.getangle()*deg2rad)*deg2rad);
 		save2.mul(rot);
 		trans.invert();
 		save2.mul(trans);
@@ -259,9 +253,8 @@ public class AvanceVoiture extends Deplacement implements Constante{
 	private void RotationRoue(int i){
 
 		Transform3D save = new Transform3D();
-		Transform3D trans = new Transform3D();
-		Vector3d translation = new Vector3d();
 		Vector3d newvecteur = new Vector3d();
+
 		this.t1.getTransform(save);
 
 		double zactuel = this.world.GetZMNTPlan(((VoitureLibre) this.vehicule).getVWorldPositionRoues()[this.numroue][0],
@@ -273,14 +266,11 @@ public class AvanceVoiture extends Deplacement implements Constante{
 			z = -Constante.rayonroue/1.8;
 		}else{z= zactuel - zancien;}
 
-
-		newvecteur.set(translation.getX(), translation.getY(),/*Translation sur z */z);
+		newvecteur.setZ(z);
 
 		zancien= zactuel;
-		trans.setTranslation(newvecteur);
-
 		save.mul(rotationroue);
-		rotationroue.rotY(-i * 4*this.vehicule.getVitesse()/rayonroue *  Math.PI/180);
+		rotationroue.rotY(-i * 4*this.vehicule.getVitesse()/rayonroue *  deg2rad);
 		save.mul(rotationroue);
 		save.setTranslation(newvecteur);
 		this.t1.setTransform(save);
@@ -312,7 +302,7 @@ public class AvanceVoiture extends Deplacement implements Constante{
 	@Override
 	public void MouvementVertical(Boolean bool) {
 		// Nothing
-		
+
 	}
 
 }

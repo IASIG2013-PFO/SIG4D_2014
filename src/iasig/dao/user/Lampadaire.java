@@ -1,6 +1,6 @@
 package iasig.dao.user;
 
-import iasig.mobile.view.Tuile;
+import iasig.univers.view.Tuile;
 
 import org.postgis.PGgeometry;
 import org.postgis.Point;

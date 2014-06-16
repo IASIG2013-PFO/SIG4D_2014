@@ -11,6 +11,7 @@ import iasig.camera.math.Geometrie;
 import iasig.camera.math.Quaternion;
 import iasig.camera.math.Vector3;
 import iasig.mobile.elements.VehiculeLibre;
+import iasig.univers.view.Tuile;
 
 import com.sun.j3d.utils.universe.SimpleUniverse;
 
@@ -110,7 +111,7 @@ public class Camera {
 
 		// Initialisation des coordonnées camera a la vertical au niveau de
 		// Annecy
-		this.eye = new Point3d(948000.0d, 6532000.0d, 20000);
+		this.eye = new Point3d(948000.0d, 6532000.0d, 1500);
 		this.at = new Point3d(948000.0d, 6532000.0d, 0);
 		this.up = new Vector3d(1.0d, 0.0d, 0.0d);
 		this.ltn = ltn;
@@ -129,7 +130,7 @@ public class Camera {
 		qUpDown = new Quaternion();
 		qUpDown.setIdentity();
 
-		this.moveView(ltn.getWorld().getUnivers(), getEye(), getAt(), getUp());
+		//this.moveView(ltn.getWorld().getUnivers(), getEye(), getAt(), getUp());
 	}
 
 	// ///////////////////////////////////////////////////
@@ -257,14 +258,15 @@ public class Camera {
 		try {
 			// Mise a jour de la position de la camera au sein du Buffer
 			// peut necessiter une requete à la base de donnees
-			ltn.getWorld().CameraMovedTo(at.x, at.y);
+			ltn.getWorld().CameraMovedTo((eye.x + at.x)/2, (eye.y + at.y)/2);
 		} catch (IOException e) {
 			System.out
 					.println(e
 							+ " : Probleme de gestion du Buffer au moment d'un deplacement camera (cf. iasig.camera.gestionaffichage.camera.java)");
 			e.printStackTrace();
 		}
-
+		
+		this.ReglesAltitude();
 		simpleU.getViewingPlatform().getViewPlatformTransform()
 				.setTransform(lookAt);
 	}
@@ -510,4 +512,70 @@ public class Camera {
 		longitude = 0;
 		latitude = 0;
 	}
+	
+	
+	public void ReglesAltitude(){
+		int Z = (int) this.getEye().getZ();
+
+		if (Z>50000){
+			ltn.getWorld().getBuffer().setResolution(Tuile.R200);
+			return;
+		}
+		if (Z>25000){
+			ltn.getWorld().getBuffer().setResolution(Tuile.R100);
+			return;
+		}
+		if (Z>15000){
+			ltn.getWorld().getBuffer().setResolution(Tuile.R40);
+			return;
+		}
+		if (Z>7000){
+			ltn.getWorld().getBuffer().setResolution(Tuile.R20);
+			return;
+		}
+		if (Z>2000){
+			ltn.getWorld().getBuffer().setResolution(Tuile.R10);
+			return;
+		}
+			ltn.getWorld().getBuffer().setResolution(Tuile.R5);
+	}
+	
+	
+//		public void Anim(VehiculeLibre car){
+//	double[] tab2 = car.getVWorldPosition();
+//}
+//	// calcul des pas pour l'animation du double clic
+//				double pasEyex = (this.getEye().getX() - simpleU.
+//						VehiculeLibre.getX()) / 100;
+//				double pasEyey = (view.getEye().getY() - doubleclic.getY()) / 100;
+//				double pasEyez = ((view.getEye().getZ() - view.getAt().getZ()) / 2) / 100;
+//
+//				double pasAtx = (view.getAt().getX() - doubleclic.getX()) / 100;
+//				double pasAty = (view.getAt().getY() - doubleclic.getY()) / 100;
+//
+//				double pasphi = (phi / 100);
+//
+//				// lancement de l'animation
+//				for (int i = 0; i < 100; i++) {
+//					view.setEye(new Point3d(view.getEye().getX() - pasEyex, view
+//							.getEye().getY() - pasEyey, view.getEye().getZ()
+//							- pasEyez));
+//					view.setAt(new Point3d(view.getAt().getX() - pasAtx, view
+//							.getAt().getY() - pasAty, .0));
+//					phi -= pasphi;
+//					// MAJ CAM
+//					view.moveView(simpleU, view.getEye(), view.getAt(),
+//							view.getUp());
+//
+//					try {
+//						Thread.sleep(15);
+//					} catch (InterruptedException e) {
+//						System.out
+//								.println(e
+//										+ " : Probleme sur l'animation double clic de la cam (cf. iasig.camera.gestionaffichage.listeners.java)");
+//						e.printStackTrace();
+//					}
+//				
+//				
+//}
 }

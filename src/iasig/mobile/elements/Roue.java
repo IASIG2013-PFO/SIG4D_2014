@@ -1,7 +1,7 @@
 package iasig.mobile.elements;
 
 import iasig.mobile.deplacement.AvanceVoiture;
-import iasig.mobile.view.Constante;
+import iasig.univers.view.Constante;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;

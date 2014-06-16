@@ -1,8 +1,8 @@
 package iasig.mobile.deplacement;
 
 import iasig.mobile.elements.Dirigeable;
-import iasig.mobile.view.Constante;
-import iasig.mobile.view.World;
+import iasig.univers.view.Constante;
+import iasig.univers.view.World;
 
 import java.awt.AWTEvent;
 import java.awt.event.KeyEvent;

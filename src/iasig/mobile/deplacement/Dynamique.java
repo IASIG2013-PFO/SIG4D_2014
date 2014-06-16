@@ -1,8 +1,8 @@
 package iasig.mobile.deplacement;
 
 import iasig.mobile.elements.VoitureLibre;
-import iasig.mobile.view.Constante;
-import iasig.mobile.view.World;
+import iasig.univers.view.Constante;
+import iasig.univers.view.World;
 
 import java.util.Enumeration;
 
@@ -41,10 +41,6 @@ public class Dynamique extends Behavior implements Constante {
 	public void processStimulus(Enumeration enumevent) {
 
 		this.PitchAndRoll();		
-		
-		if(this.voiture.getCamera()){this.world.GestionCamera(0);}
-		else{this.world.GestionCameraConducteur(0);}
-		
 		this.wakeupOn(wakeupCondition);
 	}
 
@@ -59,23 +55,24 @@ public class Dynamique extends Behavior implements Constante {
 		this.world.GestionVoiture(0);
 		double coeff;
 		if(this.voiture.typevoiture == 1){
-			coeff = 5;
+			coeff = 1;
 		}else{
-			coeff = 5;
+			coeff = 3;
 		}
 
 		if( !Double.isNaN((this.voiture.roll - ancienroll))){
 			roll.setIdentity();
 			this.t1.setTransform(roll);
-			roll.rotX(-this.voiture.roll/coeff);
+			roll.rotX(-(this.voiture.roll)/(0.5*coeff));
 			this.t1.setTransform(roll);
+			ancienroll = voiture.roll;
 		}
-		if(!Double.isNaN(this.voiture.pitch)){
+		if(!Double.isNaN(this.voiture.pitch- ancienpitch)){
 			pitch.setIdentity();
 			this.t.setTransform(pitch);
-			pitch.rotY(this.voiture.pitch/coeff);
+			pitch.rotY((this.voiture.pitch)/(coeff));
 			this.t.setTransform(pitch);
-
+			ancienpitch = voiture.pitch;
 		}
 		
 	}

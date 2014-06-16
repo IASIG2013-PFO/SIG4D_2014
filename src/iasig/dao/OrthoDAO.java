@@ -11,7 +11,7 @@ import java.sql.SQLException;
 
 import javax.imageio.ImageIO;
 
-import iasig.mobile.view.Tuile;
+import iasig.univers.view.Tuile;
 
 /**
  * @author Jean-Fran�ois

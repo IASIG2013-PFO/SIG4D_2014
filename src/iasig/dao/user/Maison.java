@@ -140,5 +140,9 @@ public class Maison {
 		public void setNom(String nom) {
 			this.nom = nom;
 		}
+		public String getType() {
+			// TODO Auto-generated method stub
+			return nom;
+		}
 }
 

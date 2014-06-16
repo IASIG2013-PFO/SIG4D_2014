@@ -1,6 +1,6 @@
 package iasig.mobile.elements;
 
-import iasig.mobile.view.World;
+import iasig.univers.view.World;
 
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;

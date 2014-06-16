@@ -3,8 +3,8 @@
  */
 package iasig.dao;
 
-import iasig.mobile.view.MNT;
-import iasig.mobile.view.Tuile;
+import iasig.univers.view.MNT;
+import iasig.univers.view.Tuile;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

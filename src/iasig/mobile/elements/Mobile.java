@@ -11,7 +11,6 @@ public abstract class Mobile implements Runnable {
 	protected static int ACCELERATE = 1;
 	protected static int SLOWDOWN = -1;
 	protected static int STOP = -2;
-	protected static int CONSTANT = 0;
 	
 	//Nom du vehicule
 	protected String name;

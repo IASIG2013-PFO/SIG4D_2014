@@ -2,7 +2,7 @@ package iasig.mobile.deplacement;
 
 
 import iasig.mobile.elements.VehiculeLibre;
-import iasig.mobile.view.World;
+import iasig.univers.view.World;
 
 import java.awt.event.KeyEvent;
 import java.util.Enumeration;

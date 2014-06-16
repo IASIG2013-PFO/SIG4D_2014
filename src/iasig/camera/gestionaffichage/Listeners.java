@@ -2,7 +2,7 @@ package iasig.camera.gestionaffichage;
 
 import iasig.mobile.elements.VehiculeLibre;
 import iasig.camera.math.*;
-import iasig.mobile.view.*;
+import iasig.univers.view.World;
 
 import java.awt.KeyboardFocusManager;
 import java.awt.Point;
@@ -17,7 +17,6 @@ import java.util.Vector;
 
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
-import javax.media.j3d.View;
 import javax.swing.SwingUtilities;
 import javax.vecmath.Point3d;
 import javax.vecmath.Vector3d;
@@ -50,7 +49,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	 * @see Camera
 	 */
 	private Camera view;
-	
+
 	/**
 	 * Point enregistre au moment d'un "released" de la souris. En pixel.
 	 * 
@@ -74,86 +73,59 @@ public class Listeners implements MouseListener, MouseWheelListener,
 
 	/**
 	 * Booleen permettant de definir s'il s'agit oui ou non d'un nouveau clic.
-	 * 
+	 * true : nouveau clic. false : pas de nouveau clic.
 	 */
 	private boolean nouvclick;
 
 	/**
-	 * Booleen permettant de changer la vue en freeCam ou en voiture. true :
-	 * Freecam False : camera sur la voiture
-	 * 
+	 * Booleen permettant de changer la vue en freeCam ou en voiture.
+	 * True:Freecam False : camera sur la voiture
 	 */
 	private boolean FreeCar;
 
 	/**
-	 * @param freeCar the freeCar to set
-	 */
-	public void setFreeCar(boolean freeCar) {
-		FreeCar = freeCar;
-	}
-
-	/**
-	 * Booleen permettant de changer la vue interieur et exterieur pour la
-	 * voiture. true : position de la camera au dessus de la voiture False :
+	 * Booleen permettant de changer la vue interieure en vue exterieure pour la
+	 * voiture. True : position de la camera au dessus de la voiture False :
 	 * camera interieure
-	 * 
 	 */
 	private boolean InOutCar;
 
 	/**
-	 * Diff�rence en pixel (en x et y) entre le point courant et le dernier
-	 * point connu.
-	 * 
-	 * @see pt
-	 * @see LastPosition
-	 */
-	private double dx, dy, dz;
-
-	/**
-	 * Univers dans lequel se trouve le dessin.
+	 * Univers dans lequel se trouve le dessin et auquel on ajoute les
+	 * listeners.
 	 * 
 	 * @see SimpleUniverse
 	 */
 	private SimpleUniverse simpleU;
-	private World world;
+
 	/**
-	 * Latitude et longitude de la Camera par rapport au point vis�.
+	 * World dans lequel se trouve le dessin et auquel on ajoute les listeners.
 	 * 
+	 * @see World
+	 */
+	private World world;
+
+	/**
+	 * Angle entre la droite Camera/point vise et l'axe des z.
 	 */
 	private double theta;
-	/**
-	 * @param theta the theta to set
-	 */
-	public void setTheta(double theta) {
-		this.theta = theta;
-	}
 
 	/**
-	 * @param phi the phi to set
+	 * Angle entre la droite Camera/point vise et l'axe des x.
 	 */
-	public void setPhi(double phi) {
-		this.phi = phi;
-	}
-
 	private double phi;
 
 	/**
-	 * TransformGroup auquel est rattach�e la cam�ra.
+	 * TransformGroup auquel est rattachee la camera.
 	 * 
 	 * @see TransformGroup
 	 */
 	private TransformGroup mnt;
 
 	/**
-	 * Vecteur contenant la liste de tous les vehicule pr�sent dans l'univers.
-	 * 
+	 * Vecteur contenant la liste de tous les vehicules present dans l'univers.
 	 */
 	private Vector<VehiculeLibre> listevehicule;
-
-	// ENCOURSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-	// SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
-	private boolean zp = true;
-	private boolean zm = true;
 
 	// ///////////////////////////////////////////////////
 	// ////////////////Constructeur///////////////////////
@@ -162,60 +134,38 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	/**
 	 * Constructeur Listeners
 	 * <p>
-	 * A la construction d'un objet Listeners, on recup�re l'univers courant
-	 * aisni que le MNT, ce qui permet d'y associer les diff�rents mouvements de
-	 * la souris. On ajoute une vue par d�faut.
+	 * A la construction d'un objet Listeners, on recupere l'univers courant
+	 * aisni que le MNT, ce qui permet d'y associer les differents mouvements de
+	 * la souris. On ajoute une vue par defaut.
 	 * </p>
 	 * 
 	 * @param simpleU
-	 *            SimpleUniverse courant.
-	 * @see Listeners#simpleU
-	 * @see Listeners#mnt
+	 *            SimpleUniverse courant dans lequel sont rattaches les
+	 *            listeners.
+	 * @param world
+	 *            World courant dans lequel sont rattaches les listeners.
+	 * @param listevehicule
+	 *            Vecteur contenant la liste des vehicules libres contenue dans
+	 *            la scène (world).
 	 */
 	public Listeners(SimpleUniverse simpleU, World world,
 			Vector<VehiculeLibre> listevehicule) {
+		// Initialisation de la classe listener
 		this.listevehicule = listevehicule;
 		this.simpleU = simpleU;
 		this.world = world;
 		this.mnt = world.getTg2();
-		System.out.println("ltn construit "+world.getHeight());
 		view = new Camera(this);
-		view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)), Math
-				.sin(Math.toRadians(theta)), 0));
-		
+		view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)), Math.sin(Math
+				.toRadians(theta)), 0));
 	}
-
+	
 	// ///////////////////////////////////////////////////
 	// ///////////Getteurs et Setteurs////////////////////
 	// ///////////////////////////////////////////////////
-	
-	public World getWorld(){
-		return world;
-	}
 
 	/**
-	 * Booleen permettant de passer de cam�ra exterieure en FreeCam et
-	 * inversement
-	 * 
-	 * @return the freeCar
-	 * 
-	 */
-	public boolean isFreeCar() {
-		return FreeCar;
-	}
-
-	/**
-	 * Booleen permettant de passer de cam�ra exterieure en cam�ra int�rieure
-	 * 
-	 * @return the InOutCar
-	 * 
-	 */
-	public boolean isInOutCar() {
-		return InOutCar;
-	}
-
-	/**
-	 * Getteur permettant de r�cup�rer le lookAt gerant la cam�ra
+	 * Recuperation de la camera courante qui est rattachee les listeners
 	 * 
 	 * @return the view
 	 */
@@ -223,44 +173,115 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		return view;
 	}
 
+	/**
+	 * Recuperation du World courant auquel sont rattaches les listeners
+	 * 
+	 * @return the world
+	 */
+	public World getWorld() {
+		return world;
+	}
+
+	/**
+	 * Recuperation du booleen permettant de savoir si la camera est en position
+	 * exterieure ou FreeCam.
+	 * 
+	 * @return freeCar
+	 */
+	public boolean isFreeCar() {
+		return FreeCar;
+	}
+
+	/**
+	 * Mise a jour du booleen FreeCar permettant de placer la camera est en
+	 * position exterieure ou FreeCam.
+	 * 
+	 * @param freeCar
+	 */
+	public void setFreeCar(boolean freeCar) {
+		this.FreeCar = freeCar;
+	}
+
+	/**
+	 * Recuperation du booleen permettant de passer de la camera exterieure en
+	 * camera interieure seulement pour la vue vehicule
+	 * 
+	 * @return InOutCar
+	 */
+	public boolean isInOutCar() {
+		return InOutCar;
+	}
+
+	/**
+	 * Mise a jour du booleen InOutCar permettant de placer la camera en
+	 * position interieure ou exterieure dans le vehicule courant.
+	 * 
+	 * @param inOutCar
+	 */
+	public void setInOutCar(boolean inOutCar) {
+		this.InOutCar = inOutCar;
+	}
+
+	/**
+	 * Mise a jour de l'angle entre la droite Camera/point vise et l'axe des x
+	 * (theta)
+	 * 
+	 * @param theta
+	 */
+	public void setTheta(double theta) {
+		this.theta = theta;
+	}
+
+	/**
+	 * Mise a jour de l'angle entre la droite Camera/point vise et l'axe des z
+	 * (phi)
+	 * 
+	 * @param phi
+	 */
+	public void setPhi(double phi) {
+		this.phi = phi;
+	}
+
 	// ///////////////////////////////////////////////////
 	// /////////////Listerners Souris/////////////////////
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Listener permettant de g�rer le zoom de la Camera.
+	 * Listener permettant de gerer le zoom de la Camera.
 	 * <p>
-	 * Listener activ� � l'activation de la molette de la souris.
+	 * Listener active a l'activation de la molette de la souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseWheelListener
-	 * 
 	 */
 	@Override
 	public void mouseWheelMoved(MouseWheelEvent arg0) {
 
+		// Difference en x,y et z entre le point vise et l'oeil de la camera
+		double dx, dy, dz;
+
 		if (arg0.getWheelRotation() < 0) {
 			// rotation molette UP
-			System.out.println("Zoom+");
-//			if (FreeCar) { // cam mnt
+			if (FreeCar) { // cam mnt
 				double z = world.GetZMNTPlan(view.getEye().x, view.getEye().y);
-				//double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
-//				System.out.println(z+" z");
+				// double z =
+				// world.getTuileCourante().getMNT().altitude(view.getEye().x,
+				// view.getEye().y);
+				// System.out.println(z+" z");
 				if (view.mntAlt(view.getEye().z, z)) {
-					zp = true;
-					// Point vis� au moment de l'action zoom
+					// Point vise au moment de l'action zoom
 					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
-//					System.out.println(pt);
-//					// angle d'horizon
+					// System.out.println(pt);
+					// // angle d'horizon
 					int horizon = -68;
 					if (phi < horizon) {
-						dx = (double) (view.getAt().x - view.getEye().x)/15;
-						dy = (double) (view.getAt().y - view.getEye().y)/15;
-						dz = (double) (view.getAt().z - view.getEye().z)/15;
-						System.out.println(dx + " "+dy+" "+dz);
+						dx = (double) (view.getAt().x - view.getEye().x) / 15;
+						dy = (double) (view.getAt().y - view.getEye().y) / 15;
+						dz = (double) (view.getAt().z - view.getEye().z) / 15;
+						System.out.println(dx + " " + dy + " " + dz);
 					} else {
 						dx = (double) ((pt.x - view.getEye().x) / 15);
 						dy = (double) ((pt.y - view.getEye().y) / 15);
@@ -277,129 +298,126 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					// MAJ de la view
 					view.moveView(simpleU, view.getEye(), view.getAt(),
 							view.getUp());
-				
-				} //else {
-//					zp = false;
-//				}
-//			} else if (!InOutCar) {// derri�re voiture
-////				view.setEye(new Point3d(view.getEye().getX()
-////						- (view.getEye().getX() - view.getAt().getX()) / 15,
-////						view.getEye().getY()
-////								- (view.getEye().getY() - view.getAt().getY())
-////								/ 15, view.getEye().getZ()
-////								- (view.getEye().getZ() - view.getAt().getZ())
-////								/ 15));
-////
-////				view.moveView(simpleU, view.getEye(), view.getAt(),
-////						view.getUp());
-//				view.incrZoom();
 
-//			}
+				} else {
+//					 this.setFreeCar(false);
+//					 VoitureLibre car = new VoitureLibre(
+//					 (float) view.getEye().getX(), (float)
+//					 view.getEye().getY(), (float) z ,4f,2f,1f,2);
+//					 world.AddVehicule(car);
+					 
+					 
+				 	}
+			} else if (!InOutCar) {// derri�re voiture
+				view.setEye(new Point3d(view.getEye().getX()
+						- (view.getEye().getX() - view.getAt().getX()) / 15,
+						view.getEye().getY()
+								- (view.getEye().getY() - view.getAt().getY())
+								/ 15, view.getEye().getZ()
+								- (view.getEye().getZ() - view.getAt().getZ())
+								/ 15));
+
+				view.moveView(simpleU, view.getEye(), view.getAt(),
+						view.getUp());
+				view.incrZoom();
+
+			}
 		} else if (arg0.getWheelRotation() > 0) {
 			// rotation molette UP
 			System.out.println("Zoom-");
 
-//			if (FreeCar) { // cam mnt
+			if (FreeCar) { // cam mnt
 				// Calcul de l'alti
-				//double z = world.GetZMNTPlan(view.getEye().x, view.getEye().y);
-				//double z = world.getTuileCourante().getMNT().altitude(view.getEye().x, view.getEye().y);
-				//if (view.mntAlt(view.getEye().z, z) || !zp) {
-					zm = true;
-					Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
-//					System.out.println(pt);
-//					// angle d'horizon
-					int horizon = -68;
-					if (phi < horizon) {
-						dx = (double) (view.getAt().x - view.getEye().x)/15;
-						dy = (double) (view.getAt().y - view.getEye().y)/15;
-						dz = (double) (view.getAt().z - view.getEye().z)/15;
-						System.out.println(dx + " "+dy+" "+dz);
-					} else {
-						dx = (double) ((pt.x - view.getEye().x) / 15);
-						dy = (double) ((pt.y - view.getEye().y) / 15);
-						dz = (double) ((pt.z - view.getEye().z) / 15);
-					}
-					// Actualisation de la position de la cam�ra
-					view.setEye(new Point3d(view.getEye().x - dx,
-							view.getEye().y - dy, view.getEye().z - dz));
-
-					// Actualisation du point vis� lors du ZOOM
-					view.setAt(new Point3d(view.getAt().x - dx, view.getAt().y
-							- dy, view.getAt().z - dz));
-
-					// MAJ de la view
-					view.moveView(simpleU, view.getEye(), view.getAt(),
-							view.getUp());
+				// double z = world.GetZMNTPlan(view.getEye().x,
+				// view.getEye().y);
+				// double z =
+				// world.getTuileCourante().getMNT().altitude(view.getEye().x,
+				// view.getEye().y);
+				// if (view.mntAlt(view.getEye().z, z) || !zp) {
+				Point3d pt = new Point3d(getPosition(arg0, simpleU, mnt));
+				// System.out.println(pt);
+				// // angle d'horizon
+				int horizon = -68;
+				if (phi < horizon) {
+					dx = (double) (view.getAt().x - view.getEye().x) / 15;
+					dy = (double) (view.getAt().y - view.getEye().y) / 15;
+					dz = (double) (view.getAt().z - view.getEye().z) / 15;
+					System.out.println(dx + " " + dy + " " + dz);
 				} else {
-					zm = false;
+					dx = (double) ((pt.x - view.getEye().x) / 15);
+					dy = (double) ((pt.y - view.getEye().y) / 15);
+					dz = (double) ((pt.z - view.getEye().z) / 15);
 				}
-//			}else if (!InOutCar) {// derri�re voiture
-//				view.setEye(new Point3d(view.getEye().getX()
-//						+ (view.getEye().getX() - view.getAt().getX()) / 15,
-//						view.getEye().getY()
-//								+ (view.getEye().getY() - view.getAt().getY())
-//								/ 15, view.getEye().getZ()
-//								+ (view.getEye().getZ() - view.getAt().getZ())
-//								/ 15));
-//
-//				view.moveView(simpleU, view.getEye(), view.getAt(),
-//						view.getUp());
-//				view.decrZoom();
-//
-//			}
-			
-//		}
-		
+				// Actualisation de la position de la cam�ra
+				view.setEye(new Point3d(view.getEye().x - dx, view.getEye().y
+						- dy, view.getEye().z - dz));
+
+				// Actualisation du point vis� lors du ZOOM
+				view.setAt(new Point3d(view.getAt().x - dx,
+						view.getAt().y - dy, view.getAt().z - dz));
+
+				// MAJ de la view
+				view.moveView(simpleU, view.getEye(), view.getAt(),
+						view.getUp());
+			} else if (!InOutCar) {// derri�re voiture
+				view.setEye(new Point3d(view.getEye().getX()
+						+ (view.getEye().getX() - view.getAt().getX()) / 15,
+						view.getEye().getY()
+								+ (view.getEye().getY() - view.getAt().getY())
+								/ 15, view.getEye().getZ()
+								+ (view.getEye().getZ() - view.getAt().getZ())
+								/ 15));
+
+				view.moveView(simpleU, view.getEye(), view.getAt(),
+						view.getUp());
+				view.decrZoom();
+
+			}
+
+		}
 	}
 
 	/**
-	 * @param inOutCar the inOutCar to set
-	 */
-	public void setInOutCar(boolean inOutCar) {
-		InOutCar = inOutCar;
-	}
-
-	/**
-	 * Listener permettant de g�rer le d�placement de la Camera ainsi que sa
+	 * Listener permettant de gerer le deplacement de la Camera ainsi que sa
 	 * rotation sur l'axe phi et theta.
 	 * <p>
-	 * Listener activ� au d�placement de la souris ainsi qu'un clic.
+	 * Listener active au deplacement de la souris ainsi qu'un clic.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
 	 */
 	@Override
-	public void mouseDragged(java.awt.event.MouseEvent arg0) {
+	public void mouseDragged(MouseEvent arg0) {
 
-		// aucun d�placement n'a encore �t� fait ou il s'agit d'un nouveau
-		// click
-		if (ReleasedPosition == null | nouvclick == true) {
+		// aucun deplacement n'a encore ete fait ou il s'agit d'un nouveau
+		// clic
+		if (ReleasedPosition == null || nouvclick == true) {
 			ReleasedPosition = PressedPosition;
 		}
-
-		// r�cup�ration du Point courant
+		// recuperation du Point courant
 		DraggedPosition = arg0.getPoint();
+
+		// Difference de pixels en x et en y entre le point courant et le
+		// dernier point connu.
+		double dx, dy;
 
 		if (SwingUtilities.isLeftMouseButton(arg0)) {
 			// click gauche
-			//System.out.println("click gauche");
-
-			// la souris se trouve dans l'�cran
+			// la souris se trouve dans l'ecran
 			if (DraggedPosition.getX() == 0
-					| DraggedPosition.getY() == 0
-					| DraggedPosition.getX() == KeyboardFocusManager
+					|| DraggedPosition.getY() == 0
+					|| DraggedPosition.getX() == KeyboardFocusManager
 							.getCurrentKeyboardFocusManager().getActiveWindow()
 							.getSize().width
-					| DraggedPosition.getY() == KeyboardFocusManager
+					|| DraggedPosition.getY() == KeyboardFocusManager
 							.getCurrentKeyboardFocusManager().getActiveWindow()
 							.getSize().height) {
-				System.out.println("souris en dehors de l'�cran");
+				System.out.println("souris en dehors de l'ecran");
 			} else {
-				// calcul du d�placement iasig.global
+				// calcul du deplacement global
 				dx = (DraggedPosition.getX() - ReleasedPosition.getX());
 				dy = (DraggedPosition.getY() - ReleasedPosition.getY());
 
@@ -419,75 +437,117 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					}
 				} else if (FreeCar) { // cam mnt
 					int scale = (int) (view.getEye().z / 200 + 1);
-					//System.out.println(scale);
 					dx *= .15 * scale;
 					dy *= .15 * scale;
 
-					// Calcul des nouvelles coordonn�es de la cam�ra
-					Point3d eye = new Point3d(view.getEye().x + dy
-							* Math.cos(Math.toRadians(theta)) - dx
-							* Math.sin(Math.toRadians(theta)), view.getEye().y
-							+ dy * Math.sin(Math.toRadians(theta)) + dx
-							* Math.cos(Math.toRadians(theta)), view.getEye().z);
+					Point3d eye = new Point3d();
+					Point3d at = new Point3d();
 
-					Point3d at = new Point3d(view.getAt().x + dy
-							* Math.cos(Math.toRadians(theta)) - dx
-							* Math.sin(Math.toRadians(theta)), view.getAt().y
-							+ dy * Math.sin(Math.toRadians(theta)) + dx
-							* Math.cos(Math.toRadians(theta)), view.getAt()
-							.getZ());
+					if (view.mntAlt(view.getEye().z,
+							world.GetZMNTPlan(view.getEye().x, view.getEye().y))) {
+						// Calcul des nouvelles coordonnees de la camera
+						eye = new Point3d(view.getEye().x + dy
+								* Math.cos(Math.toRadians(theta)) - dx
+								* Math.sin(Math.toRadians(theta)),
+								view.getEye().y + dy
+										* Math.sin(Math.toRadians(theta)) + dx
+										* Math.cos(Math.toRadians(theta)),
+								view.getEye().z);
 
+						at = new Point3d(view.getAt().x + dy
+								* Math.cos(Math.toRadians(theta)) - dx
+								* Math.sin(Math.toRadians(theta)),
+								view.getAt().y + dy
+										* Math.sin(Math.toRadians(theta)) + dx
+										* Math.cos(Math.toRadians(theta)), view
+										.getAt().getZ());
+
+					} else {
+						// Calcul des nouvelles coordonnees de la camera
+						eye = new Point3d(view.getEye().x + dy
+								* Math.cos(Math.toRadians(theta)) - dx
+								* Math.sin(Math.toRadians(theta)),
+								view.getEye().y + dy
+										* Math.sin(Math.toRadians(theta)) + dx
+										* Math.cos(Math.toRadians(theta)),
+								view.getEye().z);
+
+						eye.z = world.GetZMNTPlan(view.getEye().x,
+								view.getEye().y) + 50;
+
+						at = new Point3d(view.getAt().x + dy
+								* Math.cos(Math.toRadians(theta)) - dx
+								* Math.sin(Math.toRadians(theta)),
+								view.getAt().y + dy
+										* Math.sin(Math.toRadians(theta)) + dx
+										* Math.cos(Math.toRadians(theta)), view
+										.getAt().getZ());
+					}
 					// MAJ CAM
+
 					view.setEye(eye);
 					view.setAt(at);
 					view.moveView(simpleU, view.getEye(), view.getAt(),
 							view.getUp());
-
-					//System.out.println(pt.getX() + " " + pt.getY() + " ");
 				}
-
 			}
+
 		} else if (SwingUtilities.isRightMouseButton(arg0)) {
 			// click droit
-			System.out.println("click droit");
-
 		}
 
 		else if (SwingUtilities.isMiddleMouseButton(arg0)) {
 			// click molette
-			System.out.println("click roulette");
-			
 			Point pt_vis = arg0.getPoint();
-			
+
 			// on gere la rotation autour du point clique
 			double diffx = pt_vis.getX() - ReleasedPosition.getX();
 			double diffy = pt_vis.getY() - ReleasedPosition.getY();
 
-			
-			// Calcul des nouvelles coordonn�es de la cam�ra
-
 			if (!InOutCar && FreeCar) { // camera free (mnt)
 
+				// MAJ des angles phi et theta
 				updateAngles(Math.abs(diffx), Math.abs(diffy));
-				System.out.println("molette freeeeee");
-				System.out.println(view.getAt()+" V");
-				System.out.println(view.getEye()+" E");
+				Point3d pAt = new Point3d();
+				pAt.x = view.getAt().x;
+				pAt.y = view.getAt().y;
+				pAt.z = world.GetZMNTPlan(pAt.x, pAt.y);
+				view.setAt(pAt);
 				double dist = Geometrie.distance(view.getAt(), view.getEye());
-				view.setEye(new Point3d(view.getAt().x + dist
-						* Math.cos(Math.toRadians(theta))
-						* Math.sin(Math.toRadians(phi)), view.getAt().y + dist
-						* Math.sin(Math.toRadians(theta))
-						* Math.sin(Math.toRadians(phi)), view.getAt().z + dist
-						* Math.cos(Math.toRadians(phi))));
+				if (view.mntAlt(view.getEye().z,
+						world.GetZMNTPlan(view.getEye().x, view.getEye().y))) {
+					// view.setAt(view.getAt());
+					view.setEye(new Point3d(view.getAt().x + dist
+							* Math.cos(Math.toRadians(theta))
+							* Math.sin(Math.toRadians(phi)), view.getAt().y
+							+ dist * Math.sin(Math.toRadians(theta))
+							* Math.sin(Math.toRadians(phi)), view.getAt().z
+							+ dist * Math.cos(Math.toRadians(phi))));
 
-				view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)), Math
-						.sin(Math.toRadians(theta)), 0));
+					view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)),
+							Math.sin(Math.toRadians(theta)), 0));
+					// view.setUp(new Vector3d(.0,.0,.0));
+					view.moveView(simpleU, view.getEye(), view.getAt(),
+							view.getUp());
+				} else {
+					phi = phi + 2;
+					view.setEye(new Point3d(view.getAt().x + dist
+							* Math.cos(Math.toRadians(theta))
+							* Math.sin(Math.toRadians(phi)), view.getAt().y
+							+ dist * Math.sin(Math.toRadians(theta))
+							* Math.sin(Math.toRadians(phi)), view.getAt().z
+							+ dist * Math.cos(Math.toRadians(phi))));
 
-				view.moveView(simpleU, view.getEye(), view.getAt(),
-						view.getUp());
+					view.setUp(new Vector3d(Math.cos(Math.toRadians(theta)),
+							Math.sin(Math.toRadians(theta)), 0));
+					// view.setUp(new Vector3d(.0,.0,.0));
+					view.moveView(simpleU, view.getEye(), view.getAt(),
+							view.getUp());
+				}
 
 			} else if (!InOutCar && !FreeCar) { // camera ext suivant la voiture
-				System.out.println("molette derriere");
+				// modification des angles longitude et lattitude présent dans
+				// la classe iasig.camera.gestionaffichage.camera.java
 				if (Math.abs(diffx) > Math.abs(diffy)) {
 					if (diffx > 0) {
 						view.incrLon();
@@ -502,164 +562,155 @@ public class Listeners implements MouseListener, MouseWheelListener,
 					}
 				}
 			}
-
 		}
 
+		// MAJ de la position du released
 		ReleasedPosition = DraggedPosition;
+		// RAZ du nouveau clic
 		nouvclick = false;
 	}
 
 	/**
-	 * Listener permettant de g�rer le d�placement de la Camera.
+	 * Listener mouseMoved par defaut.
 	 * <p>
-	 * Listener activ� au d�placement de la souris.
+	 * Listener active au deplacement de la souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
 	 */
 	@Override
-	public void mouseMoved(java.awt.event.MouseEvent arg0) {
+	public void mouseMoved(MouseEvent arg0) {
 	}
 
 	/**
-	 * Listener permettant de d'enregistrer les positions courantes et de
-	 * zoomer.
+	 * Listener permettant de d'enregistrer permet de zoomer avec une animation
+	 * au moment d'un double clic.
 	 * <p>
-	 * Listener activ� au d�placement au clic de la souris.
+	 * Listener active au deplacement au clic de la souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
 	 */
 	@Override
 	public void mouseClicked(java.awt.event.MouseEvent arg0) {
-		// Cette m�thode est appel�e quand l'utilisateur a cliqu� (appuy� puis
-		// rel�ch�) sur le composant �cout�
+		// Cette methode est appelee quand l'utilisateur a clique (appuye puis
+		// relache) sur le composant ecoute
 		if (arg0.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(arg0)) {
-			System.out.println("Il y a eu un double clic");
+			// Un double clic a ete effectue
+			// recuperation de la position du double clic
+			Point3d doubleclic = new Point3d();
+			doubleclic = getPosition(arg0, simpleU, mnt);
 
-			Point3d aa = new Point3d();
+			// calcul des pas pour l'animation du double clic
+			double pasEyex = (view.getEye().getX() - doubleclic.getX()) / 100;
+			double pasEyey = (view.getEye().getY() - doubleclic.getY()) / 100;
+			double pasEyez = ((view.getEye().getZ() - view.getAt().getZ()) / 2) / 100;
 
-			aa = getPosition(arg0, simpleU, mnt);
-			
-			double pasEyex = (view.getEye().getX() - aa.getX()) / 100;
-			double pasEyey = (view.getEye().getY() - aa.getY()) / 100;
-			double pasEyez = ((view.getEye().getZ() - view.getAt().getZ())/2) / 100;
-			
-			double pasAtx = (view.getAt().getX() - aa.getX()) / 100;
-			double pasAty = (view.getAt().getY() - aa.getY()) / 100;
-			
-			double pasphi = (phi/100);
-			
+			double pasAtx = (view.getAt().getX() - doubleclic.getX()) / 100;
+			double pasAty = (view.getAt().getY() - doubleclic.getY()) / 100;
+
+			double pasphi = (phi / 100);
+
+			// lancement de l'animation
 			for (int i = 0; i < 100; i++) {
-				
-				view.setEye(new Point3d(view.getEye().getX()-pasEyex, view.getEye().getY()-pasEyey, view.getEye().getZ()-pasEyez));
-				view.setAt(new Point3d(view.getAt().getX()-pasAtx, view.getAt().getY()-pasAty, .0));
+				view.setEye(new Point3d(view.getEye().getX() - pasEyex, view
+						.getEye().getY() - pasEyey, view.getEye().getZ()
+						- pasEyez));
+				view.setAt(new Point3d(view.getAt().getX() - pasAtx, view
+						.getAt().getY() - pasAty, .0));
 				phi -= pasphi;
-				
-
 				// MAJ CAM
-				view.moveView(simpleU, view.getEye(), view.getAt(), view.getUp());
-				
+				view.moveView(simpleU, view.getEye(), view.getAt(),
+						view.getUp());
+
 				try {
 					Thread.sleep(15);
 				} catch (InterruptedException e) {
 					System.out
-							.println("Probl�me sur la MAZ de la cam @see mazAngles");
+							.println(e
+									+ " : Probleme sur l'animation double clic de la cam (cf. iasig.camera.gestionaffichage.listeners.java)");
 					e.printStackTrace();
 				}
 			}
-
-//			view.setEye(new Point3d(aa.getX(), aa.getY(), view.getEye().z / 5));
-//			view.setAt(new Point3d(aa.getX(), aa.getY(), .0));
-//			phi = 0;
-//
-//			// MAJ CAM
-//			view.moveView(simpleU, view.getEye(), view.getAt(), view.getUp());
 		}
 	}
 
 	/**
-	 * Listener par d�faut.
+	 * Listener mouseEntered par defaut.
 	 * <p>
-	 * Listener activ� lorsque que la souris rentre dans la fen�tre courante.
+	 * Listener active lorsque que la souris rentre dans la fenetre courante.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
 	 */
 	@Override
-	public void mouseEntered(java.awt.event.MouseEvent arg0) {
-
+	public void mouseEntered(MouseEvent arg0) {
 	}
 
 	/**
-	 * Listener par d�faut.
+	 * Listener mouseExited par defaut.
 	 * <p>
-	 * Listener activ� lorsque que la souris sort dans la fen�tre courante.
+	 * Listener active lorsque que la souris sort dans la fenetre active.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
 	 */
 	@Override
-	public void mouseExited(java.awt.event.MouseEvent arg0) {
-
+	public void mouseExited(MouseEvent arg0) {
 	}
 
 	/**
-	 * Listener permettant de r�cuperer la premi�re position et le double clic
-	 * zoom.
+	 * Listener permettant de recuperer la position de la souris au moment du
+	 * Pressed et d'initialiser un nouveau clic (MAJ d'un booleen)
 	 * <p>
-	 * Listener activ� � l'enfoncement du bouton souris.
+	 * Listener active a l'enfoncement du bouton souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
+	 * @see Listeners#PressedPosition
+	 * @see Listeners#nouvclick
 	 */
 	@Override
-	public void mousePressed(java.awt.event.MouseEvent arg0) {
-		System.out.println("Initialisation pt vis� !");
+	public void mousePressed(MouseEvent arg0) {
+		// Initialisation du point souris
 		PressedPosition = arg0.getPoint();
+		// creation d'un nouveau clic
 		nouvclick = true;
-
 	}
 
 	/**
-	 * Listener permettant de r�cuperer la derni�re position.
+	 * Listener permettant de recuperer la derniere position.
 	 * <p>
-	 * Listener activ� au relachement du bouton souris.
+	 * Listener active au relachement du bouton souris.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement souris associ� au listener.
+	 *            Evenement souris associe au listener.
 	 * 
 	 * @see MouseEvent
-	 * 
 	 */
 	@Override
-	public void mouseReleased(java.awt.event.MouseEvent arg0) {
+	public void mouseReleased(MouseEvent arg0) {
+		// recuperation de la position souris au moment du released
 		ReleasedPosition = arg0.getPoint();
-
+		// lancement de l'animation vue interieure si vue vehicule interieure
 		if (InOutCar)
 			view.mazAnglesByStep();
-
 	}
 
 	// ///////////////////////////////////////////////////
@@ -667,93 +718,90 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * Listeners KeyPressed.
+	 * Listeners KeyPressed. Permet de mettre a jour deux booleen : InOutCar,
+	 * Freecar
 	 * <p>
-	 * Listener activ� quand une touche est press�e.
+	 * Listener active quand une touche est pressee.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement clavier associ� au listener.
+	 *            Evenement clavier associe au listener.
 	 * 
 	 * @see KeyEvent
-	 * 
+	 * @see Listeners#FreeCar
+	 * @see Listeners#InOutCar
 	 */
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		switch (arg0.getKeyChar()) {
-
-		// Gestion du la vue en freeCam ou ext�rieure
-		// MAJ d'un Booleen
 		case ('a'): {
-
+			// Gestion du la vue en freeCam ou exterieure
+			// MAJ d'un Booleen
 			FreeCar = !FreeCar;
 			view.setZoom(0.);
 			InOutCar = false;
 			view.mazAngles();
 			if (FreeCar) {
+				// RAZ des angles phi et theta car mise en place de la Freecam
 				phi = -89;
 				theta = 45;
 				view.IniCamFree(listevehicule.firstElement(), simpleU);
 			} else {
+				// Mise en place de la camera vehicule exterieure
 				view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
 			}
 			// Have a Break...
 			break;
 		}
-
-		// Gestion du la vue en interieure ou ext�rieure de la cam�ra
-		// (MAJ d'un Booleen)
 		case ('z'): {
-			
+			// Gestion du la vue en interieure ou exterieure de la camera
+			// MAJ d'un Booleen
 			InOutCar = !InOutCar;
 			view.setZoom(0.);
 			view.mazAngles();
 			if (InOutCar) {
+				// Mise en place de la camera vehicule interieure
 				view.GestionCamInterieure(listevehicule.firstElement(), simpleU);
 			} else {
+				// Mise en place de la camera vehicule exterieure
 				view.GestionCamExterieure(listevehicule.firstElement(), simpleU);
 			}
-
 			// Have a Break...
 			break;
 		}
 		}
-
 	}
 
 	/**
-	 * Listener par d�faut.
+	 * Listener KeyReleased par defaut.
 	 * <p>
-	 * Listener activ� lorsque qu'un touche clavier est relach�e.
+	 * Listener active lorsque qu'un touche clavier est relachee.
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement clavier associ� au listener.
+	 *            Evenement clavier associe au listener.
 	 * 
 	 * @see KeyEvent
-	 * 
 	 */
 	@Override
 	public void keyReleased(KeyEvent e) {
-
 	}
 
 	/**
-	 * Listener par d�faut.
+	 * Listener keyTyped par defaut.
 	 * <p>
-	 * Listener activ� lorsque qu'un touche clavier est tap�e
+	 * Listener active lorsque qu'un touche clavier est tapee
 	 * (Pressed+Released).
 	 * </p>
 	 * 
 	 * @param arg0
-	 *            Evenement clavier associ� au listener.
+	 *            Evenement clavier associe au listener.
 	 * 
 	 * @see KeyEvent
 	 * 
 	 */
 	@Override
 	public void keyTyped(KeyEvent e) {
-
 	}
 
 	// ///////////////////////////////////////////////////
@@ -761,17 +809,20 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	// ///////////////////////////////////////////////////
 
 	/**
-	 * M�thode de passage des coordonn�es pixels au coordonn�es 3D dans la
+	 * Methode de passage des coordonnees pixels au coordonnees 3D dans la
 	 * scene.
 	 * 
-	 * 
+	 * @param event
+	 *            MouseEvent regroupant les informations de la position de la
+	 *            souris au moment du "pressed".
 	 * @param simpleU
-	 *            SimpleUniverse courant.
-	 * @param MouseEvent
-	 *            Evenements souris pour r�cuperer les pixels x et y.
+	 *            SimpleUniverse courant ou sont rattaches les listeners.
 	 * @param mnt
 	 *            TransformGroup ayant subi les transformations 3D faite
-	 *            pr�c�demment.
+	 *            precedemment.
+	 * 
+	 * @return intersection Point3d representant les coordonnees en 3D du point
+	 *         visé.
 	 */
 	public Point3d getPosition(MouseEvent event, SimpleUniverse simpleU,
 			TransformGroup mnt) {
@@ -786,29 +837,19 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		transform.transform(mousePos);
 		Vector3d direction = new Vector3d(eyePos);
 		direction.sub(mousePos);
-		//-- TEST
-		//double Xmax = world.getTuileCourante().Xmax;
-		//double Xmin = world.getTuileCourante().Xmin;
-		//double Ymax = world.getTuileCourante().Ymax;
-		//double Ymin = world.getTuileCourante().Ymin;
-		
-		System.out.println("tuile courante " + this.getWorld().getTuileCourante());
-		System.out.println("mnt de la tuile " + this.getWorld().getTuileCourante().getMNT());
-
-		
-		double Xmean = this.getWorld().getTuileCourante().getMNT().getXmean();
-		double Ymean = this.getWorld().getTuileCourante().getMNT().getYmean();
-		//-- TEST
-		System.out.println(Xmean+" "+Ymean);
+		double Xmean = this.world.getTuileCourante().getMNT().getXmean();
+		double Ymean = this.world.getTuileCourante().getMNT().getYmean();
 		// three points on the plane
-		Point3d p1 = new Point3d(Xmean,Ymean - .5*Math.cos(Math.toRadians(phi)),
-				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p2 = new Point3d(-Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
-				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p3 = new Point3d(Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
-				.5 * Math.sin(Math.toRadians(phi)));
+		Point3d p1 = new Point3d(Xmean, Ymean - .5
+				* Math.cos(Math.toRadians(phi)), .5 * Math.sin(Math
+				.toRadians(phi)));
+		Point3d p2 = new Point3d(-Xmean, Ymean + .5
+				* Math.cos(Math.toRadians(phi)), .5 * Math.sin(Math
+				.toRadians(phi)));
+		Point3d p3 = new Point3d(Xmean, Ymean + .5
+				* Math.cos(Math.toRadians(phi)), .5 * Math.sin(Math
+				.toRadians(phi)));
 		Transform3D currentTransform = new Transform3D();
-		//mnt.getLocalToVworld(currentTransform);
 		currentTransform.transform(p1);
 		currentTransform.transform(p2);
 		currentTransform.transform(p3);
@@ -819,21 +860,21 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * M�thode de passage des coordonn�es pixels au coordonn�es 3D dans la
+	 * Methode de passage des coordonnees pixels au coordonnees 3D dans la
 	 * scene.
 	 * 
-	 * 
-	 * @param simpleU
-	 *            SimpleUniverse courant.
 	 * @param x
-	 *            pixel en x de la souris au moment du clic.
-	 * 
+	 *            pixels en x de la souris au moment du clic.
 	 * @param y
-	 *            pixel en y de la souris au moment du clic.
-	 * 
+	 *            pixels en y de la souris au moment du clic.
+	 * @param simpleU
+	 *            SimpleUniverse courant ou sont rattaches les listeners.
 	 * @param mnt
 	 *            TransformGroup ayant subi les transformations 3D faite
-	 *            pr�c�demment.
+	 *            precedemment.
+	 * 
+	 * @return intersection Point3d representant les coordonnees en 3D du point
+	 *         visé.
 	 */
 	public Point3d getPosition(int x, int y, SimpleUniverse simpleU,
 			TransformGroup mnt) {
@@ -847,20 +888,20 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		transform.transform(mousePos);
 		Vector3d direction = new Vector3d(eyePos);
 		direction.sub(mousePos);
-		// three points on the plane		
-		double Xmean = this.getWorld().getTuileCourante().getMNT().getXmean();
-		double Ymean = this.getWorld().getTuileCourante().getMNT().getYmean();
-		//-- TEST
-		System.out.println(Xmean+" "+Ymean);
 		// three points on the plane
-		Point3d p1 = new Point3d(Xmean,Ymean - .5*Math.cos(Math.toRadians(phi)),
-				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p2 = new Point3d(-Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
-				.5 * Math.sin(Math.toRadians(phi)));
-		Point3d p3 = new Point3d(Xmean,Ymean + .5*Math.cos(Math.toRadians(phi)),
-				.5 * Math.sin(Math.toRadians(phi)));
+		double Xmean = this.world.getTuileCourante().getMNT().getXmean();
+		double Ymean = this.world.getTuileCourante().getMNT().getYmean();
+		// three points on the plane
+		Point3d p1 = new Point3d(Xmean, Ymean - .5
+				* Math.cos(Math.toRadians(phi)), .5 * Math.sin(Math
+				.toRadians(phi)));
+		Point3d p2 = new Point3d(-Xmean, Ymean + .5
+				* Math.cos(Math.toRadians(phi)), .5 * Math.sin(Math
+				.toRadians(phi)));
+		Point3d p3 = new Point3d(Xmean, Ymean + .5
+				* Math.cos(Math.toRadians(phi)), .5 * Math.sin(Math
+				.toRadians(phi)));
 		Transform3D currentTransform = new Transform3D();
-		//mnt.getLocalToVworld(currentTransform);
 		currentTransform.transform(p1);
 		currentTransform.transform(p2);
 		currentTransform.transform(p3);
@@ -871,10 +912,29 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * Returns the point where a line crosses a plane
+	 * 
+	 * Methode permettant de calculer les coordonnees du point d'intersection
+	 * entre un plan et une droite en 3D. Les trois points representant le plan
+	 * ne doivent pas se trouver sur la meme droite.
+	 * 
+	 * @param line1
+	 *            Un Point3d appartenant a la droite
+	 * @param line2
+	 *            Un Point3d appartenant a la droite
+	 * @param plane1
+	 *            Point3d appartenant au la plan
+	 * @param plane2
+	 *            Point3d appartenant au la plan
+	 * @param plane3
+	 *            Point3d appartenant au la plan
+	 * 
+	 * @return intersectionPoint Point3d comprennant les coordonnees du point
+	 *         d'intersection entre le plan et la droite. En cas de non
+	 *         intersection, on retourne null.
 	 */
 	public Point3d getIntersection(Point3d line1, Point3d line2,
 			Point3d plane1, Point3d plane2, Point3d plane3) {
+		// definition du plan plane1,plane2,plane3
 		Vector3d p1 = new Vector3d(plane1);
 		Vector3d p2 = new Vector3d(plane2);
 		Vector3d p3 = new Vector3d(plane3);
@@ -884,14 +944,16 @@ public class Listeners implements MouseListener, MouseWheelListener,
 		p3minusp1.sub(p1);
 		Vector3d normal = new Vector3d();
 		normal.cross(p2minusp1, p3minusp1);
-		// The plane can be defined by p1, n + d = 0
+		// Le plan peut etre defini par p1, n + d = 0
 		double d = -p1.dot(normal);
 		Vector3d i1 = new Vector3d(line1);
 		Vector3d direction = new Vector3d(line1);
 		direction.sub(line2);
 		double dot = direction.dot(normal);
+		// on n'a pas trouve d'intersection : @return null
 		if (dot == 0)
 			return null;
+		// calcul des coordonnees de l'intersection
 		double t = (-d - i1.dot(normal)) / (dot);
 		Vector3d intersection = new Vector3d(line1);
 		Vector3d scaledDirection = new Vector3d(direction);
@@ -902,14 +964,20 @@ public class Listeners implements MouseListener, MouseWheelListener,
 	}
 
 	/**
-	 * M�thode permettant de mettre � jour qLon2 et qLat2.
-	 * 
+	 * Methode permettant de mettre a jour theta et phi.
+	 * <p>
+	 * Ici, on calcule la difference de pixels sur l'axe des x et des y, si
+	 * celle en x est superieure a celle en y alors on modifie l'angle theta,
+	 * dans le cas inverse, phi est modifie.
+	 * </p>
 	 * 
 	 * @param diffx
-	 *            diff�rence de pixels en x.
+	 *            difference de pixels en x.
 	 * @param diffy
-	 *            diff�rence de pixels en y.
+	 *            diffeerence de pixels en y.
 	 * 
+	 * @see Listeners#phi
+	 * @see Listeners#theta
 	 */
 	private void updateAngles(double diffx, double diffy) {
 		if (diffx > diffy) {
@@ -929,7 +997,7 @@ public class Listeners implements MouseListener, MouseWheelListener,
 				}
 			}
 		} else {
-			// on gere l'atterissage de la camera sur la terre (en gros)
+			// on gere l'atterissage de la camera sur la terre.
 			if (DraggedPosition.getY() > ReleasedPosition.getY()) {
 				if (phi > -89) {
 					phi--;
@@ -941,79 +1009,4 @@ public class Listeners implements MouseListener, MouseWheelListener,
 			}
 		}
 	}
-
-//	/**
-//	 * M�thode permettant de r�cup�rer les coordonn�es des limites de la
-//	 * fenetre. Cette m�thode utilise le centre de la fenetre et les coordonn�es
-//	 * pixels de la souris pour en calculer les coordonn�es limite de la fenetre
-//	 * passant par la droite construite par les deux points pr�c�dents
-//	 * 
-//	 * 
-//	 * @param diffx
-//	 *            diff�rence de pixels en x.
-//	 * @param diffy
-//	 *            diff�rence de pixels en y.
-//	 * 
-//	 */
-//	private void recupExt(Point2d Ext, MouseEvent arg0, int height, int width) {
-//		// calcul des droite des diagonales de l'�cran en pixels.
-//		// point en bas � gauche au point en haut � droite
-//		// demi diagonale
-//		double Ademi = (double) -height / width;
-//		double Bdemi = height;
-//
-//		// point en haut � gauche au point en bas � droite
-//		// min-max diagonale
-//		double Amm = (double) height / width;
-//		double Bmm = 0;
-//
-//		// initialisation l'�quation de droite et du point extreme
-//		Droite d = new Droite();
-//
-//		// D�finition du triangle dans lequel le click souris se trouve
-//		// HAUT
-//		if (arg0.getY() < Ademi * arg0.getX() + Bdemi) {
-//			if (arg0.getY() < Amm * arg0.getX() + Bmm) {
-//				System.out.println("haut");
-//				// calcul de la droite point cliqu�/centre
-//
-//				d = Droite.EquationDroite(new Point(width / 2, height / 2),
-//						arg0.getPoint());
-//
-//				// Point d'intersection des deux droites
-//				Ext.x = (0 - d.getB()) / d.getA();
-//				Ext.y = 0;
-//				// GAUCHE
-//			} else {
-//				System.out.println("gauche");
-//				// calcul de la droite point cliqu�/centre
-//				d = Droite.EquationDroite(new Point(width / 2, height / 2),
-//						arg0.getPoint());
-//
-//				// Point d'intersection des deux droites
-//				Ext.x = 0;
-//				Ext.y = d.getA() * 0 + d.getB();
-//			}
-//		} else {
-//			// BAS
-//			if (arg0.getY() > Amm * arg0.getX() + Bmm) {
-//				System.out.println("bas");
-//				// calcul de la droite point cliqu�/centre
-//				d = Droite.EquationDroite(new Point(width / 2, height / 2),
-//						arg0.getPoint());
-//				// penser � mettre AB en droite
-//				Ext.x = (height - d.getB()) / d.getA();
-//				Ext.y = height;
-//				// DROITE
-//			} else {
-//				System.out.println("droite");
-//				// calcul de la droite point cliqu�/centre
-//				d = Droite.EquationDroite(new Point(width / 2, height / 2),
-//						arg0.getPoint());
-//
-//				Ext.x = width;
-//				Ext.y = width * d.getA() + d.getB();
-//			}
-//		}
-//	}
 }

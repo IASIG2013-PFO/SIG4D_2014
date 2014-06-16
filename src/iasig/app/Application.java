@@ -7,12 +7,8 @@ public class Application {
 
 	public static void main(String[] args) throws SQLException, IOException {
 
-
-		//ApplicationNetwork net = new ApplicationNetwork();
-		//net.launch();
+		@SuppressWarnings("unused")
 		ApplicationView appview = new ApplicationView();
-		
-
 	}
 
 }
