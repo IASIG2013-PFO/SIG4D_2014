@@ -5,13 +5,16 @@ import iasig.dao.user.Arbre;
 import iasig.dao.user.Lampadaire;
 import iasig.dao.user.Maison;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Vector;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.TransformGroup;
 
+import org.omg.CORBA.SystemException;
 import org.postgis.PGgeometry;
 
 public class Buffer {
@@ -27,6 +30,9 @@ public class Buffer {
 	Thread t_select;
 	Thread t_bati;
 	Thread t_tuile;
+	Thread t_MNT;
+	Thread t_ORTHO;
+	Thread t_buffer;
 	
 	Thread t_buff_aux;
 	Thread t_swap;
@@ -76,11 +82,17 @@ public class Buffer {
 
 	public ArrayList<ArrayList<Tuile>> buffer_tuile;
 	
+	public ArrayList<ArrayList<MNT>> buffer_mnt;
+	
+	public ArrayList<ArrayList<BufferedImage>> buffer_image;
+
+	
 	/**
 	 * gestion de la resolution selon l'altitude
 	 */
-	private int resolution;
+	public int resolution;
 	
+
 	public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int resolution, int centre_i, int centre_j, TransformGroup tg, World world ) throws IOException  {
 		
 		this.polygone_bufferB = dummy_polygon();
@@ -118,11 +130,17 @@ public class Buffer {
 		}
 
 		buffer_tuile = new ArrayList<ArrayList<Tuile>>();
+		buffer_mnt = new ArrayList<ArrayList<MNT>>(); 
+		buffer_image = new ArrayList<ArrayList<BufferedImage>>(); 
 		for (int i = 0; i < taille_default_buffer; i++) {
 			buffer_tuile.add(new ArrayList<Tuile>());
-			
+			buffer_mnt.add(new ArrayList<MNT>());
+			buffer_image.add(new ArrayList<BufferedImage>());
 			for (int j = 0; j < taille_default_buffer; j++) {
 				buffer_tuile.get(i).add(null);
+				buffer_mnt.get(i).add(null);
+				buffer_image.get(i).add(null);
+
 			}
 		}
 		
@@ -173,13 +191,16 @@ public class Buffer {
 				}
 			 });
 		 
+		 
+		 
+		 
 		//Thread Ajout du tuilage
 
 		 t_tuile = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						remplissage_Buffer_Tuile();
+						remplissage_Buffer_Tuile2();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -192,7 +213,7 @@ public class Buffer {
 		t_select.start();
 		t_bati.start();
 		t_tuile.start();
-		
+				
 		
 		//Attendre completion des threads de selections BDD
 		//avant MAJ du buffer auxilliaire
@@ -239,6 +260,163 @@ public class Buffer {
 		
 	}
 
+	
+	
+	
+public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int resolution, int centre_i, int centre_j, TransformGroup tg, World world, String aux ) throws IOException  {
+		
+		this.polygone_bufferB = dummy_polygon();
+		
+		this.centre_buffer_auxiliaire_i=centre_i;
+		this.centre_buffer_auxiliaire_j=centre_j;
+
+		
+		this.centre_buffer_visible_i=centre_i;
+		this.centre_buffer_visible_j=centre_j;
+		
+		this.marge=taille_buffer_visible; //A adapter en fonction de la taille de buffers
+		
+		this.taille_buffer_memoire = taille_buffer_memoire;
+		this.taille_buffer_auxiliaire = taille_buffer_memoire;
+		this.taille_buffer_visible=taille_buffer_visible;
+		
+		//Référence sur le TransformGroup parent
+		this.tg = tg;
+		this.world = world;
+		
+		this.resolution = resolution;
+		
+		
+		//Initialisation des Buffers (matrices) à vide		
+		buffer_memoire = new ArrayList<ArrayList<SuperBG>>();
+		buffer_auxiliaire = new ArrayList<ArrayList<SuperBG>>();
+		for (int i = 0; i < taille_default_buffer; i++) {
+			buffer_memoire.add(new ArrayList<SuperBG>());
+			buffer_auxiliaire.add(new ArrayList<SuperBG>());
+			for (int j = 0; j < taille_default_buffer; j++) {
+				buffer_memoire.get(i).add(null);
+				buffer_auxiliaire.get(i).add(null);
+			}
+		}
+
+		buffer_tuile = new ArrayList<ArrayList<Tuile>>();
+		buffer_mnt = new ArrayList<ArrayList<MNT>>(); 
+		buffer_image = new ArrayList<ArrayList<BufferedImage>>(); 
+		for (int i = 0; i < taille_default_buffer; i++) {
+			buffer_tuile.add(new ArrayList<Tuile>());
+			buffer_mnt.add(new ArrayList<MNT>());
+			buffer_image.add(new ArrayList<BufferedImage>());
+			for (int j = 0; j < taille_default_buffer; j++) {
+				buffer_tuile.get(i).add(null);
+				buffer_mnt.get(i).add(null);
+				buffer_image.get(i).add(null);
+
+			}
+		}
+		
+		buffer_objet = new ArrayList<ArrayList<ArrayList<Object>>>();
+		buffer_bati =  new ArrayList<ArrayList<ArrayList<Batiment>>>();
+		
+		for (int i = 0; i < taille_default_buffer; i++) {
+			buffer_objet.add(new ArrayList<ArrayList<Object>>());
+			buffer_bati.add(new ArrayList<ArrayList<Batiment>>());
+			
+			for (int j = 0; j < taille_default_buffer; j++) {
+				buffer_objet.get(i).add(new ArrayList<Object>());
+				buffer_bati.get(i).add(new ArrayList<Batiment>());
+			}
+		}
+		
+		buffer_visible = new ArrayList<ArrayList<SuperBG>>();
+		for (int i = 0; i < taille_default_buffer; i++) {
+			buffer_visible.add(new ArrayList<SuperBG>());
+			
+			for (int j = 0; j < this.taille_default_buffer; j++) {
+				buffer_visible.get(i).add(null);
+			}
+		}
+		//Fin initialisation
+		
+
+		
+		//Thread Ajout des Objets
+		
+		 t_select = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				double time = System.currentTimeMillis();
+				selection_Objet(true, rechargement_complet);
+				System.out.println("Temps des selections d'objets  : "+(System.currentTimeMillis()-time));
+
+				
+			}
+		 });
+		 
+		//Thread Ajout du bati
+		 
+		 t_bati = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					selection_Bati(true, rechargement_complet);
+				}
+			 });
+		 
+		 
+		 
+		 
+		//Thread Ajout du tuilage
+
+		 t_tuile = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						remplissage_Buffer_Tuile2();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			 });
+		 
+		double time = System.currentTimeMillis();
+		if(resolution <= Tuile.R10){
+		t_select.start();
+		}
+		if (resolution <= Tuile.R20){
+		t_bati.start();
+		}
+		t_tuile.start();
+				
+		
+		//Attendre completion des threads de selections BDD
+		//avant MAJ du buffer auxilliaire
+		try {
+			t_select.join();
+			t_bati.join();
+			t_tuile.join();
+
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Temps des selections d'objets (tuile/bati/objet) : "+(System.currentTimeMillis()-time));
+
+		//Fin Join(); thread terminated
+
+		//remplissage du Buffer auxiliaire
+		//initialisation de son propre buffer auxiliaire
+		time = System.currentTimeMillis();
+		remplissage_Buffer_Auxiliaire(this.buffer_auxiliaire);
+		System.out.println("Temps de selection de construction du buffer auxiliaire : "+(System.currentTimeMillis()-time));
+
+	
+	
+		
+		
+	}
+	
+	
+	
 	/**
 	 * Permet d'ajouter un objet 
 	 * Recupere la maille de rattachement et calcul de la position relative par rapport 
@@ -304,13 +482,48 @@ public class Buffer {
 	
 	
 	
+	
+public void AjoutMNT(MNT mnt) {
+		
+		int demi_taille_buffer= this.taille_buffer_auxiliaire/2;
+		
+		int deltai = mnt.maille_i - this.centre_buffer_auxiliaire_i;
+		int deltaj = mnt.maille_j - this.centre_buffer_auxiliaire_j;
+		
+//		System.out.println("maille_i "+mnt.maille_i);
+//		System.out.println("maille_j "+mnt.maille_j);
+//		System.out.println("delati "+deltai);
+//		System.out.println("delatj "+deltaj);
+//		System.out.println("demi_taille_buffer + deltai "+demi_taille_buffer + deltai);
+//		System.out.println("demi_taille_buffer + deltaj "+demi_taille_buffer + deltaj);
+
+
+		int indexbuffmnt_i = demi_taille_buffer + deltai;
+		int indexbuffmnt_j = demi_taille_buffer + deltaj;
+		
+    	//obj.buffer_image.get(maillei).set(maillej, image);
+    	//System.out.println("MNT ajouté / INDEX i "+indexbuffmnt_i+" INDEX J "+indexbuffmnt_j+" "+mnt+ " "+ mnt.getZmean());
+		
+		buffer_mnt.get(indexbuffmnt_i).set(indexbuffmnt_j, mnt );
+		
+    	//System.out.println("MNT apres ajout / INDEX i "+indexbuffmnt_i+" INDEX J "+indexbuffmnt_j+" "+mnt+ " "+ buffer_mnt.get(indexbuffmnt_i).get(indexbuffmnt_j).getZmean());
+
+	
+	}
+	
+
+	
+	
 	/**
 	 * @param resolution the resolution to set
 	 */
 	public void setResolution(int resolution) {
 		
-		if(resolution==this.resolution)
+		if(resolution==this.resolution || resolution > Tuile.R20)
 			return;
+		
+		if (this.resolution < resolution){
+			
 		
 		this.resolution = resolution;
 
@@ -343,49 +556,157 @@ public class Buffer {
 
 			break;
 		}
-		case(Tuile.R40):{
-			taille_buffer_auxiliaire = 59;
-			taille_buffer_visible = 19;
-			bool_objet = false;
-			bool_bati = false;
-			rechargement_complet = true;
-
-			break;
-		}
-		case(Tuile.R100):{
-			taille_buffer_auxiliaire = 59;
-			taille_buffer_visible = 19;
-			bool_objet = false;
-			bool_bati = false;
-			rechargement_complet = true;
-
-			break;
-		}
-		case(Tuile.R200):{
-			taille_buffer_auxiliaire = 59;
-			taille_buffer_visible = 19;
-			bool_objet = false;
-			bool_bati = false;
-			rechargement_complet = true;
-
-			break;
-		}
+//		case(Tuile.R40):{
+//			taille_buffer_auxiliaire = 59;
+//			taille_buffer_visible = 19;
+//			bool_objet = false;
+//			bool_bati = false;
+//			rechargement_complet = true;
+//
+//			break;
+//		}
+//		case(Tuile.R100):{
+//			taille_buffer_auxiliaire = 59;
+//			taille_buffer_visible = 19;
+//			bool_objet = false;
+//			bool_bati = false;
+//			rechargement_complet = true;
+//
+//			break;
+//		}
+//		case(Tuile.R200):{
+//			taille_buffer_auxiliaire = 59;
+//			taille_buffer_visible = 19;
+//			bool_objet = false;
+//			bool_bati = false;
+//			rechargement_complet = true;
+//
+//			break;
+//		}
 				
 		}
 		
-		try {
+//		try {
 			System.err.println("rechargement des objets: "+bool_objet);
 			System.err.println("rechargement des bati: "+bool_bati);
-
-			rechargement_buffer_memoire();
+			System.err.println("niveau Resolution : "+resolution);
 			
-			reinitialisation_visible();
+			//buffer UNIQUE, decommenter ligne suivante
+			//rechargement_buffer_memoire();
 			
+			//Buffer multiples
 			
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if(World.t_buffer.isAlive()){try {
+				World.t_buffer.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}}
+			
+			interSwap(World.buffer, World.buffer2);
+			
+			t_buffer = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						//AJOUT MULTIBUFFER
+						World.buffer2 = new Buffer(45, 15, World.buffer.resolution+1, World.buffer.centre_buffer_visible_i, World.buffer.centre_buffer_visible_i, tg, world, "dummy");
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			 });
+			
+			t_buffer.start();
+		
+			
 		}
+		
+//		if (this.resolution > resolution){
+//			
+//			
+//			this.resolution = resolution;
+//
+//			//case pour définir la taille du buffer en cours
+//			switch(resolution){
+//			
+//			case(Tuile.R5):{
+//				taille_buffer_auxiliaire = 15;
+//				taille_buffer_visible = 3;
+//				bool_objet = true;
+//				bool_bati = true;
+//				rechargement_complet = true;
+//				break;
+//			}
+//			case(Tuile.R10):{
+//				taille_buffer_auxiliaire = 29;
+//				taille_buffer_visible = 9;
+//				bool_objet = false;
+//				bool_bati = true;
+//				rechargement_complet = true;
+//
+//				break;
+//			}
+//			case(Tuile.R20):{
+//				taille_buffer_auxiliaire = 45;
+//				taille_buffer_visible = 15;
+//				bool_objet = false;
+//				bool_bati = false;
+//				rechargement_complet = true;
+//
+//				break;
+//			}
+//			case(Tuile.R40):{
+//				taille_buffer_auxiliaire = 59;
+//				taille_buffer_visible = 19;
+//				bool_objet = false;
+//				bool_bati = false;
+//				rechargement_complet = true;
+//
+//				break;
+//			}
+//			case(Tuile.R100):{
+//				taille_buffer_auxiliaire = 59;
+//				taille_buffer_visible = 19;
+//				bool_objet = false;
+//				bool_bati = false;
+//				rechargement_complet = true;
+//
+//				break;
+//			}
+//			case(Tuile.R200):{
+//				taille_buffer_auxiliaire = 59;
+//				taille_buffer_visible = 19;
+//				bool_objet = false;
+//				bool_bati = false;
+//				rechargement_complet = true;
+//
+//				break;
+//			}
+//					
+//			}
+//			
+////			try {
+//				System.err.println("rechargement des objets: "+bool_objet);
+//				System.err.println("rechargement des bati: "+bool_bati);
+//				//buffer UNIQUE, decommenter ligne suivante
+//				//rechargement_buffer_memoire();
+//				
+//				//Buffer multiples
+//				//interSwap(World.buffer, World.buffer3);
+//				
+//				initialisation_buffer_visible(World.buffer.buffer_memoire);
+//				
+//			}
+		
+		
+		
+	//	} 
+//		catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	
 		rechargement_complet = false;
 
@@ -435,13 +756,17 @@ public class Buffer {
 				buffer_auxiliaire.get(i).set(j,null);
 			}
 		}
+		
+		
+		
+		
 
-		try {
-			rafraichissement_visible(0, 0);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			rafraichissement_visible(0, 0);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		
 		world.getCanvas().addMouseListener(world.getListeners());
 		world.getCanvas().addMouseMotionListener(world.getListeners());
@@ -454,18 +779,81 @@ public class Buffer {
 		
 	}
 	
+	
+	
+public void interSwap(Buffer affiche, Buffer dispo){
+		
+		world.getCanvas().removeMouseListener(world.getListeners());
+		world.getCanvas().removeMouseMotionListener(world.getListeners());
+		world.getCanvas().removeMouseWheelListener(world.getListeners());
+		world.getCanvas().removeKeyListener(world.getListeners());
+		
+//		//Refenetrage du buffer_memoire autour du buffer_auxiliaire
+//		this.centre_buffer_memoire_i = this.centre_buffer_auxiliaire_i;
+//		this.centre_buffer_memoire_j = this.centre_buffer_auxiliaire_j;
+		
+//		//Redimmensionnement de la taille du buffer mémoire hommogène ave taille buffer auxiliaire
+//		this.taille_buffer_memoire = this.taille_buffer_auxiliaire;
+
+		System.out.println(dispo.taille_buffer_auxiliaire);
+		affiche.taille_buffer_memoire = dispo.taille_buffer_auxiliaire;
+		affiche.taille_buffer_visible = dispo.taille_buffer_visible;
+		affiche.centre_buffer_memoire_i = dispo.centre_buffer_auxiliaire_i;
+		affiche.centre_buffer_memoire_j = dispo.centre_buffer_auxiliaire_j;
+
+		for (int i = 0; i< dispo.taille_buffer_auxiliaire; i++){
+			for(int j = 0; j< dispo.taille_buffer_auxiliaire; j++){
+			
+				//System.out.println("interswap "+i+" "+j );
+				if (affiche.buffer_memoire.get(i).get(j) != null){affiche.buffer_memoire.get(i).get(j).sbg.removeAllChildren();}
+				affiche.buffer_memoire.get(i).set(j, new SuperBG(dispo.buffer_auxiliaire.get(i).get(j)));
+				//dispo.buffer_auxiliaire.get(i).set(j, affiche.buffer_memoire.get(i).get(j) );
+			}
+		}
+		
+		initialisation_buffer_visible(World.buffer.buffer_memoire);
+		//reinitialisation_visible();
+		
+		
+		
+		
+
+//		try {
+//			rafraichissement_visible(0, 0);
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+		
+		world.getCanvas().addMouseListener(world.getListeners());
+		world.getCanvas().addMouseMotionListener(world.getListeners());
+		world.getCanvas().addMouseWheelListener(world.getListeners());
+		world.getCanvas().addKeyListener(world.getListeners());
+		
+//		//creation du polygone de selection
+//		this.polygone_bufferB = this.polygone_bufferA;
+		
+		
+	}
+	
+	
+	
+	
 	/**
 	 * Met à disposition le visible
 	 * @throws IOException 
 	 */
 	public void initialisation_buffer_visible(ArrayList<ArrayList<SuperBG>> buffmem) {
-		System.out.println("init buffer visible");
+		System.out.println("init buffer visible, taille"+this.taille_buffer_visible);
 	
 		
 		for (int i = 0; i< taille_buffer_visible; i++){
 			for(int j = 0; j< taille_buffer_visible; j++){
 				
+				//PROVOQUE SCINTILLEMENT
+				if(buffer_visible.get(i).get(j) != null){buffer_visible.get(i).get(j).sbg.detach();}
 				buffer_visible.get(i).set(j, copieAttache_SuperBG(i, j, buffmem));	
+				
 			}
 		}
 	}
@@ -475,37 +863,37 @@ public class Buffer {
 		
 		System.out.println("reinit statique buffer visible");
 		
-		for (int i = taille_buffer_visible; i< taille_default_buffer; i++){
-			for(int j = 0; j< taille_default_buffer; j++){
-				if (buffer_visible.get(i).get(j) != null){
+		for (int i = World.buffer.taille_buffer_visible; i< taille_default_buffer; i++){
+			for(int j = 0; j< World.buffer.taille_default_buffer; j++){
+				if (World.buffer.buffer_visible.get(i).get(j) != null){
 					
-					buffer_visible.get(i).get(j).sbg.detach();
-					
-				}
-				
-			}
-		}
-		
-		for (int i = 0; i< taille_buffer_visible; i++){
-			for(int j = taille_buffer_visible; j< taille_default_buffer; j++){
-				if (buffer_visible.get(i).get(j) != null){
-					
-					buffer_visible.get(i).get(j).sbg.detach();
+					World.buffer.buffer_visible.get(i).get(j).sbg.detach();
 					
 				}
 				
 			}
 		}
 		
-		for (int i = 0; i< taille_buffer_visible; i++){
-			for(int j = 0; j< taille_buffer_visible; j++){
-				if (buffer_visible.get(i).get(j) != null){
+		for (int i = 0; i< World.buffer.taille_buffer_visible; i++){
+			for(int j = World.buffer.taille_buffer_visible; j< World.buffer.taille_default_buffer; j++){
+				if (World.buffer.buffer_visible.get(i).get(j) != null){
 					
-					buffer_visible.get(i).get(j).sbg.detach();
+					World.buffer.buffer_visible.get(i).get(j).sbg.detach();
 					
 				}
 				
-				buffer_visible.get(i).set(j, copieAttache_SuperBG(i, j, this.buffer_memoire));	
+			}
+		}
+		
+		for (int i = 0; i< World.buffer.taille_buffer_visible; i++){
+			for(int j = 0; j< World.buffer.taille_buffer_visible; j++){
+				if (World.buffer.buffer_visible.get(i).get(j) != null){
+					
+					World.buffer.buffer_visible.get(i).get(j).sbg.detach();
+					
+				}
+				
+				World.buffer.buffer_visible.get(i).set(j, copieAttache_SuperBG(i, j, World.buffer.buffer_memoire));	
 
 			}
 		}
@@ -643,6 +1031,7 @@ public class Buffer {
 				//Refenetrage du buffer_memoire autour du buffer_auxiliaire
 				centre_buffer_auxiliaire_i=centre_buffer_visible_i;
 				centre_buffer_auxiliaire_j=centre_buffer_visible_j;
+				
 				System.out.println("nouveau centre du buffaux: "+centre_buffer_auxiliaire_i+" "+centre_buffer_auxiliaire_j);
 
 	
@@ -675,7 +1064,7 @@ public class Buffer {
 						@Override
 						public void run() {
 							try {
-								remplissage_Buffer_Tuile();
+								remplissage_Buffer_Tuile2();
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -798,6 +1187,46 @@ public class Buffer {
 				}
 			}
 				
+			public void selection_MNT(){
+				
+				int demi_taille_buffer= this.taille_buffer_auxiliaire/2;
+				
+				int i_terrain_min = this.centre_buffer_auxiliaire_i - demi_taille_buffer;
+				int j_terrain_min = this.centre_buffer_auxiliaire_j - demi_taille_buffer;
+				
+				int i_terrain_max = this.centre_buffer_auxiliaire_i + demi_taille_buffer;
+				int j_terrain_max = this.centre_buffer_auxiliaire_j + demi_taille_buffer;
+				
+//				int i_terrain_max = this.centre_buffer_auxiliaire_i - ( ( this.taille_buffer_auxiliaire - 1) - demi_taille_buffer);
+//				int j_terrain_max = this.centre_buffer_auxiliaire_j - ( ( this.taille_buffer_auxiliaire - 1) - demi_taille_buffer);
+		
+				GenericDAO.selection_MNT_buffer(this, i_terrain_min, j_terrain_min, i_terrain_max, j_terrain_max, resolution);
+				
+				
+				System.out.println("fin rafraichissement des MNT");
+				
+			}
+			
+			
+			public void selection_ORTHO(){
+				
+				int demi_taille_buffer= this.taille_buffer_auxiliaire/2;
+				
+				int i_terrain_min = this.centre_buffer_auxiliaire_i - demi_taille_buffer;
+				int j_terrain_min = this.centre_buffer_auxiliaire_j - demi_taille_buffer;
+				
+				int i_terrain_max = this.centre_buffer_auxiliaire_i + demi_taille_buffer;
+				int j_terrain_max = this.centre_buffer_auxiliaire_j + demi_taille_buffer;
+				
+				//int i_terrain_max = this.centre_buffer_auxiliaire_i - ( ( this.taille_buffer_auxiliaire - 1) - demi_taille_buffer);
+				//int j_terrain_max = this.centre_buffer_auxiliaire_j - ( ( this.taille_buffer_auxiliaire - 1) - demi_taille_buffer);
+				
+				GenericDAO.selection_ORTHO_buffer(this, i_terrain_min, j_terrain_min, i_terrain_max, j_terrain_max, resolution);
+				
+				
+				System.out.println("fin rafraichissement des ORTHO");
+				
+			}
 			
 			
 			
@@ -823,20 +1252,93 @@ public class Buffer {
 							}
 							else{
 								buffer_tuile.get(i).set(j,null);
-							}
-							
+							}					
 						}
 				}
 					
 			}
 			
 			
+			/**
+			 * Permet de remplir le Buffer Memoire de Tuiles - PROTO requete unique
+			 * @throws IOException 
+			 */
+			public void remplissage_Buffer_Tuile2() throws IOException {
+				
+				
+				System.out.println("remplissage du buffer de tuiles");
 			
-			
-			public void Attache(BranchGroup bg, SuperBG sbg){
+				
+				//Thread Ajout des MNT
+				
+				 t_MNT = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						
+						double time = System.currentTimeMillis();
+						selection_MNT();
+						System.out.println("Temps des selections des MNT  : "+(System.currentTimeMillis()-time));
+						
+					}
+				 });
+				 
+				 
+				//Thread Ajout des ORTHOS
+					
+				 t_ORTHO = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						
+						double time = System.currentTimeMillis();
+						selection_ORTHO();
+						System.out.println("Temps des selections des orthos  : "+(System.currentTimeMillis()-time));
+						
+					}
+				 });
+				
+					t_MNT.start();
+					t_ORTHO.start();
+					
+					
+					//Attendre completion des threads de selections BDD
+					//avant MAJ du buffer auxilliaire
+					try {
+						t_MNT.join();
+						t_ORTHO.join();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 
+
+					
+					System.out.println("remplissage du buffer de tuiles");
+					
+					int demi_taille_buffer= this.taille_buffer_auxiliaire/2;
+					
+					for (int i = 0; i< this.taille_buffer_auxiliaire; i++){
+						
+						int deltai = i - demi_taille_buffer;
+						int i_terrain = this.centre_buffer_auxiliaire_i +  deltai;
+						
+							for(int j = 0; j< this.taille_buffer_auxiliaire; j++){
+								int deltaj = j - demi_taille_buffer;
+								int j_terrain = this.centre_buffer_auxiliaire_j +  deltaj;
+								
+								if(i_terrain>=0 && i_terrain<=Tuile.PX-1 && j_terrain>=0 && j_terrain<=Tuile.PY ){
+									
+									
+									buffer_tuile.get(i).set(j,new Tuile(buffer_mnt.get(i).get(j), buffer_image.get(i).get(j)) );
+								}
+								else{
+									buffer_tuile.get(i).set(j,null);
+								}					
+							}
+					}
+				 
 				
 			}
+			
+			
 		
 			public PGgeometry dummy_polygon(){
 				
@@ -885,6 +1387,16 @@ public class Buffer {
 					e.printStackTrace();
 				}
 				return polygone;	
+				
+				
+			}
+			
+			public void updateBuffer2(){
+				
+			}
+			
+			public void updateBuffer3(){
+				
 				
 				
 			}

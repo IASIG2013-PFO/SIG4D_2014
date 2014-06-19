@@ -193,6 +193,8 @@ public class Tuile {
 	/*********************CONSTRUCTEUR*******************/
 
 	//---------------------------------------------------
+	
+
 	public Tuile(int i, int j, int r) throws IOException{
 		/** 
 		 * FONCTION :
@@ -223,6 +225,41 @@ public class Tuile {
 		ortho = orthoDAO.load_ortho(i, j, r);
 	}
 	//---------------------------------------------------
+	
+	
+	public Tuile(MNT _mnt, BufferedImage _ortho) throws IOException{
+		/** 
+		 * FONCTION :
+		 * Creer d'une tuile à partir d'un MNT et d'une orthophoto
+		 *
+		 * PARAMETRES EN ENTREE :
+		 * mnt, le MNT en entrée
+		 * ortho, bufferedImage en entrée
+		 * CONSTRUIT :
+		 * retourne une tuile
+		 * */
+		
+		if(_mnt.maille_i<0 || _mnt.maille_i>PX-1 || _mnt.maille_j<0 || _mnt.maille_j>PY || masque_noir[_mnt.maille_i][_mnt.maille_j]){
+			this.mnt = null;
+			this.ortho = null;
+			return;
+		}
+		
+		//Recuperation du mnt dans la base de donnees
+		//System.out.println("mnt a la contruction tuile "+mnt);
+		this.mnt= _mnt;
+		//System.out.println("MNT dans TUILE costructeur "+this.mnt+"  provient de "+_mnt+" "+this.mnt.getZmean());
+		
+		i_maille = _mnt.maille_i;
+		j_maille = _mnt.maille_j;
+
+		//Recuperation de l'orthophoto dans la base de donnees
+		//System.out.println("ortho a la contruction tuile "+ortho);
+
+		this.ortho = _ortho;
+	}
+	//---------------------------------------------------
+	
 	
 	/****************************************************/
 	
@@ -344,7 +381,7 @@ public class Tuile {
 		 * RETOURNE : - [Scalaire, objet de la classe TriangleArray] : Geometrie
 		 * du MNT sous forme de triangles 3D.
 		 **/
-
+		//System.out.println("APPEL TRACE_MNT Classe Tuile");
 		// Instanciation de la geometrie avec indication du nombre total de
 		// triangles.
 		TriangleArray mnt_graphique = new TriangleArray(6 * (mnt.getNX() - 1)
@@ -484,7 +521,7 @@ public class Tuile {
 		 * RETOURNE : - [Scalaire, objet de la classe Texture] : La texture
 		 * creee a partir de l'orthophoto.
 		 **/
-
+		
 		Texture texture = new TextureLoader(ortho).getTexture(); // Chargement
 																	// de la
 																	// texture e

@@ -48,6 +48,7 @@ public class OrthoDAO extends DAO {
         	ByteArrayInputStream bis = new ByteArrayInputStream(content);
         	
 			try {
+				
 				image = ImageIO.read(bis);
 			}
 			catch (IOException e) {

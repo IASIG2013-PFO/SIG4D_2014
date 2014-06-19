@@ -73,9 +73,11 @@ public class World extends JFrame {
 
 	/****************** OBJETS A CHARGER ******************/
 	public Tunnel tunnel;
-	public Buffer buffer_objets;
-	public Buffer buffer_BG;
-	public Vector<Vector<Object>> buffer_visible;
+//	public Buffer buffer_objets;
+//	public Buffer buffer_BG;
+//
+//	public Vector<Vector<Object>> buffer_visible;
+
 	Shape3D[] pieces;
 	public static Objet3d[] tabobj;
 
@@ -90,7 +92,14 @@ public class World extends JFrame {
 
 	private Canvas3D canvas3d;
 
-	private Buffer buffer;
+	public static Buffer buffer;
+	public static Buffer buffer2;
+	private Buffer buffer3;
+	
+	public static Thread t_buffer;
+
+
+
 	
 
 	/**
@@ -430,8 +439,31 @@ public class World extends JFrame {
 
 		int i_init = (int) ((948000.0 - Tuile.Xmin) / Tuile.DX);
 		int j_init = (int) ((6532000.0 - Tuile.Ymin) / Tuile.DY);
+		
+		
+		
+		
 		// Initialisation du buffer
-		buffer = new Buffer(15, 3, Tuile.R5 ,i_init, j_init, transform, this);
+		buffer = new Buffer(15, 5, Tuile.R5 ,i_init, j_init, transform, this);
+	
+		t_buffer = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					//AJOUT MULTIBUFFER
+					compagnonBuffer();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		 });
+		
+		t_buffer.start();
+		
+		
+		//buffer3 = new Buffer(15, 5, Tuile.R5 ,i_init, j_init, transform, this);
+
 
 		System.out.println("Initialisation buffer terminée !!!");
 
@@ -875,19 +907,32 @@ public class World extends JFrame {
 
 	public void setTuileCourante(double x, double y) {
 
-		// System.out.println("setTuileCourante");
+		System.out.println("setTuileCourante");
 		int i = (int) ((x - Tuile.Xmin) / Tuile.DX);
 		int j = (int) ((y - Tuile.Ymin) / Tuile.DY);
-
+		System.out.println(" i tuile courante: "+i+" j tuile courante: "+j);
+		
 		int delta_i = buffer.centre_buffer_memoire_i - i;
 		int delta_j = buffer.centre_buffer_memoire_j - j;
 
 		int i_mem = (int) ((buffer.taille_buffer_memoire - 1) / 2) + delta_i;
 		int j_mem = (int) ((buffer.taille_buffer_memoire - 1) / 2) + delta_j;
+		
+		//System.out.println("tuile courante: i mem: "+i_mem+" j mem: "+j_mem+"(World.java)");
 
-		SuperBG sbg1 = buffer.buffer_memoire.get(i_mem).get(j_mem);
+		SuperBG sbg1 = World.buffer.buffer_memoire.get(i_mem).get(j_mem);
 		tuileCourante = sbg1.tuile;
 	}
+	
+	
+	public void compagnonBuffer() throws IOException {
+	
+		buffer2 = new Buffer(29,9, buffer.resolution + 1 ,(int) ((948000.0 - Tuile.Xmin) / Tuile.DX), (int) ((6532000.0 - Tuile.Ymin) / Tuile.DY), buffer.tg,this, "compagnon");
+		buffer3 = new Buffer(1,1, buffer.resolution + 1 ,(int) ((948000.0 - Tuile.Xmin) / Tuile.DX), (int) ((6532000.0 - Tuile.Ymin) / Tuile.DY), buffer.tg,this, "compagnon");
+		
+		
+	}
+	
 }
 /* CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC */
 

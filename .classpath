@@ -21,5 +21,7 @@
 	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/joal-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/jocl-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/jogl-all-natives-linux-amd64.jar"/>
+	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/jai-1_1_3/lib/jai_codec.jar"/>
+	<classpathentry kind="lib" path="/home/pierre/WORKSPACE/TP/SIG4D_avecBDD/jar/jai-1_1_3/lib/jai_core.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

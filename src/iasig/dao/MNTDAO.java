@@ -9,6 +9,9 @@ import iasig.univers.view.Tuile;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.postgis.PGgeometryLW;
+import org.postgresql.core.types.PGByte;
+
 
 /**
  * @author Jean-Fran�ois
@@ -56,6 +59,7 @@ public MNT load_mnt(int i, int j, int r){
 				int pi=result.getInt("y");
 				int pj=result.getInt("x");
 				int z=result.getInt("z");
+				
 				
 				if(z<zmin){
 					zmin=z;

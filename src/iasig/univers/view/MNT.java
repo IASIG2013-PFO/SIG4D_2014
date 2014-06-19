@@ -3,6 +3,8 @@ package iasig.univers.view;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 import javax.vecmath.Point3d;
@@ -28,6 +30,9 @@ public class MNT {
 	private int Zmin; //Altitude minimale
 	private int Zmax; //Altitude maximale
 	
+	public int maille_i;
+	public int maille_j;
+	
 	private int[][] M; //Matrice des altitudes, le premier point est le coin Nord-Ouest de la grille (Xmin,Ymax)
 	/*//////////////////////////////////////////////////*/
 	
@@ -39,6 +44,12 @@ public class MNT {
 	
 	/********************CONSTRUCTEURS*******************/
 		
+	public MNT(){};
+	
+	
+	
+
+	
 	//---------------------------------------------------
 	public MNT(String fich_entree) throws IOException {
 		/** 
@@ -54,7 +65,7 @@ public class MNT {
 		 * ---------------------------
 		 * 
 		 * PARAMETRE EN ENTREE :
-		 * - fich_entree [Scalaire, chaîne de caracteres] : chemin du fichier du MNT a charger.
+		 * - fich_entree [Scalaire, chaï¿½ne de caracteres] : chemin du fichier du MNT a charger.
 		 * 
 		 * CONSTRUIT :
 		 * - [Scalaire, objet de la classe MNT] : un nouveau MNT, comportant les memes informations que dans le fichier.
@@ -216,7 +227,7 @@ public class MNT {
 		}
 	}
 	//---------------------------------------------------
-	
+
 	//---------------------------------------------------
 	public MNT(int nx, int ny, int xmin, int xmax, int dx, int ymin, int ymax, int dy, int zmin, int zmax, int[][] m){
 		/** 
@@ -253,6 +264,46 @@ public class MNT {
 		M=m;	
 	}
 	//---------------------------------------------------
+	
+	
+	public MNT(int nx, int ny, int xmin, int xmax, int dx, int ymin, int ymax, int dy, int zmin, int zmax, int[][] m, int maillei, int maillej){
+		/** 
+		 * FONCTION :
+		 * Construire un MNT par lecture systematique des attributs fournis en entree.
+		 * 
+		 * PARAMETRES EN ENTREE :
+		 * - nx [Scalaire, entier] : valeur a attribuer a NX.
+		 * - ny [Scalaire, entier] : valeur a attribuer a NY.
+		 * - xmin [Scalaire, entier] : valeur a attribuer a Xmin.
+		 * - xmax [Scalaire, entier] : valeur a attribuer a Xmax.
+		 * - dx [Scalaire, entier] : valeur a attribuer a DX.
+		 * - ymin [Scalaire, entier] : valeur a attribuer a Ymin.
+		 * - ymax [Scalaire, entier] : valeur a attribuer a Ymax.
+		 * - dy [Scalaire, entier] : valeur a attribuer a DY.
+		 * - zmin [Scalaire, entier] : valeur a attribuer a Zmin.
+		 * - zmax [Scalaire, entier] : valeur a attribuer a Zmax.
+		 * - m [Matrice[NY lignes, NX colonnes] : valeur a attribuer a M.
+		 *  
+		 * CONSTRUIT :
+		 * - [Scalaire, objet de la classe MNT] : un nouveau MNT avec les valeurs d'attributs calques sur ceux fournis en entree.
+		 * */
+		
+		NX=nx;
+		NY=ny;
+		Xmin=xmin;
+		Xmax=xmax;
+		DX=dx;
+		Ymin=ymin;
+		Ymax=ymax;
+		DY=dy;
+		Zmin=zmin;
+		Zmax=zmax;
+		M=m;	
+		maille_i=maillei;
+		maille_j=maillej;
+	}
+	//---------------------------------------------------
+	
 	
 	/****************************************************/
 	
@@ -476,7 +527,7 @@ public class MNT {
 		 * ---------------------------
 		 * 
 		 * PARAMETRE EN ENTREE :
-		 * - fich_sortie [Scalaire, chaîne de caracteres] : chemin du fichier dans lequel ecrire. Si le fichier existe deja, il est ecrase.
+		 * - fich_sortie [Scalaire, chaï¿½ne de caracteres] : chemin du fichier dans lequel ecrire. Si le fichier existe deja, il est ecrase.
 		 */
 		
 		PrintWriter flux = new PrintWriter(new File(fich_sortie)); //Flux d'ecriture
@@ -530,7 +581,7 @@ public class MNT {
 		 * Le premier point indique correspond au coin Nord-Ouest. Puis le balayage se fait d'abord en X, puis en Y.
 		 * 
 		 * PARAMETRE EN ENTREE :
-		 * - fich_sortie [Scalaire, chaîne de caracteres] : chemin du fichier dans lequel ecrire. Si le fichier existe deja, il est ecrase.
+		 * - fich_sortie [Scalaire, chaï¿½ne de caracteres] : chemin du fichier dans lequel ecrire. Si le fichier existe deja, il est ecrase.
 		 */
 		
 		PrintWriter flux = new PrintWriter(new File(fich_sortie)); //Flux d'ecriture
@@ -596,7 +647,7 @@ public class MNT {
 	public MNT[][][] generateMNTPyramid(int PX, int PY, int[] resolution){
 		/** 
 		 * FONCTION :
-		 * Generer une pyramide de MNT, c'est a dire un tuilage où chaque tuile correspond a une collection de MNT a differentes resolutions.
+		 * Generer une pyramide de MNT, c'est a dire un tuilage oï¿½ chaque tuile correspond a une collection de MNT a differentes resolutions.
 		 * Le resultat est stocke dans un tenseur : une resolution par couche.
 		 * Tuiles_<Resolution du MNT>_MNT/MNT_<X du coin Sud-Ouest (Xmin)>_<Y du coin Sud-Ouest (Ymin)>.txt
 		 * 
@@ -697,20 +748,20 @@ public class MNT {
 //		if(X-Xd<Yd-Y){
 		if (k==1) {
 			if(Math.abs(X-Xd)<Math.abs(Yd-Y)){//k==1
-				//Le point se situe sur la face triangulaire inférieure
+				//Le point se situe sur la face triangulaire infï¿½rieure
 				p1 = new Point3d(Xd+(1-k)*DX , Yd-DY , getZAt(i  , j+(1-k)-1) );
 			}
 			else {
-				//Le point se situe sur la face triangulaire supérieure
+				//Le point se situe sur la face triangulaire supï¿½rieure
 				p1 = new Point3d(Xd+k*DX     , Yd    , getZAt(i-1, j+k-1)     );				
 			}	
 		}else{//k==0
 			if(Math.abs(X-Xd)>DY-Math.abs(Yd-Y)){//k==1
-				//Le point se situe sur la face triangulaire inférieure
+				//Le point se situe sur la face triangulaire infï¿½rieure
 				p1 = new Point3d(Xd+(1-k)*DX , Yd-DY , getZAt(i  , j+(1-k)-1) );
 			}
 			else {
-				//Le point se situe sur la face triangulaire supérieure
+				//Le point se situe sur la face triangulaire supï¿½rieure
 				p1 = new Point3d(Xd+k*DX     , Yd    , getZAt(i-1, j+k-1)     );
 				
 			}
