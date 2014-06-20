@@ -52,7 +52,7 @@ public class Batiment {
 		this.geom = geom;
 		this.centroid = centroid;
 		this.forme  = (MultiPolygon)this.geom.getGeometry(); ;
-		this.H = 10*hauteur;
+		this.H = hauteur;
 		
 		Point pt = (Point)centroid.getGeometry();
 

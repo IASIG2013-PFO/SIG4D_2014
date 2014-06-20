@@ -742,6 +742,7 @@ public class GenericDAO extends DAO {
 		int jmin = (j_terrain_min*1000 + 6513000)%6513000 / 10;
 		int jmax = ( (j_terrain_max*1000 + 1000 + 6513000)%6513000 / 10 ) -1 ;
 		
+		System.out.println("genericDAO "+resolution);
 	    int res = 5*Tuile.resolution[resolution-1];
 		int nx = Tuile.DX/res + 1;
 	    int ny = Tuile.DY/res + 1;
@@ -919,7 +920,7 @@ public class GenericDAO extends DAO {
 			int jmax = ( (j_terrain_max*1000 + 1000 + 6513000)%6513000 / 10 ) -1 ;
 			//mod(26*1000 + 6513000 +1000, 6513000)/10 - 1 
 		 
-			System.out.println("ortho_"+Tuile.resolution[resolution-1]);
+			//System.out.println("ortho_"+Tuile.resolution[resolution-1]);
 			
 //			System.out.println("ORTHO"+ imin);
 //			System.out.println("ORTHO"+imax);

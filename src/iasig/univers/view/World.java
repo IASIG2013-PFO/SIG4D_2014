@@ -94,7 +94,7 @@ public class World extends JFrame {
 
 	public static Buffer buffer;
 	public static Buffer buffer2;
-	private Buffer buffer3;
+	public static Buffer buffer3;
 	
 	public static Thread t_buffer;
 
@@ -443,9 +443,11 @@ public class World extends JFrame {
 		
 		
 		
+		
 		// Initialisation du buffer
 		buffer = new Buffer(15, 5, Tuile.R5 ,i_init, j_init, transform, this);
 	
+		
 		t_buffer = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -460,7 +462,12 @@ public class World extends JFrame {
 		 });
 		
 		t_buffer.start();
-		
+		try {
+			t_buffer.join();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		//buffer3 = new Buffer(15, 5, Tuile.R5 ,i_init, j_init, transform, this);
 

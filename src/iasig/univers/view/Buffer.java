@@ -37,6 +37,9 @@ public class Buffer {
 	Thread t_buff_aux;
 	Thread t_swap;
 	
+	int[] tailleBufferVis = {1,3,9,15,19,19,19};
+	int[] tailleBufferMem = {1,15,29,45,59,59,59};
+	
 	/**
 	 * le vecteur de vecteur, portant les objets indexes selon leur maille d'appartenance
 	 */
@@ -379,12 +382,14 @@ public Buffer(int taille_buffer_memoire,int taille_buffer_visible , int resoluti
 			 });
 		 
 		double time = System.currentTimeMillis();
-		if(resolution <= Tuile.R10){
+		
+		if(resolution == Tuile.R5){
 		t_select.start();
 		}
-		if (resolution <= Tuile.R20){
+		if (resolution < Tuile.R20){
 		t_bati.start();
 		}
+		
 		t_tuile.start();
 				
 		
@@ -519,13 +524,17 @@ public void AjoutMNT(MNT mnt) {
 	 */
 	public void setResolution(int resolution) {
 		
-		if(resolution==this.resolution || resolution > Tuile.R20)
+		if(resolution==World.buffer.resolution || resolution > Tuile.R20)
 			return;
 		
-		if (this.resolution < resolution){
+		int oldRes = World.buffer.resolution;
+		World.buffer.resolution = resolution;
+		
+		if (oldRes < resolution){
+			
 			
 		
-		this.resolution = resolution;
+		
 
 		//case pour définir la taille du buffer en cours
 		switch(resolution){
@@ -586,7 +595,6 @@ public void AjoutMNT(MNT mnt) {
 				
 		}
 		
-//		try {
 			System.err.println("rechargement des objets: "+bool_objet);
 			System.err.println("rechargement des bati: "+bool_bati);
 			System.err.println("niveau Resolution : "+resolution);
@@ -603,6 +611,7 @@ public void AjoutMNT(MNT mnt) {
 				e.printStackTrace();
 			}}
 			
+			interSwap_NoDetach(World.buffer, World.buffer3);
 			interSwap(World.buffer, World.buffer2);
 			
 			t_buffer = new Thread(new Runnable() {
@@ -610,7 +619,7 @@ public void AjoutMNT(MNT mnt) {
 				public void run() {
 					try {
 						//AJOUT MULTIBUFFER
-						World.buffer2 = new Buffer(45, 15, World.buffer.resolution+1, World.buffer.centre_buffer_visible_i, World.buffer.centre_buffer_visible_i, tg, world, "dummy");
+						World.buffer2 = new Buffer(tailleBufferMem[World.buffer.resolution+1], tailleBufferVis[World.buffer.resolution+1], World.buffer.resolution+1, World.buffer.centre_buffer_visible_i, World.buffer.centre_buffer_visible_j, tg, world, "dummy");
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -623,40 +632,38 @@ public void AjoutMNT(MNT mnt) {
 			
 		}
 		
-//		if (this.resolution > resolution){
-//			
-//			
-//			this.resolution = resolution;
-//
-//			//case pour définir la taille du buffer en cours
-//			switch(resolution){
-//			
-//			case(Tuile.R5):{
-//				taille_buffer_auxiliaire = 15;
-//				taille_buffer_visible = 3;
-//				bool_objet = true;
-//				bool_bati = true;
-//				rechargement_complet = true;
-//				break;
-//			}
-//			case(Tuile.R10):{
-//				taille_buffer_auxiliaire = 29;
-//				taille_buffer_visible = 9;
-//				bool_objet = false;
-//				bool_bati = true;
-//				rechargement_complet = true;
-//
-//				break;
-//			}
-//			case(Tuile.R20):{
-//				taille_buffer_auxiliaire = 45;
-//				taille_buffer_visible = 15;
-//				bool_objet = false;
-//				bool_bati = false;
-//				rechargement_complet = true;
-//
-//				break;
-//			}
+		if (oldRes > resolution){
+			
+			
+			//case pour définir la taille du buffer en cours
+			switch(resolution){
+			
+			case(Tuile.R5):{
+				taille_buffer_auxiliaire = 15;
+				taille_buffer_visible = 3;
+				bool_objet = true;
+				bool_bati = true;
+				rechargement_complet = true;
+				break;
+			}
+			case(Tuile.R10):{
+				taille_buffer_auxiliaire = 29;
+				taille_buffer_visible = 9;
+				bool_objet = false;
+				bool_bati = true;
+				rechargement_complet = true;
+
+				break;
+			}
+			case(Tuile.R20):{
+				taille_buffer_auxiliaire = 45;
+				taille_buffer_visible = 15;
+				bool_objet = false;
+				bool_bati = false;
+				rechargement_complet = true;
+
+				break;
+			}
 //			case(Tuile.R40):{
 //				taille_buffer_auxiliaire = 59;
 //				taille_buffer_visible = 19;
@@ -685,20 +692,48 @@ public void AjoutMNT(MNT mnt) {
 //				break;
 //			}
 //					
-//			}
-//			
-////			try {
-//				System.err.println("rechargement des objets: "+bool_objet);
-//				System.err.println("rechargement des bati: "+bool_bati);
-//				//buffer UNIQUE, decommenter ligne suivante
-//				//rechargement_buffer_memoire();
-//				
-//				//Buffer multiples
-//				//interSwap(World.buffer, World.buffer3);
-//				
-//				initialisation_buffer_visible(World.buffer.buffer_memoire);
-//				
-//			}
+			}
+
+			System.err.println("rechargement des objets: "+bool_objet);
+			System.err.println("rechargement des bati: "+bool_bati);
+			System.err.println("niveau Resolution : "+resolution);
+			
+			//buffer UNIQUE, decommenter ligne suivante
+			//rechargement_buffer_memoire();
+			
+			//Buffer multiples
+			
+			if(World.t_buffer.isAlive()){try {
+				World.t_buffer.join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}}
+			
+			interSwap_NoDetach(World.buffer, World.buffer2);
+			interSwap(World.buffer, World.buffer3);
+			
+			if(World.buffer.resolution>1){
+			t_buffer = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						//AJOUT MULTIBUFFER
+						World.buffer3 = new Buffer(tailleBufferMem[World.buffer.resolution-1], tailleBufferVis[World.buffer.resolution-1], World.buffer.resolution-1, World.buffer.centre_buffer_visible_i, World.buffer.centre_buffer_visible_j, tg, world, "dummy");
+
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			 });
+			
+			t_buffer.start();
+			}
+			
+			
+
+			}
 		
 		
 		
@@ -707,7 +742,8 @@ public void AjoutMNT(MNT mnt) {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-	
+		World.buffer.resolution = resolution;
+
 		rechargement_complet = false;
 
 	}
@@ -753,7 +789,8 @@ public void AjoutMNT(MNT mnt) {
 			for(int j = 0; j< taille_buffer_memoire; j++){
 			
 				buffer_memoire.get(i).set(j, new SuperBG(buffer_auxiliaire.get(i).get(j)));
-				buffer_auxiliaire.get(i).set(j,null);
+				//INHIBE LE NETTOYAGE
+				//buffer_auxiliaire.get(i).set(j,null);
 			}
 		}
 		
@@ -788,14 +825,9 @@ public void interSwap(Buffer affiche, Buffer dispo){
 		world.getCanvas().removeMouseWheelListener(world.getListeners());
 		world.getCanvas().removeKeyListener(world.getListeners());
 		
-//		//Refenetrage du buffer_memoire autour du buffer_auxiliaire
-//		this.centre_buffer_memoire_i = this.centre_buffer_auxiliaire_i;
-//		this.centre_buffer_memoire_j = this.centre_buffer_auxiliaire_j;
-		
-//		//Redimmensionnement de la taille du buffer mémoire hommogène ave taille buffer auxiliaire
-//		this.taille_buffer_memoire = this.taille_buffer_auxiliaire;
 
 		System.out.println(dispo.taille_buffer_auxiliaire);
+		
 		affiche.taille_buffer_memoire = dispo.taille_buffer_auxiliaire;
 		affiche.taille_buffer_visible = dispo.taille_buffer_visible;
 		affiche.centre_buffer_memoire_i = dispo.centre_buffer_auxiliaire_i;
@@ -812,18 +844,6 @@ public void interSwap(Buffer affiche, Buffer dispo){
 		}
 		
 		initialisation_buffer_visible(World.buffer.buffer_memoire);
-		//reinitialisation_visible();
-		
-		
-		
-		
-
-//		try {
-//			rafraichissement_visible(0, 0);
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
 		
 		world.getCanvas().addMouseListener(world.getListeners());
 		world.getCanvas().addMouseMotionListener(world.getListeners());
@@ -837,7 +857,32 @@ public void interSwap(Buffer affiche, Buffer dispo){
 	}
 	
 	
+public void interSwap_NoDetach(Buffer aCopier, Buffer laCopie){
+	//laCopie est un buffer compagnon donc on ne travaille que sur l'auxiliaire
+	//aCopier est le buffer d'affichage donc travaille sur le memoire
+	laCopie.taille_buffer_auxiliaire = aCopier.taille_buffer_memoire;
+	laCopie.taille_buffer_visible = aCopier.taille_buffer_visible;
+	laCopie.centre_buffer_auxiliaire_i = aCopier.centre_buffer_memoire_i;
+	laCopie.centre_buffer_auxiliaire_j = aCopier.centre_buffer_memoire_j;
+
+	for (int i = 0; i< aCopier.taille_buffer_memoire; i++){
+		for(int j = 0; j< aCopier.taille_buffer_memoire; j++){
+		
+			//affiche.buffer_memoire.get(i).set(j, new SuperBG(dispo.buffer_auxiliaire.get(i).get(j)));
+			
+			laCopie.buffer_auxiliaire.get(i).set(j,new SuperBG(aCopier.buffer_memoire.get(i).get(j)));
+			
+			//dispo.buffer_auxiliaire.get(i).set(j, affiche.buffer_memoire.get(i).get(j) );
+		}
+	}
 	
+	
+
+}
+
+
+
+
 	
 	/**
 	 * Met à disposition le visible
